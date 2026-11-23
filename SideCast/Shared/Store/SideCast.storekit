@@ -1,44 +1,41 @@
 {
-  "appPolicies" : {
-    "eula" : "",
-    "policies" : [
-
-    ]
+  "appPolicies": {
+    "eula": "",
+    "policies": []
   },
-  "identifier" : "6F3C1B2A",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "6F3C1B2A",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "6755000001",
-      "localizations" : [
+      "displayPrice": "4.99",
+      "familyShareable": true,
+      "internalID": "6755000001",
+      "localizations": [
         {
-          "description" : "Per-app output and volume, and several devices at once.",
-          "displayName" : "SideCast Premium",
-          "locale" : "en_US"
+          "description": "Per-app Mac audio here, plus multiple devices at once.",
+          "displayName": "SideCast Premium",
+          "locale": "en_US"
+        },
+        {
+          "description": "让 Mac 把单个应用投到本设备，并可与其他设备同时连接。",
+          "displayName": "SideCast 高级版",
+          "locale": "zh_Hans"
         }
       ],
-      "productID" : "com.imarkr.SideCast.premium",
-      "referenceName" : "SideCast Premium",
-      "type" : "NonConsumable"
+      "productID": "com.imarkr.SideCast.premium",
+      "referenceName": "SideCast Premium",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
-
-    ]
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
   },
-  "subscriptionGroups" : [
-
-  ],
-  "version" : {
-    "major" : 4,
-    "minor" : 0
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
   }
 }

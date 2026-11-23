@@ -1,1295 +1,1292 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@ (needs Premium)": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@（需要高级版）"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ · %lld%%" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld%%"
           }
         }
       }
     },
-    "%@ (offline)": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@（离线）"
+    "%@ · Muted" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · 已静音"
           }
         }
       }
     },
-    "%@ · %lld%%": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · %lld%%"
+    "%@ (needs Premium)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（需要高级版）"
           }
         }
       }
     },
-    "%@ · Muted": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ · 已静音"
+    "%@ (offline)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（离线）"
           }
         }
       }
     },
-    "%lld connected": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已连接 %lld 台"
+    "%lld connected" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已连接 %lld 台"
           }
         }
       }
     },
-    "%lld processes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 个进程"
+    "%lld processes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个进程"
           }
         }
       }
     },
-    "000000": {
-      "shouldTranslate": false
+    "000000" : {
+      "shouldTranslate" : false
     },
-    "A one-time purchase for this device. Without it, this device plays the Mac's other sound and only one such device can be connected at a time. With Premium, your Mac can send single apps here, and this device can be connected alongside others. SideCast on the Mac is free.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "为本设备一次性购买。未购买时，本设备只能播放 Mac 的「其他声音」，且同一时间只能连接一台未购买的设备；购买后，Mac 可以把单个应用投到本设备，本设备也可以与其他设备同时连接。Mac 上的 SideCast 免费。"
+    "A one-time purchase for this device. Without it, this device plays the Mac's other sound and only one such device can be connected at a time. With Premium, your Mac can send single apps here, and this device can be connected alongside others. SideCast on the Mac is free." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为本设备一次性购买。未购买时，本设备只能播放 Mac 的「其他声音」，且同一时间只能连接一台未购买的设备；购买后，Mac 可以把单个应用投到本设备，本设备也可以与其他设备同时连接。Mac 上的 SideCast 免费。"
           }
         }
       }
     },
-    "A removed device has to enter a new pairing code the next time it connects.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "移除后，该设备下次连接时需要重新输入配对码。"
+    "A removed device has to enter a new pairing code the next time it connects." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除后，该设备下次连接时需要重新输入配对码。"
           }
         }
       }
     },
-    "Advanced mode": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高级模式"
+    "Advanced mode" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高级模式"
           }
         }
       }
     },
-    "Allow": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "允许"
+    "Allow" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许"
           }
         }
       }
     },
-    "Allow SideCast in Login Items to finish turning this on.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在「登录项」中允许 SideCast 以完成开启。"
+    "Allow SideCast in Login Items to finish turning this on." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在「登录项」中允许 SideCast 以完成开启。"
           }
         }
       }
     },
-    "Apps": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "应用"
+    "Apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用"
           }
         }
       }
     },
-    "Apps that play sound appear here.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在发声的应用会显示在这里。"
+    "Apps that play sound appear here." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在发声的应用会显示在这里。"
           }
         }
       }
     },
-    "Apps you don't change play through the Mac as usual. Your choices are remembered for each app.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未调整的应用照常从 Mac 发声。你的设置会按应用记住。"
+    "Apps you don't change play through the Mac as usual. Your choices are remembered for each app." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未调整的应用照常从 Mac 发声。你的设置会按应用记住。"
           }
         }
       }
     },
-    "Audio keeps playing when you lock the screen or switch apps.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "锁屏或切换到其他 App 时，音频会继续播放。"
+    "Audio keeps playing when you lock the screen or switch apps." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "锁屏或切换到其他 App 时，音频会继续播放。"
           }
         }
       }
     },
-    "Audio mode": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "音频模式"
+    "Audio mode" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频模式"
           }
         }
       }
     },
-    "Both devices are in the same mode.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "两台设备处于相同模式。"
+    "Both devices are in the same mode." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "两台设备处于相同模式。"
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消"
+    "Cancel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
           }
         }
       }
     },
-    "Choose this device as an app's output on your Mac.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 Mac 上把某个应用的输出设为这台设备。"
+    "Choose this device as an app's output on your Mac." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 Mac 上把某个应用的输出设为这台设备。"
           }
         }
       }
     },
-    "Collapsed": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已收起"
+    "Collapsed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已收起"
           }
         }
       }
     },
-    "Connect": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接"
+    "Connect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接"
           }
         }
       }
     },
-    "Connected": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已连接"
+    "Connected" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已连接"
           }
         }
       }
     },
-    "Connected to %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已连接到 %@"
+    "Connected to %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已连接到 %@"
           }
         }
       }
     },
-    "Connecting…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在连接…"
+    "Connecting…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在连接…"
           }
         }
       }
     },
-    "Could not start audio playback.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法开始播放音频。"
+    "Could not start audio playback." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法开始播放音频。"
           }
         }
       }
     },
-    "Debug trace": {
-      "shouldTranslate": false
-    },
-    "Device offline": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设备离线"
+    "Device offline" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设备离线"
           }
         }
       }
     },
-    "Devices": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设备"
+    "Devices" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设备"
           }
         }
       }
     },
-    "Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录同一 Apple ID 的设备无需配对码即可连接。SideCast 只会在你的 iCloud 中保存各设备的名称和公钥。"
+    "Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录同一 Apple ID 的设备无需配对码即可连接。SideCast 只会在你的 iCloud 中保存各设备的名称和公钥。"
           }
         }
       }
     },
-    "Disconnect": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "断开"
+    "Disconnect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "断开"
           }
         }
       }
     },
-    "Done": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完成"
+    "Done" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
           }
         }
       }
     },
-    "Enter the code shown on %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "输入 %@ 上显示的配对码"
+    "Enter the code shown on %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入 %@ 上显示的配对码"
           }
         }
       }
     },
-    "Enter this code on %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 %@ 上输入此配对码"
+    "Enter this code on %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 上输入此配对码"
           }
         }
       }
     },
-    "Expanded": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已展开"
+    "Expanded" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已展开"
           }
         }
       }
     },
-    "Follow the app's setting": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "跟随应用设置"
+    "Follow the app's setting" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随应用设置"
           }
         }
       }
     },
-    "Forget": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "删除"
+    "Forget" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
           }
         }
       }
     },
-    "Free": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "免费"
+    "Free" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "免费"
           }
         }
       }
     },
-    "General": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通用"
+    "General" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通用"
           }
         }
       }
     },
-    "High quality": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高音质"
+    "High quality" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高音质"
           }
         }
       }
     },
-    "Language": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "语言"
+    "iCloud isn't signed in on this Mac." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac 未登录 iCloud。"
           }
         }
       }
     },
-    "Lets you route and set the volume of each kind of process inside an app separately, for example a browser's helper processes.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可对应用内不同类型的进程（例如浏览器的辅助进程）分别设置输出设备和音量。"
+    "Language" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语言"
           }
         }
       }
     },
-    "Local network": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本地网络"
+    "Lets you route and set the volume of each kind of process inside an app separately, for example a browser's helper processes." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可对应用内不同类型的进程（例如浏览器的辅助进程）分别设置输出设备和音量。"
           }
         }
       }
     },
-    "Local network access is off": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本地网络权限已关闭"
+    "Local network" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地网络"
           }
         }
       }
     },
-    "Looking for Macs running SideCast…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在查找运行 SideCast 的 Mac…"
+    "Local network access is off" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地网络权限已关闭"
           }
         }
       }
     },
-    "Low latency": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低延迟"
+    "Looking for Macs running SideCast…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在查找运行 SideCast 的 Mac…"
           }
         }
       }
     },
-    "Low latency suits video, calls and games. High quality sends lossless audio with a little more delay.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低延迟适合视频、通话和游戏；高音质传输无损音频，延迟稍高。"
+    "Low latency" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低延迟"
           }
         }
       }
     },
-    "Main process": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "主进程"
+    "Low latency suits video, calls and games. High quality sends lossless audio with a little more delay." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低延迟适合视频、通话和游戏；高音质传输无损音频，延迟稍高。"
           }
         }
       }
     },
-    "Make sure SideCast is running on your Mac and both devices have Wi-Fi turned on. This device appears on the Mac as “%@”.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请确认 Mac 上的 SideCast 正在运行，且两台设备都已打开 Wi-Fi。本设备在 Mac 上显示为“%@”。"
+    "macOS asks for these the first time SideCast needs them. You can change them in System Settings › Privacy & Security." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 会在 SideCast 首次需要时请求这些权限，你也可以在「系统设置 › 隐私与安全性」中更改。"
           }
         }
       }
     },
-    "Mute": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "静音"
+    "Main process" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主进程"
           }
         }
       }
     },
-    "Name": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "名称"
+    "Make sure SideCast is running on your Mac and both devices have Wi-Fi turned on. This device appears on the Mac as “%@”." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请确认 Mac 上的 SideCast 正在运行，且两台设备都已打开 Wi-Fi。本设备在 Mac 上显示为“%@”。"
           }
         }
       }
     },
-    "Nearby Macs": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "附近的 Mac"
+    "Mute" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "静音"
           }
         }
       }
     },
-    "Nearby devices": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "附近的设备"
+    "Name" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称"
           }
         }
       }
     },
-    "Needed to find and connect to your devices.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用于查找并连接你的设备。"
+    "Nearby devices" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "附近的设备"
           }
         }
       }
     },
-    "Needed to take an app's sound and play it on another device or at another volume. SideCast never records or saves audio.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用于获取应用的声音，以便在其他设备上或以其他音量播放。SideCast 不会录制或保存音频。"
+    "Nearby Macs" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "附近的 Mac"
           }
         }
       }
     },
-    "Needs Premium on the device": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "该设备需要高级版"
+    "Needed to find and connect to your devices." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用于查找并连接你的设备。"
           }
         }
       }
     },
-    "Needs a pairing code": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要配对码"
+    "Needed to take an app's sound and play it on another device or at another volume. SideCast never records or saves audio." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用于获取应用的声音，以便在其他设备上或以其他音量播放。SideCast 不会录制或保存音频。"
           }
         }
       }
     },
-    "No devices connected.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有已连接的设备。"
+    "Needs a pairing code" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要配对码"
           }
         }
       }
     },
-    "No other devices on your iCloud account have opened SideCast yet.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的 iCloud 账号下还没有其他设备打开过 SideCast。"
+    "Needs Premium on the device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该设备需要高级版"
           }
         }
       }
     },
-    "No paired devices.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有已配对的设备。"
+    "No devices connected." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有已连接的设备。"
           }
         }
       }
     },
-    "No sound is coming from the apps SideCast controls. If they are playing, allow SideCast to record system audio.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 控制的应用没有传来声音。如果它们正在播放，请允许 SideCast 录制系统音频。"
+    "No other devices on your iCloud account have opened SideCast yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的 iCloud 账号下还没有其他设备打开过 SideCast。"
           }
         }
       }
     },
-    "Not connected": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未连接"
+    "No paired devices." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有已配对的设备。"
           }
         }
       }
     },
-    "OK": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "好"
+    "No sound is coming from the apps SideCast controls. If they are playing, allow SideCast to record system audio." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 控制的应用没有传来声音。如果它们正在播放，请允许 SideCast 录制系统音频。"
           }
         }
       }
     },
-    "Off. SideCast can't find your devices.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已关闭，SideCast 无法找到你的设备。"
+    "Not connected" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未连接"
           }
         }
       }
     },
-    "Only one device without SideCast Premium can be connected at a time.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "同一时间只能连接一台未购买 SideCast 高级版的设备。"
+    "Off. SideCast can't find your devices." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已关闭，SideCast 无法找到你的设备。"
           }
         }
       }
     },
-    "Only one device without SideCast Premium can be connected at a time. Buy Premium in SideCast on the device to connect it alongside others.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "同一时间只能连接一台未购买 SideCast 高级版的设备。在该设备的 SideCast 中购买高级版后，即可与其他设备同时连接。"
+    "OK" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
           }
         }
       }
     },
-    "Open Login Items": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开登录项"
+    "Only one device without SideCast Premium can be connected at a time." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同一时间只能连接一台未购买 SideCast 高级版的设备。"
           }
         }
       }
     },
-    "Open Settings": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开设置"
+    "Only one device without SideCast Premium can be connected at a time. Buy Premium in SideCast on the device to connect it alongside others." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同一时间只能连接一台未购买 SideCast 高级版的设备。在该设备的 SideCast 中购买高级版后，即可与其他设备同时连接。"
           }
         }
       }
     },
-    "Open SideCast on your iPad to see it here.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 iPad 上打开 SideCast，它就会出现在这里。"
+    "Open Login Items" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开登录项"
           }
         }
       }
     },
-    "Open SideCast on your iPad. It appears here when it's on the same Wi-Fi network or nearby.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 iPad 上打开 SideCast。当它与 Mac 在同一 Wi-Fi 网络或就在附近时，会显示在这里。"
+    "Open Settings" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开设置"
           }
         }
       }
     },
-    "Open SideCast when you log in": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录时打开 SideCast"
+    "Open SideCast on your iPad to see it here." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPad 上打开 SideCast，它就会出现在这里。"
           }
         }
       }
     },
-    "Other sound": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "其他声音"
+    "Open SideCast on your iPad. It appears here when it's on the same Wi-Fi network or nearby." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 iPad 上打开 SideCast。当它与 Mac 在同一 Wi-Fi 网络或就在附近时，会显示在这里。"
           }
         }
       }
     },
-    "Output": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "输出"
+    "Open SideCast when you log in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录时打开 SideCast"
           }
         }
       }
     },
-    "Output for other sound": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "其他声音的输出"
+    "Other sound" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他声音"
           }
         }
       }
     },
-    "Pair": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对"
+    "Output" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输出"
           }
         }
       }
     },
-    "Pair Device": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对设备"
+    "Output for other sound" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他声音的输出"
           }
         }
       }
     },
-    "Paired %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对于 %@"
+    "Pair" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对"
           }
         }
       }
     },
-    "Paired devices": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已配对的设备"
+    "Pair Device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对设备"
           }
         }
       }
     },
-    "Paired · Tap to connect": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已配对 · 轻点以连接"
+    "Paired · Tap to connect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已配对 · 轻点以连接"
           }
         }
       }
     },
-    "Permissions": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "权限"
+    "Paired %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对于 %@"
           }
         }
       }
     },
-    "Premium": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高级版"
+    "Paired devices" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已配对的设备"
           }
         }
       }
     },
-    "Premium unlocked": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高级版已解锁"
+    "Permissions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "权限"
           }
         }
       }
     },
-    "Process %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "进程 %@"
+    "Premium" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高级版"
           }
         }
       }
     },
-    "Quit SideCast": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 SideCast"
+    "Premium unlocked" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高级版已解锁"
           }
         }
       }
     },
-    "Remove": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "移除"
+    "Process %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程 %@"
           }
         }
       }
     },
-    "Reset to system default": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "恢复为系统默认"
+    "Quit SideCast" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出 SideCast"
           }
         }
       }
     },
-    "Restart Now": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "立即重启"
+    "Remove" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除"
           }
         }
       }
     },
-    "Restart SideCast to use the new language.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重启 SideCast 后新语言生效。"
+    "Reset to system default" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复为系统默认"
           }
         }
       }
     },
-    "Restore Purchases": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "恢复购买"
+    "Restart Now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即重启"
           }
         }
       }
     },
-    "Same Apple ID · Tap to connect": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "同一 Apple ID · 轻点以连接"
+    "Restart SideCast to use the new language." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启 SideCast 后新语言生效。"
           }
         }
       }
     },
-    "Same as System": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "跟随系统"
+    "Restore Purchases" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复购买"
           }
         }
       }
     },
-    "Same as app": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "跟随应用"
+    "Same Apple ID · Tap to connect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同一 Apple ID · 轻点以连接"
           }
         }
       }
     },
-    "Saved settings for apps that aren't running": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未运行应用的已保存设置"
+    "Same as app" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随应用"
           }
         }
       }
     },
-    "Settings…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设置…"
+    "Same as System" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随系统"
           }
         }
       }
     },
-    "SideCast": {
-      "shouldTranslate": false
-    },
-    "SideCast Premium": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 高级版"
+    "Saved settings for apps that aren't running" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未运行应用的已保存设置"
           }
         }
       }
     },
-    "SideCast Premium is unlocked": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 高级版已解锁"
+    "Settings…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置…"
           }
         }
       }
+    },
+    "SideCast" : {
+      "shouldTranslate" : false
     },
-    "SideCast Settings": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 设置"
+    "SideCast can't find your devices because local network access is off." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地网络权限已关闭，SideCast 无法找到你的设备。"
           }
         }
       }
     },
-    "SideCast can't find your devices because local network access is off.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "本地网络权限已关闭，SideCast 无法找到你的设备。"
+    "SideCast could not capture app audio. Check the permission in System Settings." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 无法获取应用音频，请在系统设置中检查权限。"
           }
         }
       }
     },
-    "SideCast could not capture app audio. Check the permission in System Settings.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 无法获取应用音频，请在系统设置中检查权限。"
+    "SideCast devices" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 设备"
           }
         }
       }
     },
-    "SideCast devices": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 设备"
+    "SideCast needs local network access to find your Mac. Turn it on in Settings." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 需要本地网络权限才能找到你的 Mac，请在设置中打开。"
           }
         }
       }
     },
-    "SideCast needs local network access to find your Mac. Turn it on in Settings.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 需要本地网络权限才能找到你的 Mac，请在设置中打开。"
+    "SideCast on the Mac is free, including per-app output and volume on this Mac. SideCast Premium is a one-time purchase in SideCast on each iPad, iPhone or Vision Pro. A device with Premium can receive single apps and can be connected alongside other devices; a device without it receives the other sound, one device at a time." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac 上的 SideCast 免费，包括在这台 Mac 上分应用设置输出和音量。SideCast 高级版需要在每台 iPad、iPhone 或 Vision Pro 的 SideCast 中一次性购买。已购买的设备可以接收单个应用，并可与其他设备同时连接；未购买的设备只能接收「其他声音」，且同一时间只能连接一台。"
           }
         }
       }
     },
-    "SideCast on the Mac is free, including per-app output and volume on this Mac. SideCast Premium is a one-time purchase in SideCast on each iPad, iPhone or Vision Pro. A device with Premium can receive single apps and can be connected alongside other devices; a device without it receives the other sound, one device at a time.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 上的 SideCast 免费，包括在这台 Mac 上分应用设置输出和音量。SideCast 高级版需要在每台 iPad、iPhone 或 Vision Pro 的 SideCast 中一次性购买。已购买的设备可以接收单个应用，并可与其他设备同时连接；未购买的设备只能接收「其他声音」，且同一时间只能连接一台。"
+    "SideCast Premium" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 高级版"
           }
         }
       }
     },
-    "SideCast volume": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideCast 音量"
+    "SideCast Premium is unlocked" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 高级版已解锁"
           }
         }
       }
     },
-    "Sound from apps you haven't set separately.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有单独设置的应用的声音。"
+    "SideCast Settings" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 设置"
           }
         }
       }
     },
-    "Startup": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "启动"
+    "SideCast volume" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideCast 音量"
           }
         }
       }
     },
-    "System Default": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "系统默认"
+    "Sound from apps you haven't set separately." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有单独设置的应用的声音。"
           }
         }
       }
     },
-    "System audio recording": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "录制系统音频"
+    "Startup" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动"
           }
         }
       }
     },
-    "Tap to pair and connect": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "轻点以配对并连接"
+    "System audio recording" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "录制系统音频"
           }
         }
       }
     },
-    "The App Store isn't available right now. Try again later.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "暂时无法连接 App Store，请稍后再试。"
+    "System Default" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统默认"
           }
         }
       }
     },
-    "The code is valid for 2 minutes.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对码 2 分钟内有效。"
+    "Tap to pair and connect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻点以配对并连接"
           }
         }
       }
     },
-    "The connection failed.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接失败。"
+    "The App Store isn't available right now. Try again later." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂时无法连接 App Store，请稍后再试。"
           }
         }
       }
     },
-    "The connection was lost.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接已断开。"
+    "The code is valid for 2 minutes." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对码 2 分钟内有效。"
           }
         }
       }
     },
-    "The device could not be verified.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法验证该设备。"
+    "The connection failed." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接失败。"
           }
         }
       }
     },
-    "The pairing code expired. Try again to get a new code.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对码已过期，请重新连接以获取新的配对码。"
+    "The connection was lost." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接已断开。"
           }
         }
       }
     },
-    "The pairing code was incorrect.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "配对码不正确。"
+    "The device could not be verified." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法验证该设备。"
           }
         }
       }
     },
-    "This Mac": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台 Mac"
+    "The pairing code expired. Try again to get a new code." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对码已过期，请重新连接以获取新的配对码。"
           }
         }
       }
     },
-    "This Mac (no change)": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台 Mac（不改变）"
+    "The pairing code was incorrect." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配对码不正确。"
           }
         }
       }
     },
-    "This Mac is already connected to another device without SideCast Premium. Buy Premium on this device to connect it alongside others.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台 Mac 已连接另一台未购买 SideCast 高级版的设备。在本设备上购买高级版后，即可与其他设备同时连接。"
+    "This device is in use by %@." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该设备正在被 %@ 使用。"
           }
         }
       }
     },
-    "This device is in use by %@.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "该设备正在被 %@ 使用。"
+    "This Mac" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac"
           }
         }
       }
     },
-    "This needs SideCast Premium on the device": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要在该设备上购买 SideCast 高级版"
+    "This Mac (no change)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac（不改变）"
           }
         }
       }
     },
-    "To send a single app to %@, buy SideCast Premium in SideCast on %@. Until then %@ can play the other sound.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "要把单个应用投到 %1$@，请在 %2$@ 的 SideCast 中购买高级版。在此之前，%3$@ 可以播放「其他声音」。"
+    "This Mac is already connected to another device without SideCast Premium. Buy Premium on this device to connect it alongside others." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac 已连接另一台未购买 SideCast 高级版的设备。在本设备上购买高级版后，即可与其他设备同时连接。"
           }
         }
       }
     },
-    "Trusted automatically": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自动信任"
+    "This needs SideCast Premium on the device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要在该设备上购买 SideCast 高级版"
           }
         }
       }
     },
-    "Try Again": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重试"
+    "To send a single app to %@, buy SideCast Premium in SideCast on %@. Until then %@ can play the other sound." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要把单个应用投到 %1$@，请在 %2$@ 的 SideCast 中购买高级版。在此之前，%3$@ 可以播放「其他声音」。"
           }
         }
       }
     },
-    "Unavailable Device": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不可用的设备"
+    "Trusted automatically" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动信任"
           }
         }
       }
     },
-    "Unmute": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消静音"
+    "Try Again" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
           }
         }
       }
     },
-    "Volume": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "音量"
+    "Unavailable Device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不可用的设备"
           }
         }
       }
     },
-    "Waiting for pairing code…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "等待输入配对码…"
+    "Unmute" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消静音"
           }
         }
       }
     },
-    "Your devices on iCloud": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iCloud 上的设备"
+    "Volume" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音量"
           }
         }
       }
     },
-    "iCloud isn't signed in on this Mac.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台 Mac 未登录 iCloud。"
+    "Waiting for pairing code…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待输入配对码…"
           }
         }
       }
     },
-    "macOS asks for these the first time SideCast needs them. You can change them in System Settings › Privacy & Security.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS 会在 SideCast 首次需要时请求这些权限，你也可以在「系统设置 › 隐私与安全性」中更改。"
+    "Your devices on iCloud" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 上的设备"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

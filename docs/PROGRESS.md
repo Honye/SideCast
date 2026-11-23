@@ -19,6 +19,23 @@ USB 有线（FR-CONN-03/04）属于 V1，不在 MVP 内。
 
 ## 更新日志
 
+### 2026-11-23 · App Store Connect 内购商品
+- 在你的个人开发者账号（Chengyu Xiang，团队 JUWHF23XW6）下新建 App 记录：
+  - 名称「SideCast - Mac Audio Output」：「SideCast」已被占用。设备上显示的名称仍是 SideCast。
+  - 平台：iOS、macOS、visionOS；主要语言：英语（美国）。
+  - Bundle ID：`com.imarkr.SideCast`；SKU：`SideCast`；用户访问权限：全部。
+  - App ID：6838349080。
+- 新建内购商品：
+  - 非消耗型，商品 ID `com.imarkr.SideCast.premium`，参考名称 SideCast Premium，Apple ID 6838349185。
+  - 价格：基准美国 $4.99，其他地区自动换算（中国大陆 ¥38）。
+  - 家人共享：已开启（不可关闭）。
+  - 销售地区：全部国家和地区，并自动包含以后新增的地区。
+  - 显示名称和描述：
+    - 英文：SideCast Premium /「Per-app Mac audio here, plus multiple devices at once.」（Apple 限制描述最多 55 个字符，原定英文过长，已改用你选的版本）
+    - 简体中文：SideCast 高级版 /「让 Mac 把单个应用投到本设备，并可与其他设备同时连接。」
+  - 状态：Prepare for Submission。
+- 本地 StoreKit 测试配置已同步为相同的价格、家人共享和文案。
+
 ### 2026-11-23 · 收费方式调整（PRD v0.4）
 - 因 LemonSqueezy 不再接受新用户注册，改为 **Mac 端免费、接收端在 App Store 收费**，详见 PRD 第 4 节。
 - **删除** Mac 端的 LemonSqueezy 许可证代码、设置项和相关测试。
@@ -156,10 +173,10 @@ USB 有线（FR-CONN-03/04）属于 V1，不在 MVP 内。
 
 | 事项 | 说明 |
 |---|---|
+| 提交内购审核前的准备 | 第一个非消耗型内购必须随新版本 App 一起提交审核；提交前还需要：内购的审核截图（购买界面）、确认已签署「付费 App 协议」（Paid Applications Agreement）。若要在中国大陆上架，App 还需提交 AIGC 服务声明和安全评估报告 |
 | 试用新的收费规则 | 在 Mac 的「应用」页给某个应用选择未购买的 iPad，应弹出说明；「其他声音」选 iPad 应能播放；再连一台未购买的设备，应被断开并说明原因。在 Xcode 里给 iPad 选上 `SideCast.storekit` 测试购买后，同一台 iPad 应能接收单个应用 |
 | 真机验证同 Apple ID 自动信任 | Mac 和 iPad 登录同一 Apple ID 并打开 iCloud，各自运行新版 SideCast 一次（等几秒让 iCloud 同步），iPad 上的 Mac 应显示「同一 Apple ID」，连接时不再要求配对码。iPad 首次构建到真机时，Xcode 会为 iCloud 能力自动更新描述文件 |
 | 调试版的注意事项 | 调试版会接收我用于测试的调试命令（分布式通知）；同时运行两个 SideCast 实例（例如 Xcode 里一个、命令行一个）会共用身份和设置并互相干扰 |
-| 在 App Store Connect 创建内购商品 | 非消耗型，商品 ID `com.imarkr.SideCast.premium`，价格待定；本地测试可在 Xcode 的 Scheme › Run › Options › StoreKit Configuration 选择 `SideCast/Shared/Store/SideCast.storekit`（其中价格 0.99 只是测试占位） |
 
 | 事项 | 说明 |
 |---|---|
