@@ -154,6 +154,34 @@ private struct DevicesSettingsView: View {
                 Text("A removed device has to enter a new pairing code the next time it connects.")
             }
 
+            Section {
+                if sender.accountDirectory.devices.isEmpty {
+                    Text(sender.accountDirectory.isAccountAvailable
+                         ? "No other devices on your iCloud account have opened SideCast yet."
+                         : "iCloud isn't signed in on this Mac.")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(sender.accountDirectory.devices) { entry in
+                    let revoked = sender.trustStore.revokedAccountDevices.contains(entry.id)
+                    HStack {
+                        Label(entry.device.name, systemImage: entry.device.platform.symbolName)
+                        Spacer()
+                        Text(revoked ? "Needs a pairing code" : "Trusted automatically")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if revoked {
+                            Button("Allow") { sender.trustStore.allowAccountDevice(id: entry.id) }
+                        } else {
+                            Button("Remove", role: .destructive) { sender.forget(entry.id) }
+                        }
+                    }
+                }
+            } header: {
+                Text("Your devices on iCloud")
+            } footer: {
+                Text("Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud.")
+            }
+
             Section("This Mac") {
                 LabeledContent("Name", value: sender.identity.device.name)
             }

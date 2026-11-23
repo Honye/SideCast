@@ -89,6 +89,8 @@ private struct MacRow: View {
     var body: some View {
         let status = receiver.status(for: peer.id)
         let paired = receiver.trustStore.peers.contains { $0.id == peer.id }
+        let sameAccount = receiver.accountDirectory.containsDevice(id: peer.id)
+            && !receiver.trustStore.revokedAccountDevices.contains(peer.id)
         Button {
             receiver.connect(peer)
         } label: {
@@ -99,7 +101,15 @@ private struct MacRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(peer.device.name)
                         .foregroundStyle(.primary)
-                    Text(paired ? "Paired · Tap to connect" : "Tap to pair and connect")
+                    Group {
+                        if sameAccount {
+                            Text("Same Apple ID · Tap to connect")
+                        } else if paired {
+                            Text("Paired · Tap to connect")
+                        } else {
+                            Text("Tap to pair and connect")
+                        }
+                    }
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

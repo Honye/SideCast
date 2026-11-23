@@ -94,6 +94,16 @@
         }
       }
     },
+    "Allow": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许"
+          }
+        }
+      }
+    },
     "Allow SideCast in Login Items to finish turning this on.": {
       "localizations": {
         "zh-Hans": {
@@ -293,6 +303,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "设备"
+          }
+        }
+      }
+    },
+    "Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录同一 Apple ID 的设备无需配对码即可连接。SideCast 只会在你的 iCloud 中保存各设备的名称和公钥。"
           }
         }
       }
@@ -587,6 +607,26 @@
         }
       }
     },
+    "Needs a pairing code": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要配对码"
+          }
+        }
+      }
+    },
+    "No other devices on your iCloud account have opened SideCast yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的 iCloud 账号下还没有其他设备打开过 SideCast。"
+          }
+        }
+      }
+    },
     "No paired devices.": {
       "localizations": {
         "zh-Hans": {
@@ -863,6 +903,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复购买"
+          }
+        }
+      }
+    },
+    "Same Apple ID · Tap to connect": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一 Apple ID · 轻点以连接"
           }
         }
       }
@@ -1210,6 +1260,16 @@
         }
       }
     },
+    "Trusted automatically": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动信任"
+          }
+        }
+      }
+    },
     "Try Again": {
       "localizations": {
         "zh-Hans": {
@@ -1300,12 +1360,32 @@
         }
       }
     },
+    "Your devices on iCloud": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud 上的设备"
+          }
+        }
+      }
+    },
     "Your license is no longer valid.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "你的许可证已失效。"
+          }
+        }
+      }
+    },
+    "iCloud isn't signed in on this Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 未登录 iCloud。"
           }
         }
       }

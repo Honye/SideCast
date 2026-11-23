@@ -17,6 +17,8 @@ final class SenderController {
     let identity: LocalIdentity
     let trustStore: TrustStore
     let node: NetworkNode
+    /// Devices on the same iCloud account, trusted without a pairing code (FR-CONN-05).
+    let accountDirectory: AccountDeviceDirectory
     let ruleStore: RuleStore
     let license: LicenseManager
 
@@ -84,10 +86,15 @@ final class SenderController {
         identity = IdentityStore.loadOrCreate(role: .sender)
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
+        accountDirectory = AccountDeviceDirectory(
+            store: RuntimeEnvironment.isRunningTests ? InMemoryKeyValueStore(account: .init()) : ICloudKeyValueStore(),
+            identity: identity
+        )
         ruleStore = RuleStore()
         license = LicenseManager()
         router.sinkProvider = { [weak self] id in self?.streams[id] }
         license.onChange = { [weak self] in self?.premiumChanged() }
+        trustStore.accountTrust = { [accountDirectory] device, key in accountDirectory.contains(device, identityKey: key) }
     }
 
     func start() {
@@ -100,6 +107,7 @@ final class SenderController {
             self?.reconnectWantedReceivers()
         }
         node.start()
+        accountDirectory.start()
         startAudioMonitoring()
         Task { await license.revalidate() }
         Log.app.info("Sender started as \(self.identity.device.name, privacy: .public)")

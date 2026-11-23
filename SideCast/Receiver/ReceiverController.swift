@@ -17,6 +17,8 @@ final class ReceiverController {
     let identity: LocalIdentity
     let trustStore: TrustStore
     let node: NetworkNode
+    /// Devices on the same iCloud account, trusted without a pairing code (FR-CONN-05).
+    let accountDirectory: AccountDeviceDirectory
 
     private(set) var sessions: [PeerSession] = []
     private(set) var lastError: String?
@@ -47,6 +49,11 @@ final class ReceiverController {
         identity = IdentityStore.loadOrCreate(role: .receiver)
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
+        accountDirectory = AccountDeviceDirectory(
+            store: RuntimeEnvironment.isRunningTests ? InMemoryKeyValueStore(account: .init()) : ICloudKeyValueStore(),
+            identity: identity
+        )
+        trustStore.accountTrust = { [accountDirectory] device, key in accountDirectory.contains(device, identityKey: key) }
     }
 
     func start() {
@@ -56,6 +63,7 @@ final class ReceiverController {
             self?.accept(connection)
         }
         node.start()
+        accountDirectory.start()
         nowPlaying.onDisconnect = { [weak self] in self?.disconnect() }
         store.onChange = { [weak self] in
             guard let self else { return }
