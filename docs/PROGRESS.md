@@ -12,7 +12,7 @@
 | M2 | Mac 分应用音频捕获（Process Tap）与本地设备路由、分应用音量 | FR-ROUTE-01/02/04~09, FR-VOL-01~04 | ✅ 完成（FR-ROUTE-10 移到 M4） |
 | M3 | 音频网络传输（低延迟 / 高音质）、iPad 播放、后台播放与锁屏卡片 | FR-MODE-01~04, FR-RECV-01~04 | ✅ 完成（待真机验证） |
 | M4 | 菜单栏 / 设置窗口完整界面、高级模式（按进程设置）、开机自启、中英文 | 6.8 节, FR-ROUTE-10, FR-PERM-01~03, 7.5 节 | ✅ 完成 |
-| M5 | 免费 / 高级版：iPad 内购、Paddle 许可证、连接时解锁 | FR-PAY-01~05, FR-CONN-09 | 未开始 |
+| M5 | 免费 / 高级版：iPad 内购、LemonSqueezy 许可证、连接时解锁 | FR-PAY-01~05, FR-CONN-09 | 未开始 |
 | M6 | 同 Apple ID 自动信任（iCloud） | FR-CONN-05 | 未开始 |
 
 USB 有线（FR-CONN-03/04）属于 V1，不在 MVP 内。
@@ -108,6 +108,7 @@ USB 有线（FR-CONN-03/04）属于 V1，不在 MVP 内。
 |---|---|
 | SideCast / Mac 重启后是否自动重连上次的接收端 | 不自动重连，手动连接 |
 | 新接收端的默认音频模式 | 低延迟 |
+| 官网版收款与许可证平台 | 由 Paddle 改为 LemonSqueezy（Paddle Billing 不提供许可证密钥；PRD 已同步为 v0.3） |
 
 ## 需要你确认的事项
 
