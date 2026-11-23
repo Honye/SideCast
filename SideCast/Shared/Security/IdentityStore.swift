@@ -56,12 +56,11 @@ enum IdentityStore {
     }
 
     private static func baseQuery() -> [String: Any] {
-        var query: [String: Any] = [
+        [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: keychainAccount,
         ]
-        return query
     }
 
     private static func readKeychain() -> Data? {

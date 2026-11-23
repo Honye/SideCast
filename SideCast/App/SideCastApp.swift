@@ -12,17 +12,12 @@ struct SideCastApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarView()
+            MenuBarView(openSettings: { appDelegate.settingsWindow.show() })
                 .environment(appDelegate.sender)
         } label: {
             Image(systemName: "hifispeaker.2.fill")
         }
         .menuBarExtraStyle(.window)
-
-        Settings {
-            SettingsView()
-                .environment(appDelegate.sender)
-        }
     }
 #else
     @State private var receiver = ReceiverController()

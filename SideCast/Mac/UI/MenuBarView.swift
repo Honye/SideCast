@@ -8,6 +8,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(SenderController.self) private var sender
+    let openSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -15,12 +16,12 @@ struct MenuBarView: View {
                 .font(.headline)
 
             DevicesSection()
+            Divider()
+            AppsSection()
 
             Divider()
             HStack {
-                SettingsLink {
-                    Text("Settings…")
-                }
+                Button("Settings…", action: openSettings)
                 Spacer()
                 Button("Quit SideCast") {
                     NSApplication.shared.terminate(nil)
@@ -47,6 +48,32 @@ private struct DevicesSection: View {
             }
             ForEach(sender.receivers) { peer in
                 ReceiverRow(peer: peer)
+            }
+        }
+    }
+}
+
+private struct AppsSection: View {
+    @Environment(SenderController.self) private var sender
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Apps")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            if let error = sender.audioError {
+                Label(error, systemImage: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .lineLimit(3)
+            }
+            if sender.visibleApps.isEmpty {
+                Text("Apps that play sound appear here.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(sender.visibleApps) { app in
+                AppRowView(app: app)
             }
         }
     }
