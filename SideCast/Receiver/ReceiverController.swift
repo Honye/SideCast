@@ -32,8 +32,6 @@ final class ReceiverController {
     private(set) var currentStream: StreamConfig?
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
-    /// Whether the connected Mac has its own Premium license.
-    private(set) var macPremium = false
 
     @ObservationIgnored private var started = false
     @ObservationIgnored private let ring = FloatRingBuffer(capacity: 1 << 16)
@@ -168,7 +166,6 @@ final class ReceiverController {
             sessions.removeAll { $0 === session }
             if audioSessionID == session.id {
                 stopAudio()
-                macPremium = false
             }
             if let error, session.isInitiator || error.isFinal {
                 lastError = error.userMessage
@@ -233,9 +230,6 @@ final class ReceiverController {
             player.setTargetLatency(config.codec == .opus ? .lowLatency : .highQuality)
             audioReceiver?.setStream(config)
             currentStream = config
-        case .premiumStatus(let unlocked):
-            guard session.id == audioSessionID else { return }
-            macPremium = unlocked
         case .stopStream(let streamID):
             guard session.id == audioSessionID, currentStream?.streamID == streamID else { return }
             audioReceiver?.setStream(nil)

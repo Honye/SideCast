@@ -22,8 +22,16 @@ struct ReceiverRow: View {
                 .frame(width: 20)
                 .foregroundStyle(status == .connected ? Color.accentColor : .secondary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(device.name)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(device.name)
+                        .lineLimit(1)
+                    if status == .connected && sender.isPremium(receiver: device.id) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                            .font(.caption)
+                            .help(Text("Premium"))
+                    }
+                }
                 StatusText(status: status)
             }
             Spacer(minLength: 4)

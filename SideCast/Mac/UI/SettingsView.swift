@@ -35,14 +35,15 @@ struct SettingsView: View {
 
 private struct AppsSettingsView: View {
     @Environment(SenderController.self) private var sender
-    @AppStorage("settings.tab") private var tab: SettingsTab = .apps
 
     var body: some View {
         Form {
             if sender.hasWarnings {
                 WarningsView()
             }
-            if sender.isPremium {
+                Section("Other sound") {
+                    AllAudioRow()
+                }
                 Section {
                     if sender.visibleApps.isEmpty {
                         Text("Apps that play sound appear here.")
@@ -56,14 +57,6 @@ private struct AppsSettingsView: View {
                 } footer: {
                     Text("Apps you don't change play through the Mac as usual. Your choices are remembered for each app.")
                 }
-            } else {
-                Section("Output") {
-                    FreeOutputRow()
-                }
-                Section {
-                    UpgradeBanner { tab = .general }
-                }
-            }
 
             let dormant = sender.dormantRules
             if !dormant.isEmpty {
@@ -200,7 +193,7 @@ private struct GeneralSettingsView: View {
         @Bindable var sender = sender
         @Bindable var preferences = preferences
         Form {
-            PremiumSettingsSection()
+            PremiumInfoSection()
 
             Section("Startup") {
                 Toggle("Open SideCast when you log in", isOn: Binding(

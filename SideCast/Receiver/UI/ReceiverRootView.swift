@@ -170,7 +170,7 @@ private struct ConnectedView: View {
                 showsPremium = true
             } label: {
                 Label(
-                    receiver.store.isUnlocked || receiver.macPremium ? "Premium unlocked" : "SideCast Premium",
+                    receiver.store.isUnlocked ? "Premium unlocked" : "SideCast Premium",
                     systemImage: "sparkles"
                 )
             }

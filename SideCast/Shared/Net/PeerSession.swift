@@ -18,7 +18,7 @@ enum PeerSessionError: Error, Equatable {
     case pairingFailed
     case pairingExpired
     case peerBusy(String)
-    /// The Mac's free version is already connected to another device.
+    /// The Mac is already connected to another receiver without Premium.
     case freeDeviceLimit
     case transportClosed
 }

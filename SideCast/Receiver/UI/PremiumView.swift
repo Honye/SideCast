@@ -20,10 +20,6 @@ struct PremiumSection: View {
                 Label("SideCast Premium is unlocked", systemImage: "checkmark.seal.fill")
                     .foregroundStyle(.green)
             } else {
-                if receiver.macPremium, let mac = receiver.activeSession?.peer?.name {
-                    Label("Unlocked by \(mac)", systemImage: "checkmark.seal")
-                        .foregroundStyle(.green)
-                }
                 if store.productUnavailable {
                     Label("The App Store isn't available right now. Try again later.", systemImage: "exclamationmark.icloud")
                         .foregroundStyle(.secondary)
@@ -62,7 +58,7 @@ struct PremiumSection: View {
         } header: {
             Text("SideCast Premium")
         } footer: {
-            Text("A one-time purchase. While this device is connected, your Mac can send each app to a different output, set each app's volume, and connect several devices at once.")
+            Text("A one-time purchase for this device. Without it, this device plays the Mac's other sound and only one such device can be connected at a time. With Premium, your Mac can send single apps here, and this device can be connected alongside others. SideCast on the Mac is free.")
         }
     }
 }

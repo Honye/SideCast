@@ -11,7 +11,6 @@ import SwiftUI
 struct MenuBarView: View {
     @Environment(SenderController.self) private var sender
     let openSettings: () -> Void
-    let openPremium: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -43,10 +42,7 @@ struct MenuBarView: View {
 
             Divider()
 
-            if !sender.isPremium {
-                FreeOutputRow()
-                UpgradeBanner(openPremium: openPremium)
-            } else {
+            AllAudioRow()
             Section {
                 if sender.visibleApps.isEmpty {
                     Text("Apps that play sound appear here.")
@@ -64,7 +60,6 @@ struct MenuBarView: View {
                 .fixedSize(horizontal: false, vertical: true)
             } header: {
                 SectionHeader(title: Text("Apps"))
-            }
             }
 
             Divider()

@@ -9,8 +9,8 @@
 //        "com.imarkr.SideCast.debug", "{\"cmd\":\"route\",\"app\":\"com.apple.afplay\",\"device\":\"BuiltInSpeakerDevice\",\"volume\":0.5}", $(), true)'
 //
 //  Commands: route (app, device UID | "default" | "receiver:<uuid>", volume, muted), reset (app),
-//  mode (receiver, lowLatency | highQuality), license (unlocked: Bool, simulates a license),
-//  free (device: like route, for the free version's all-audio output), settings.
+//  mode (receiver, lowLatency | highQuality), premium (receiver, unlocked: simulates a receiver's
+//  purchase), all (device: like route, for the "other sound" output), settings.
 //
 
 #if os(macOS) && DEBUG
@@ -62,17 +62,20 @@ enum DebugCommands {
                let mode = (command["mode"] as? String).flatMap(AudioMode.init(rawValue:)) {
                 sender.setAudioMode(mode, for: receiver)
             }
-        case "license":
-            sender.license.debugUnlocked = command["unlocked"] as? Bool ?? false
-            sender.premiumChanged()
-        case "free":
+        case "premium":
+            if let receiver = (command["receiver"] as? String).flatMap(UUID.init(uuidString:)) {
+                sender.receiverPremium[receiver] = command["unlocked"] as? Bool ?? false
+                sender.premiumStatusReceived.insert(receiver)
+                sender.premiumChanged()
+            }
+        case "all", "free":
             if let device = command["device"] as? String {
                 if device == "default" {
-                    sender.freeTarget = .systemDefault
+                    sender.allAudioTarget = .systemDefault
                 } else if device.hasPrefix("receiver:"), let id = UUID(uuidString: String(device.dropFirst(9))) {
-                    sender.freeTarget = .receiver(id: id)
+                    sender.allAudioTarget = .receiver(id: id)
                 } else {
-                    sender.freeTarget = .device(uid: device)
+                    sender.allAudioTarget = .device(uid: device)
                 }
             }
         case "reset":

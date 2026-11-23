@@ -17,7 +17,7 @@ extension PeerSessionError {
         case .roleMismatch:
             String(localized: "Both devices are in the same mode.")
         case .freeDeviceLimit:
-            String(localized: "This Mac uses the free version of SideCast, which connects one device at a time. SideCast Premium on this device or the Mac removes the limit.")
+            String(localized: "This Mac is already connected to another device without SideCast Premium. Buy Premium on this device to connect it alongside others.")
         case .authenticationFailed:
             String(localized: "The device could not be verified.")
         case .transportClosed:

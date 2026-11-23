@@ -20,7 +20,6 @@ final class SenderController {
     /// Devices on the same iCloud account, trusted without a pairing code (FR-CONN-05).
     let accountDirectory: AccountDeviceDirectory
     let ruleStore: RuleStore
-    let license: LicenseManager
 
     // MARK: Connections
 
@@ -47,14 +46,17 @@ final class SenderController {
     private(set) var debugLines: [String] = []
 #endif
 
-    // MARK: Premium (FR-PAY-01~05)
+    // MARK: Premium (PRD 4, FR-PAY)
 
     /// Premium status reported by each connected receiver (App Store purchase on that device).
-    private(set) var receiverPremium: [UUID: Bool] = [:]
-    /// Free version: where all of the Mac's audio goes (FR-ROUTE-03).
-    var freeTarget: OutputTarget = SenderController.loadFreeTarget() {
+    var receiverPremium: [UUID: Bool] = [:]
+    /// Keys routed to a receiver that hasn't bought Premium; they stay silent (FR-PAY-01).
+    private(set) var premiumRequired: Set<String> = []
+    /// Where the sound of apps without their own setting goes (FR-ROUTE-03). The only route an
+    /// unpaid receiver can take.
+    var allAudioTarget: OutputTarget = SenderController.loadAllAudioTarget() {
         didSet {
-            if let data = try? JSONEncoder().encode(freeTarget) {
+            if let data = try? JSONEncoder().encode(allAudioTarget) {
                 UserDefaults.standard.set(data, forKey: "routing.freeTarget")
             }
             applyRoutes()
@@ -65,7 +67,6 @@ final class SenderController {
     @ObservationIgnored var ownProcessObjects: [AudioObjectID] = []
     @ObservationIgnored var readySince: [UUID: Date] = [:]
     @ObservationIgnored var premiumStatusReceived: Set<UUID> = []
-    @ObservationIgnored var lastSentPremium: Bool?
 
     /// Audio mode per receiver (FR-MODE-01), remembered across launches (FR-MODE-04).
     private(set) var audioModes: [UUID: AudioMode] = SenderController.loadAudioModes()
@@ -91,9 +92,7 @@ final class SenderController {
             identity: identity
         )
         ruleStore = RuleStore()
-        license = LicenseManager()
         router.sinkProvider = { [weak self] id in self?.streams[id] }
-        license.onChange = { [weak self] in self?.premiumChanged() }
         trustStore.accountTrust = { [accountDirectory] device, key in accountDirectory.contains(device, identityKey: key) }
     }
 
@@ -109,7 +108,6 @@ final class SenderController {
         node.start()
         accountDirectory.start()
         startAudioMonitoring()
-        Task { await license.revalidate() }
         Log.app.info("Sender started as \(self.identity.device.name, privacy: .public)")
     }
 
@@ -151,11 +149,6 @@ final class SenderController {
     // MARK: - Connection actions
 
     func connect(_ peer: DiscoveredPeer) {
-        // Free version: one receiver at a time (FR-CONN-09).
-        if !isPremium, connectedReceivers.contains(where: { $0.id != peer.id }) {
-            onUpgradeNeeded?(.multipleDevices)
-            return
-        }
         wantedReceivers.insert(peer.id)
         lastErrors[peer.id] = nil
         guard session(for: peer.id) == nil else { return }
@@ -322,7 +315,7 @@ final class SenderController {
 
     private func poll() {
         var silent = false
-        for key in Array(ruleStore.rules.keys) + [Self.freeRouteKey] {
+        for key in Array(ruleStore.rules.keys) + [Self.allAudioRouteKey] {
             guard let peak = router.takePeak(for: key) else { continue }
             levels[key] = peak
             if playingKeys.contains(key), peak == 0 {
@@ -381,21 +374,18 @@ final class SenderController {
 
     func markFreeLimit(_ peerID: UUID) {
         wantedReceivers.remove(peerID)
-        lastErrors[peerID] = String(localized: "The free version connects one device at a time.")
+        lastErrors[peerID] = String(localized: "Only one device without SideCast Premium can be connected at a time.")
     }
 
     private func applyRoutes() {
         var units: [RouteUnit] = []
         var offline: Set<String> = []
         var playing: Set<String> = []
+        var needsPremium: Set<String> = []
         let connected = Set(connectedReceivers.map(\.id))
-        if !isPremium {
-            // Free version: all of the Mac's audio to one place.
-            if let unit = freeRouteUnit(connected: connected, offline: &offline) {
-                units.append(unit)
-            }
-        }
-        for app in apps where isPremium && !app.processes.isEmpty {
+        // Per-app rules are free on this Mac; sending one app to a receiver needs Premium on
+        // that receiver.
+        for app in apps where !app.processes.isEmpty {
             // Split the app's processes between the app rule and any per-kind rules.
             var buckets: [String: [AudioProcess]] = [:]
             for group in app.processGroups {
@@ -418,11 +408,14 @@ final class SenderController {
                         offline.insert(key)
                     }
                 case .receiver(let id):
-                    if connected.contains(id) {
+                    if !connected.contains(id) {
+                        target = .discard
+                        offline.insert(key)
+                    } else if isPremium(receiver: id) {
                         target = .receiver(id)
                     } else {
                         target = .discard
-                        offline.insert(key)
+                        needsPremium.insert(key)
                     }
                 }
                 if !rule.muted, processes.contains(where: \.isRunningOutput) {
@@ -437,8 +430,14 @@ final class SenderController {
                 ))
             }
         }
+        // Everything else (apps without their own setting) goes to the "all audio" target.
+        let routed = units.flatMap(\.processes)
+        if let unit = allAudioRouteUnit(connected: connected, excluding: routed, offline: &offline) {
+            units.append(unit)
+        }
         playingKeys = playing
         if offline != offlineApps { offlineApps = offline }
+        if needsPremium != premiumRequired { premiumRequired = needsPremium }
         router.apply(units, defaultDeviceUID: defaultOutputUID)
         let message = router.lastError.map { _ in String(localized: "SideCast could not capture app audio. Check the permission in System Settings.") }
         if message != audioError { audioError = message }
@@ -478,9 +477,8 @@ final class SenderController {
                 other.close(reason: "Replaced")
             }
             readySince[peer.id] = Date()
-            session.send(.premiumStatus(unlocked: license.isLicensed))
-            // Give the receiver a moment to report its own premium status before applying the
-            // free version's one-device limit.
+            // Give the receiver a moment to report its premium status before applying the
+            // limit of one unpaid device.
             DispatchQueue.main.asyncAfter(deadline: .now() + PremiumTiming.statusGracePeriod + 0.1) { [weak self] in
                 self?.enforceDeviceLimit()
             }

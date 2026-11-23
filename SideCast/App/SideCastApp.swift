@@ -24,10 +24,7 @@ struct SideCastApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarView(
-                openSettings: { appDelegate.settingsWindow.show() },
-                openPremium: { appDelegate.settingsWindow.show(tab: .general) }
-            )
+            MenuBarView(openSettings: { appDelegate.settingsWindow.show() })
                 .environment(appDelegate.sender)
         } label: {
             MenuBarIcon()

@@ -116,7 +116,11 @@ struct RuleControls: View {
                     Text(title)
                         .lineLimit(1)
                         .truncationMode(.middle)
-                    if sender.offlineApps.contains(ruleKey) {
+                    if sender.premiumRequired.contains(ruleKey) {
+                        Label("Needs Premium on the device", systemImage: "lock.circle")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    } else if sender.offlineApps.contains(ruleKey) {
                         Label("Device offline", systemImage: "exclamationmark.circle")
                             .font(.caption2)
                             .foregroundStyle(.orange)
@@ -132,8 +136,14 @@ struct RuleControls: View {
                 }
                 OutputPicker(choice: choice, allowsInherit: allowsInherit) { newChoice in
                     switch newChoice {
-                    case .inherit: reset()
-                    case .target(let target): setTarget(target)
+                    case .inherit:
+                        reset()
+                    case .target(.receiver(let id)) where !sender.isPremium(receiver: id):
+                        // Single apps can only go to receivers with Premium (FR-PAY-01).
+                        let name = sender.displayName(for: .receiver(id: id))
+                        sender.onUpgradeNeeded?(.singleAppToReceiver(name: name))
+                    case .target(let target):
+                        setTarget(target)
                     }
                 }
             }
@@ -184,7 +194,11 @@ private struct OutputPicker: View {
             if !sender.connectedReceivers.isEmpty {
                 Section("SideCast devices") {
                     ForEach(sender.connectedReceivers) { receiver in
-                        Text(receiver.name).tag(OutputChoice.target(.receiver(id: receiver.id)))
+                        if sender.isPremium(receiver: receiver.id) {
+                            Text(receiver.name).tag(OutputChoice.target(.receiver(id: receiver.id)))
+                        } else {
+                            Text("\(receiver.name) (needs Premium)").tag(OutputChoice.target(.receiver(id: receiver.id)))
+                        }
                     }
                 }
             }

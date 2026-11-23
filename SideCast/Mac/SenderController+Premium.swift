@@ -2,25 +2,23 @@
 //  SenderController+Premium.swift
 //  SideCast
 //
-//  Free vs Premium on the Mac (PRD 4, FR-PAY-01~05, FR-CONN-09):
-//  - Premium: per-app routing and volume, several receivers at once.
-//  - Free: all of the Mac's audio to one output, one receiver at a time.
-//  - Premium is on while this Mac has a license OR any connected receiver bought Premium;
-//    it ends with that connection (FR-PAY-04).
+//  Business model (PRD 4, v0.4):
+//  - The Mac app is free: per-app routing, volume and advanced mode on this Mac cost nothing.
+//  - Each receiver (iPad / iPhone / Vision Pro) buys SideCast Premium on its own (App Store).
+//  - A receiver without Premium only gets the "all audio" route (apps without their own
+//    setting) and only one such receiver can be connected at a time.
+//  - A receiver with Premium can receive single apps and doesn't count toward that limit.
 //
 
 #if os(macOS)
+import CoreAudio
 import Foundation
 
 enum UpgradeReason {
-    case perAppControl
-    case multipleDevices
-}
-
-enum PremiumSource: Equatable {
-    case none
-    case license
-    case receiver(name: String)
+    /// Sending a single app to a receiver without Premium.
+    case singleAppToReceiver(name: String)
+    /// A second receiver without Premium.
+    case anotherUnpaidDevice
 }
 
 enum PremiumTiming {
@@ -28,30 +26,55 @@ enum PremiumTiming {
     static let statusGracePeriod: TimeInterval = 2
 }
 
-extension SenderController {
-    var isPremium: Bool {
-        premiumSource != .none
+/// The limit of one connected receiver without Premium (FR-CONN-09), as a pure function.
+enum DeviceLimitPolicy {
+    struct Connection {
+        let id: UUID
+        /// nil while the receiver hasn't reported its status yet.
+        let hasPremium: Bool?
+        let readySince: Date
     }
 
-    var premiumSource: PremiumSource {
-        if license.isLicensed { return .license }
-        if let receiver = connectedReceivers.first(where: { receiverPremium[$0.id] == true }) {
-            return .receiver(name: receiver.name)
+    /// Receivers to disconnect, given connections in the order they connected.
+    static func connectionsToClose(_ connections: [Connection], now: Date) -> [UUID] {
+        var keptUnpaid = false
+        var close: [UUID] = []
+        for connection in connections {
+            switch connection.hasPremium {
+            case true?:
+                continue
+            case nil where now.timeIntervalSince(connection.readySince) < PremiumTiming.statusGracePeriod:
+                continue // still waiting for its status
+            default:
+                if keptUnpaid {
+                    close.append(connection.id)
+                } else {
+                    keptUnpaid = true
+                }
+            }
         }
-        return .none
+        return close
+    }
+}
+
+extension SenderController {
+    func isPremium(receiver id: UUID) -> Bool {
+        receiverPremium[id] == true
     }
 
-    static func loadFreeTarget() -> OutputTarget {
+    static func loadAllAudioTarget() -> OutputTarget {
         guard let data = UserDefaults.standard.data(forKey: "routing.freeTarget"),
               let target = try? JSONDecoder().decode(OutputTarget.self, from: data) else { return .systemDefault }
         return target
     }
 
-    /// The free version's single route: every process except SideCast itself.
-    func freeRouteUnit(connected: Set<UUID>, offline: inout Set<String>) -> RouteUnit? {
-        let key = Self.freeRouteKey
+    static let allAudioRouteKey = "__all__"
+
+    /// Captures every process except SideCast's own and the ones that already have a route.
+    func allAudioRouteUnit(connected: Set<UUID>, excluding routed: [AudioObjectID], offline: inout Set<String>) -> RouteUnit? {
+        let key = Self.allAudioRouteKey
         let target: RouteTarget
-        switch freeTarget {
+        switch allAudioTarget {
         case .systemDefault:
             return nil
         case .device(let uid):
@@ -72,49 +95,36 @@ extension SenderController {
         return RouteUnit(
             key: key,
             name: "All audio",
-            processes: ownProcessObjects,
+            processes: Array(Set(ownProcessObjects + routed)).sorted(),
             target: target,
             gain: 1,
             capturesAllExcept: true
         )
     }
 
-    static let freeRouteKey = "__all__"
-
-    /// Re-evaluates everything that depends on Premium.
+    /// Re-evaluates everything that depends on receivers' Premium status.
     func premiumChanged() {
-        let licensed = license.isLicensed
-        if licensed != lastSentPremium {
-            lastSentPremium = licensed
-            for session in sessions where session.state == .ready {
-                session.send(.premiumStatus(unlocked: licensed))
-            }
-        }
         enforceDeviceLimit()
         refreshRoutes()
     }
 
-    /// Free version: keep the first connected receiver and disconnect the rest (FR-CONN-09).
     func enforceDeviceLimit() {
-        guard !isPremium else { return }
         let ready = sessions.filter { $0.state == .ready && $0.peer != nil }
-        guard ready.count > 1 else { return }
-        let now = Date()
-        var closedAny = false
-        for session in ready.dropFirst() {
-            guard let id = session.peer?.id else { continue }
-            // Still waiting for this receiver to say whether it has Premium.
-            if !premiumStatusReceived.contains(id),
-               let since = readySince[id], now.timeIntervalSince(since) < PremiumTiming.statusGracePeriod {
-                continue
-            }
-            markFreeLimit(id)
+        let connections = ready.compactMap { session -> DeviceLimitPolicy.Connection? in
+            guard let id = session.peer?.id else { return nil }
+            return DeviceLimitPolicy.Connection(
+                id: id,
+                hasPremium: premiumStatusReceived.contains(id) ? isPremium(receiver: id) : nil,
+                readySince: readySince[id] ?? .distantPast
+            )
+        }
+        let close = DeviceLimitPolicy.connectionsToClose(connections, now: Date())
+        guard !close.isEmpty else { return }
+        for session in ready where close.contains(session.peer?.id ?? UUID()) {
+            if let id = session.peer?.id { markFreeLimit(id) }
             session.close(reason: GoodbyeReason.freeDeviceLimit)
-            closedAny = true
         }
-        if closedAny {
-            onUpgradeNeeded?(.multipleDevices)
-        }
+        onUpgradeNeeded?(.anotherUnpaidDevice)
     }
 }
 #endif

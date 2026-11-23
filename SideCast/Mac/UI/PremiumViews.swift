@@ -2,26 +2,27 @@
 //  PremiumViews.swift
 //  SideCast
 //
-//  Free version output picker, upgrade prompts and the Premium (license) settings section.
+//  "All audio" output picker, upgrade prompts and the Premium explanation (PRD 4, v0.4).
 //
 
 #if os(macOS)
 import AppKit
 import SwiftUI
 
-/// Free version: one output for all of the Mac's audio (FR-ROUTE-03).
-struct FreeOutputRow: View {
+/// Where apps without their own setting play (FR-ROUTE-03). This is the only route a receiver
+/// without Premium can take.
+struct AllAudioRow: View {
     @Environment(SenderController.self) private var sender
 
     var body: some View {
         @Bindable var sender = sender
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: "macbook")
+                Image(systemName: "speaker.wave.2.circle")
                     .frame(width: 20)
-                Text("Mac audio")
+                Text("Other sound")
                 Spacer()
-                Picker(selection: $sender.freeTarget) {
+                Picker(selection: $sender.allAudioTarget) {
                     Text("This Mac (no change)").tag(OutputTarget.systemDefault)
                     Section("This Mac") {
                         ForEach(sender.outputDevices) { device in
@@ -35,9 +36,9 @@ struct FreeOutputRow: View {
                             }
                         }
                     }
-                    if !isAvailable(sender.freeTarget) {
+                    if !isAvailable(sender.allAudioTarget) {
                         Divider()
-                        Text("\(sender.displayName(for: sender.freeTarget)) (offline)").tag(sender.freeTarget)
+                        Text("\(sender.displayName(for: sender.allAudioTarget)) (offline)").tag(sender.allAudioTarget)
                     }
                 } label: {
                     EmptyView()
@@ -45,14 +46,14 @@ struct FreeOutputRow: View {
                 .labelsHidden()
                 .fixedSize()
                 .controlSize(.small)
-                .accessibilityLabel(Text("Output for all Mac audio"))
+                .accessibilityLabel(Text("Output for other sound"))
             }
-            if sender.offlineApps.contains(SenderController.freeRouteKey) {
+            if sender.offlineApps.contains(SenderController.allAudioRouteKey) {
                 Label("Device offline", systemImage: "exclamationmark.circle")
                     .font(.caption2)
                     .foregroundStyle(.orange)
             }
-            Text("Sends all of the Mac's sound to one place.")
+            Text("Sound from apps you haven't set separately.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -67,104 +68,51 @@ struct FreeOutputRow: View {
     }
 }
 
-/// Explains a premium feature with a button to the Premium settings (FR-PAY-01).
-struct UpgradeBanner: View {
-    let openPremium: () -> Void
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "sparkles")
-                .foregroundStyle(.tint)
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Per-app output and volume are part of SideCast Premium.")
-                    .font(.callout)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button("Learn about Premium…", action: openPremium)
-                    .controlSize(.small)
-            }
-        }
-    }
-}
-
-/// Settings › General › SideCast Premium.
-struct PremiumSettingsSection: View {
+/// Settings › General › SideCast Premium: explains the model and shows connected devices.
+struct PremiumInfoSection: View {
     @Environment(SenderController.self) private var sender
-    @State private var key = ""
 
     var body: some View {
-        let license = sender.license
         Section {
-            switch sender.premiumSource {
-            case .license:
-                LabeledContent("Status") {
-                    Label("Unlocked", systemImage: "checkmark.seal.fill")
-                        .foregroundStyle(.green)
-                }
-            case .receiver(let name):
-                LabeledContent("Status") {
-                    Text("Unlocked while connected to \(name)")
-                        .foregroundStyle(.green)
-                }
-            case .none:
-                LabeledContent("Status", value: String(localized: "Free version"))
+            if sender.connectedReceivers.isEmpty {
+                Text("No devices connected.")
+                    .foregroundStyle(.secondary)
             }
-
-            if case let .licensed(suffix) = license.state {
-                LabeledContent("License key") {
-                    Text(verbatim: "••••-\(suffix)")
-                        .font(.body.monospaced())
-                }
-                Button("Deactivate on This Mac") {
-                    Task { await license.deactivate() }
-                }
-            } else {
-                HStack {
-                    TextField("License key", text: $key)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.body.monospaced())
-                        .disableAutocorrection(true)
-                    Button("Activate") {
-                        Task { await license.activate(key: key) }
+            ForEach(sender.connectedReceivers) { receiver in
+                LabeledContent {
+                    if sender.isPremium(receiver: receiver.id) {
+                        Label("Premium", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Text("Free")
+                            .foregroundStyle(.secondary)
                     }
-                    .disabled(key.trimmingCharacters(in: .whitespaces).isEmpty || license.state == .working)
+                } label: {
+                    Label(receiver.name, systemImage: receiver.platform.symbolName)
                 }
-                if license.state == .working {
-                    ProgressView().controlSize(.small)
-                }
-                if let url = license.checkoutURL {
-                    Button("Buy SideCast Premium…") { NSWorkspace.shared.open(url) }
-                }
-            }
-            if let error = license.lastError {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
             }
         } header: {
             Text("SideCast Premium")
         } footer: {
-            Text("Premium adds per-app output and volume, and lets you connect several devices at once. It's a one-time purchase. If an iPad or iPhone bought Premium in the App Store, it's unlocked while that device is connected.")
+            Text("SideCast on the Mac is free, including per-app output and volume on this Mac. SideCast Premium is a one-time purchase in SideCast on each iPad, iPhone or Vision Pro. A device with Premium can receive single apps and can be connected alongside other devices; a device without it receives the other sound, one device at a time.")
         }
     }
 }
 
 enum UpgradeAlert {
     @MainActor
-    static func present(_ reason: UpgradeReason, openPremium: @escaping () -> Void) {
+    static func present(_ reason: UpgradeReason) {
         let alert = NSAlert()
-        alert.messageText = String(localized: "This needs SideCast Premium")
+        alert.messageText = String(localized: "This needs SideCast Premium on the device")
         switch reason {
-        case .multipleDevices:
-            alert.informativeText = String(localized: "The free version connects one device at a time. With Premium you can connect several devices and send different apps to each.")
-        case .perAppControl:
-            alert.informativeText = String(localized: "With Premium you can choose an output and volume for each app.")
+        case .singleAppToReceiver(let name):
+            alert.informativeText = String(localized: "To send a single app to \(name), buy SideCast Premium in SideCast on \(name). Until then \(name) can play the other sound.")
+        case .anotherUnpaidDevice:
+            alert.informativeText = String(localized: "Only one device without SideCast Premium can be connected at a time. Buy Premium in SideCast on the device to connect it alongside others.")
         }
-        alert.addButton(withTitle: String(localized: "Learn about Premium…"))
-        alert.addButton(withTitle: String(localized: "Not Now"))
+        alert.addButton(withTitle: String(localized: "OK"))
         NSApp.activate()
-        if alert.runModal() == .alertFirstButtonReturn {
-            openPremium()
-        }
+        alert.runModal()
     }
 }
 #endif
