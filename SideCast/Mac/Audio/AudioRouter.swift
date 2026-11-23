@@ -84,6 +84,11 @@ final class AudioRouter {
         }
     }
 
+    /// Forces the next `apply` to reconfigure, e.g. after a receiver's sink changed.
+    func invalidate() {
+        lastUnits = []
+    }
+
     func takePeak(for key: String) -> Float? {
         for engine in engines.values {
             if let peak = engine.takePeak(for: key) { return peak }

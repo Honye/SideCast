@@ -20,8 +20,24 @@ final class ReceiverController {
 
     private(set) var sessions: [PeerSession] = []
     private(set) var lastError: String?
+    /// SideCast's own output volume on this device, 0…1 (FR-RECV-02).
+    var volume: Double = UserDefaults.standard.object(forKey: "receiver.volume") as? Double ?? 1 {
+        didSet {
+            UserDefaults.standard.set(volume, forKey: "receiver.volume")
+            player.volume = Float(volume)
+        }
+    }
+    private(set) var currentStream: StreamConfig?
 
     @ObservationIgnored private var started = false
+    @ObservationIgnored private let ring = FloatRingBuffer(capacity: 1 << 16)
+    @ObservationIgnored private lazy var player = AudioPlayer(ring: ring)
+    @ObservationIgnored private var audioReceiver: AudioReceiver?
+    @ObservationIgnored private var audioSessionID: UUID?
+    @ObservationIgnored private let nowPlaying = NowPlayingController()
+#if DEBUG
+    @ObservationIgnored private var statsTimer: Timer?
+#endif
 
     init() {
         identity = IdentityStore.loadOrCreate(role: .receiver)
@@ -36,6 +52,7 @@ final class ReceiverController {
             self?.accept(connection)
         }
         node.start()
+        nowPlaying.onDisconnect = { [weak self] in self?.disconnect() }
         Log.app.info("Receiver started as \(self.identity.device.name, privacy: .public)")
     }
 
@@ -128,8 +145,12 @@ final class ReceiverController {
                     return
                 }
             }
+            startAudio(for: session)
         case .closed(let error):
             sessions.removeAll { $0 === session }
+            if audioSessionID == session.id {
+                stopAudio()
+            }
             if let error, session.isInitiator || error.isFinal {
                 lastError = error.userMessage
             }
@@ -138,10 +159,65 @@ final class ReceiverController {
         }
     }
 
+    // MARK: - Audio
+
+    private func startAudio(for session: PeerSession) {
+        stopAudio()
+        guard let key = session.audioKey else { return }
+        let receiver = AudioReceiver(key: key, ring: ring)
+        do {
+            try receiver.start { [weak session] port in
+                MainActor.assumeIsolated {
+                    session?.send(.receiverInfo(audioPort: port))
+                }
+            }
+            player.volume = Float(volume)
+            try player.start()
+        } catch {
+            Log.audio.error("Could not start audio: \(error.localizedDescription, privacy: .public)")
+            lastError = String(localized: "Could not start audio playback.")
+        }
+        audioReceiver = receiver
+        audioSessionID = session.id
+        nowPlaying.show(macName: session.peer?.name ?? "Mac")
+#if DEBUG
+        statsTimer?.invalidate()
+        statsTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, let receiver = self.audioReceiver else { return }
+                DebugTrace.write("rx packets=\(receiver.packetsReceived) lost=\(receiver.packetsLost) buffered=\(self.ring.available / 2) stream=\(self.currentStream?.codec.rawValue ?? "-") engine=\(self.player.isRunning)")
+            }
+        }
+#endif
+    }
+
+    private func stopAudio() {
+#if DEBUG
+        statsTimer?.invalidate()
+        statsTimer = nil
+#endif
+        audioReceiver?.stop()
+        audioReceiver = nil
+        audioSessionID = nil
+        currentStream = nil
+        player.stop()
+        nowPlaying.hide()
+    }
+
     private func handle(_ message: ControlMessage, from session: PeerSession) {
         switch message {
         case .ping(let id):
             session.send(.pong(id: id))
+        case .startStream(let config):
+            guard session.id == audioSessionID else { return }
+            ring.skip(ring.available)
+            player.setTargetLatency(config.codec == .opus ? .lowLatency : .highQuality)
+            audioReceiver?.setStream(config)
+            currentStream = config
+        case .stopStream(let streamID):
+            guard session.id == audioSessionID, currentStream?.streamID == streamID else { return }
+            audioReceiver?.setStream(nil)
+            currentStream = nil
         default:
             Log.net.debug("Unhandled message \(String(describing: message), privacy: .public)")
         }

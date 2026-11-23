@@ -93,6 +93,20 @@ private struct ReceiverRow: View {
                 StatusText(status: status)
             }
             Spacer()
+            if status == .connected {
+                Picker(selection: Binding(
+                    get: { sender.audioMode(for: peer.id) },
+                    set: { sender.setAudioMode($0, for: peer.id) }
+                )) {
+                    Text("Low latency").tag(AudioMode.lowLatency)
+                    Text("High quality").tag(AudioMode.highQuality)
+                } label: {
+                    EmptyView()
+                }
+                .labelsHidden()
+                .fixedSize()
+                .controlSize(.small)
+            }
             switch status {
             case .connected, .connecting, .pairing:
                 Button("Disconnect") { sender.disconnect(peer.id) }

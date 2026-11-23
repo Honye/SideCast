@@ -85,6 +85,19 @@ private struct ConnectedView: View {
                 .foregroundStyle(.tint)
             Text("Connected to \(session.peer?.name ?? "")")
                 .font(.title2)
+            if let stream = receiver.currentStream {
+                Text(stream.codec == .opus ? "Low latency" : "High quality")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            HStack {
+                Image(systemName: "speaker.fill")
+                Slider(value: Bindable(receiver).volume, in: 0...1)
+                    .accessibilityLabel(Text("Volume"))
+                Image(systemName: "speaker.wave.3.fill")
+            }
+            .frame(maxWidth: 360)
+            .foregroundStyle(.secondary)
             Button("Disconnect", role: .destructive) {
                 receiver.disconnect()
             }

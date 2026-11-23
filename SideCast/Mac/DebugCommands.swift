@@ -9,7 +9,7 @@
 //        "com.imarkr.SideCast.debug", "{\"cmd\":\"route\",\"app\":\"com.apple.afplay\",\"device\":\"BuiltInSpeakerDevice\",\"volume\":0.5}", $(), true)'
 //
 //  Commands: route (app, device UID | "default" | "receiver:<uuid>", volume, muted), reset (app),
-//  settings.
+//  mode (receiver, lowLatency | highQuality), settings.
 //
 
 #if os(macOS) && DEBUG
@@ -55,6 +55,11 @@ enum DebugCommands {
             }
             if let muted = command["muted"] as? Bool {
                 sender.setMuted(muted, for: app)
+            }
+        case "mode":
+            if let receiver = (command["receiver"] as? String).flatMap(UUID.init(uuidString:)),
+               let mode = (command["mode"] as? String).flatMap(AudioMode.init(rawValue:)) {
+                sender.setAudioMode(mode, for: receiver)
             }
         case "reset":
             if let appID = command["app"] as? String {

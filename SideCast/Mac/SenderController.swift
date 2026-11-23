@@ -41,7 +41,13 @@ final class SenderController {
     private(set) var debugLines: [String] = []
 #endif
 
+    /// Audio mode per receiver (FR-MODE-01), remembered across launches (FR-MODE-04).
+    private(set) var audioModes: [UUID: AudioMode] = SenderController.loadAudioModes()
+
     @ObservationIgnored private let router = AudioRouter()
+    @ObservationIgnored private var audioPorts: [UUID: UInt16] = [:]
+    @ObservationIgnored private var streams: [UUID: RemoteAudioStream] = [:]
+    @ObservationIgnored private var nextStreamID = UInt32.random(in: 1...UInt32.max / 2)
     @ObservationIgnored private var wantedReceivers: Set<UUID> = []
     @ObservationIgnored private var reconnectWork: [UUID: DispatchWorkItem] = [:]
     @ObservationIgnored private let pairingPanel = PairingPanelController()
@@ -55,6 +61,7 @@ final class SenderController {
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
         ruleStore = RuleStore()
+        router.sinkProvider = { [weak self] id in self?.streams[id] }
     }
 
     func start() {
@@ -78,6 +85,7 @@ final class SenderController {
         node.stop()
         pollTimer?.invalidate()
         router.stopAll()
+        streams.values.forEach { $0.stop() }
     }
 
     // MARK: - Connection queries
@@ -324,6 +332,11 @@ final class SenderController {
             applyRoutes()
         case .closed(let error):
             sessions.removeAll { $0 === session }
+            if let peerID = session.peer?.id, !sessions.contains(where: { $0.peer?.id == peerID && $0.state == .ready }) {
+                streams.removeValue(forKey: peerID)?.stop()
+                audioPorts.removeValue(forKey: peerID)
+                router.invalidate()
+            }
             applyRoutes()
             guard let peerID = session.peer?.id ?? session.expectedPeerID else { return }
             if let error {
@@ -343,9 +356,76 @@ final class SenderController {
         switch message {
         case .ping(let id):
             session.send(.pong(id: id))
+        case .receiverInfo(let port):
+            guard let peerID = session.peer?.id else { return }
+            audioPorts[peerID] = port
+            restartStream(for: peerID)
         default:
             Log.net.debug("Unhandled message \(String(describing: message), privacy: .public)")
         }
+    }
+
+    // MARK: - Network audio
+
+    func audioMode(for receiverID: UUID) -> AudioMode {
+        audioModes[receiverID] ?? .lowLatency
+    }
+
+    func setAudioMode(_ mode: AudioMode, for receiverID: UUID) {
+        audioModes[receiverID] = mode
+        if let data = try? JSONEncoder().encode(audioModes.reduce(into: [String: AudioMode]()) { $0[$1.key.uuidString] = $1.value }) {
+            UserDefaults.standard.set(data, forKey: "audio.modes")
+        }
+        restartStream(for: receiverID)
+    }
+
+    private static func loadAudioModes() -> [UUID: AudioMode] {
+        guard let data = UserDefaults.standard.data(forKey: "audio.modes"),
+              let stored = try? JSONDecoder().decode([String: AudioMode].self, from: data) else { return [:] }
+        return stored.reduce(into: [:]) { result, entry in
+            if let id = UUID(uuidString: entry.key) { result[id] = entry.value }
+        }
+    }
+
+    /// (Re)creates the UDP stream to a connected receiver with its current mode.
+    private func restartStream(for receiverID: UUID) {
+        guard let session = sessions.first(where: { $0.peer?.id == receiverID && $0.state == .ready }),
+              let port = audioPorts[receiverID],
+              let key = session.audioKey,
+              let connection = (session.transport as? NWTransport)?.connection,
+              case let .hostPort(host, _)? = connection.currentPath?.remoteEndpoint else { return }
+
+        if let old = streams.removeValue(forKey: receiverID) {
+            old.stop()
+            session.send(.stopStream(streamID: old.config.streamID))
+        }
+        let codec = audioMode(for: receiverID).codec
+        nextStreamID &+= 1
+        let config = StreamConfig(
+            streamID: nextStreamID,
+            codec: codec,
+            sampleRate: AudioWireFormat.sampleRate,
+            channels: AudioWireFormat.channels,
+            framesPerPacket: AudioWireFormat.framesPerPacket(for: codec)
+        )
+        do {
+            let stream = try RemoteAudioStream(
+                config: config,
+                key: key,
+                host: host,
+                port: port,
+                interface: connection.currentPath?.availableInterfaces.first
+            )
+            session.send(.startStream(config))
+            stream.start()
+            streams[receiverID] = stream
+            Log.audio.info("Streaming to \(session.peer?.name ?? "?", privacy: .public) as \(codec.rawValue, privacy: .public) on port \(port)")
+            DebugTrace.write("stream \(config.streamID) to \(host):\(port) codec=\(codec)")
+        } catch {
+            Log.audio.error("Could not start stream: \(String(describing: error), privacy: .public)")
+        }
+        router.invalidate()
+        applyRoutes()
     }
 
     private func scheduleReconnect(_ peerID: UUID) {
