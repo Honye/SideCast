@@ -13,16 +13,84 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("SideCast")
                 .font(.headline)
+
+            DevicesSection()
+
             Divider()
-            SettingsLink {
-                Text("Settings…")
-            }
-            Button("Quit SideCast") {
-                NSApplication.shared.terminate(nil)
+            HStack {
+                SettingsLink {
+                    Text("Settings…")
+                }
+                Spacer()
+                Button("Quit SideCast") {
+                    NSApplication.shared.terminate(nil)
+                }
             }
         }
         .padding()
-        .frame(width: 320)
+        .frame(width: 340)
+    }
+}
+
+private struct DevicesSection: View {
+    @Environment(SenderController.self) private var sender
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Devices")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            if sender.receivers.isEmpty {
+                Text("Open SideCast on your iPad to see it here.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(sender.receivers) { peer in
+                ReceiverRow(peer: peer)
+            }
+        }
+    }
+}
+
+private struct ReceiverRow: View {
+    @Environment(SenderController.self) private var sender
+    let peer: DiscoveredPeer
+
+    var body: some View {
+        let status = sender.status(for: peer.id)
+        HStack {
+            Image(systemName: peer.device.platform.symbolName)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(peer.device.name)
+                StatusText(status: status)
+            }
+            Spacer()
+            switch status {
+            case .connected, .connecting, .pairing:
+                Button("Disconnect") { sender.disconnect(peer.id) }
+            case .available, .failed:
+                Button("Connect") { sender.connect(peer) }
+            }
+        }
+    }
+}
+
+struct StatusText: View {
+    let status: LinkStatus
+
+    var body: some View {
+        Group {
+            switch status {
+            case .available: Text("Not connected")
+            case .connecting: Text("Connecting…")
+            case .pairing: Text("Waiting for pairing code…")
+            case .connected: Text("Connected").foregroundStyle(.green)
+            case .failed(let message): Text(message).foregroundStyle(.red)
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }
 #endif
