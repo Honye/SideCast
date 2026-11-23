@@ -37,6 +37,9 @@ final class SenderController {
     /// Recent peak level per app (0…1), for meters.
     private(set) var levels: [String: Float] = [:]
     private(set) var audioError: String?
+    /// Routed apps that claim to play have produced only silence for a while: the audio
+    /// capture permission may be missing (FR-PERM-02).
+    private(set) var capturedSilenceSuspected = false
 #if DEBUG
     private(set) var debugLines: [String] = []
 #endif
@@ -146,38 +149,97 @@ final class SenderController {
     }
 
     // MARK: - Audio actions
+    //
+    // Rules are keyed by app ID, or in advanced mode by "<app ID>#<process kind>" for one kind
+    // of helper process inside an app (FR-ROUTE-10).
 
-    func rule(for app: AudioApp) -> AppRule {
-        ruleStore.rule(for: app.id)
+    func rule(forKey key: String) -> AppRule {
+        ruleStore.rule(for: key)
+    }
+
+    func setTarget(_ target: OutputTarget, forKey key: String, name: String) {
+        ruleStore.update(key, name: name) { $0.target = target }
+        applyRoutes()
+    }
+
+    func setVolume(_ volume: Double, forKey key: String, name: String) {
+        ruleStore.update(key, name: name) { $0.volume = min(max(volume, 0), 1) }
+        applyRoutes()
+    }
+
+    func setMuted(_ muted: Bool, forKey key: String, name: String) {
+        ruleStore.update(key, name: name) { $0.muted = muted }
+        applyRoutes()
+    }
+
+    func resetRule(forKey key: String) {
+        ruleStore.reset(key)
+        applyRoutes()
     }
 
     func setTarget(_ target: OutputTarget, for app: AudioApp) {
-        ruleStore.update(app.id, name: app.name) { $0.target = target }
-        applyRoutes()
+        setTarget(target, forKey: app.id, name: app.name)
     }
 
     func setVolume(_ volume: Double, for app: AudioApp) {
-        ruleStore.update(app.id, name: app.name) { $0.volume = min(max(volume, 0), 1) }
-        applyRoutes()
+        setVolume(volume, forKey: app.id, name: app.name)
     }
 
     func setMuted(_ muted: Bool, for app: AudioApp) {
-        ruleStore.update(app.id, name: app.name) { $0.muted = muted }
-        applyRoutes()
+        setMuted(muted, forKey: app.id, name: app.name)
     }
 
     func resetRule(for appID: String) {
-        ruleStore.reset(appID)
+        resetRule(forKey: appID)
+    }
+
+    // Per-process-kind overrides (advanced mode).
+
+    func hasOverride(_ group: ProcessGroup) -> Bool {
+        ruleStore.rules[group.id] != nil
+    }
+
+    /// The rule a process kind follows: its own override, or the app's rule.
+    func effectiveRule(for group: ProcessGroup) -> AppRule {
+        ruleStore.rules[group.id] ?? ruleStore.rule(for: group.appID)
+    }
+
+    func override(_ group: ProcessGroup, name: String, _ change: (inout AppRule) -> Void) {
+        let base = effectiveRule(for: group)
+        ruleStore.update(group.id, name: name, keepPassthrough: true) { rule in
+            if ruleStore.rules[group.id] == nil { rule = base }
+            change(&rule)
+        }
         applyRoutes()
+    }
+
+    /// Advanced mode: per-process-kind rules inside an app (FR-ROUTE-10).
+    var advancedMode: Bool = UserDefaults.standard.bool(forKey: "routing.advanced") {
+        didSet {
+            UserDefaults.standard.set(advancedMode, forKey: "routing.advanced")
+            applyRoutes()
+        }
     }
 
     /// Apps worth showing: playing now, or with a custom rule.
     var visibleApps: [AudioApp] {
-        apps.filter { $0.isPlaying || ruleStore.rules[$0.id] != nil }
-            .sorted { lhs, rhs in
-                if lhs.isPlaying != rhs.isPlaying { return lhs.isPlaying }
-                return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
-            }
+        apps.filter { app in
+            app.isPlaying || ruleStore.rules[app.id] != nil
+                || (advancedMode && app.processGroups.contains { ruleStore.rules[$0.id] != nil })
+        }
+        .sorted { lhs, rhs in
+            if lhs.isPlaying != rhs.isPlaying { return lhs.isPlaying }
+            return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+        }
+    }
+
+    /// Saved rules whose app (or process kind) is not running right now.
+    var dormantRules: [(key: String, rule: AppRule)] {
+        let live = Set(apps.flatMap { [$0.id] + $0.processGroups.map(\.id) })
+        return ruleStore.rules
+            .filter { !live.contains($0.key) }
+            .map { (key: $0.key, rule: $0.value) }
+            .sorted { ($0.rule.appName ?? $0.key).localizedStandardCompare($1.rule.appName ?? $1.key) == .orderedAscending }
     }
 
     func displayName(for target: OutputTarget) -> String {
@@ -217,16 +279,27 @@ final class SenderController {
     }
 
     private var pollCount = 0
+    /// Consecutive polls without any signal per routed key while its processes claim to play.
+    @ObservationIgnored private var silentPolls: [String: Int] = [:]
+    @ObservationIgnored private var playingKeys: Set<String> = []
 
     private func poll() {
-        for app in apps where ruleStore.rules[app.id] != nil {
-            if let peak = router.takePeak(for: app.id) {
-                levels[app.id] = peak
-#if DEBUG
-                if pollCount % 4 == 0 { DebugTrace.write("peak \(app.id) \(peak)") }
-#endif
+        var silent = false
+        for key in ruleStore.rules.keys {
+            guard let peak = router.takePeak(for: key) else { continue }
+            levels[key] = peak
+            if playingKeys.contains(key), peak == 0 {
+                silentPolls[key, default: 0] += 1
+            } else {
+                silentPolls[key] = 0
             }
+            // ~10 s of digital silence from apps that claim to play.
+            if silentPolls[key, default: 0] >= 20 { silent = true }
+#if DEBUG
+            if pollCount % 4 == 0 { DebugTrace.write("peak \(key) \(peak)") }
+#endif
         }
+        if silent != capturedSilenceSuspected { capturedSilenceSuspected = silent }
 #if DEBUG
         debugLines = DebugTrace.recent()
 #endif
@@ -258,41 +331,54 @@ final class SenderController {
     private func applyRoutes() {
         var units: [RouteUnit] = []
         var offline: Set<String> = []
+        var playing: Set<String> = []
         let connected = Set(connectedReceivers.map(\.id))
         for app in apps where !app.processes.isEmpty {
-            let rule = ruleStore.rule(for: app.id)
-            guard !rule.isPassthrough else { continue }
-            let target: RouteTarget
-            switch rule.target {
-            case .systemDefault:
-                guard let uid = defaultOutputUID else { continue }
-                target = .device(uid)
-            case .device(let uid):
-                if outputDevices.contains(where: { $0.id == uid }) {
-                    target = .device(uid)
-                } else {
-                    target = .discard
-                    offline.insert(app.id)
-                }
-            case .receiver(let id):
-                if connected.contains(id) {
-                    target = .receiver(id)
-                } else {
-                    target = .discard
-                    offline.insert(app.id)
-                }
+            // Split the app's processes between the app rule and any per-kind rules.
+            var buckets: [String: [AudioProcess]] = [:]
+            for group in app.processGroups {
+                let key = advancedMode && ruleStore.rules[group.id] != nil ? group.id : app.id
+                buckets[key, default: []].append(contentsOf: group.processes)
             }
-            units.append(RouteUnit(
-                key: app.id,
-                name: app.name,
-                processes: app.processObjectIDs,
-                target: target,
-                gain: rule.muted ? 0 : Float(rule.volume)
-            ))
+            for (key, processes) in buckets {
+                let rule = ruleStore.rule(for: key)
+                guard !rule.isPassthrough else { continue }
+                let target: RouteTarget
+                switch rule.target {
+                case .systemDefault:
+                    guard let uid = defaultOutputUID else { continue }
+                    target = .device(uid)
+                case .device(let uid):
+                    if outputDevices.contains(where: { $0.id == uid }) {
+                        target = .device(uid)
+                    } else {
+                        target = .discard
+                        offline.insert(key)
+                    }
+                case .receiver(let id):
+                    if connected.contains(id) {
+                        target = .receiver(id)
+                    } else {
+                        target = .discard
+                        offline.insert(key)
+                    }
+                }
+                if !rule.muted, processes.contains(where: \.isRunningOutput) {
+                    playing.insert(key)
+                }
+                units.append(RouteUnit(
+                    key: key,
+                    name: app.name,
+                    processes: processes.map(\.objectID),
+                    target: target,
+                    gain: rule.muted ? 0 : Float(rule.volume)
+                ))
+            }
         }
+        playingKeys = playing
         if offline != offlineApps { offlineApps = offline }
         router.apply(units, defaultDeviceUID: defaultOutputUID)
-        let message = router.lastError.map { String(describing: $0) }
+        let message = router.lastError.map { _ in String(localized: "SideCast could not capture app audio. Check the permission in System Settings.") }
         if message != audioError { audioError = message }
     }
 

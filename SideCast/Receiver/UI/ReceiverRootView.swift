@@ -34,9 +34,27 @@ struct ReceiverRootView: View {
 
 private struct MacListView: View {
     @Environment(ReceiverController.self) private var receiver
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         List {
+            if receiver.node.localNetworkDenied {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Local network access is off", systemImage: "wifi.exclamationmark")
+                            .font(.headline)
+                        Text("SideCast needs local network access to find your Mac. Turn it on in Settings.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                        Button("Open Settings") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                openURL(url)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
             if let error = receiver.lastError {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle")
@@ -52,25 +70,46 @@ private struct MacListView: View {
                     }
                 }
                 ForEach(receiver.senders) { peer in
-                    Button {
-                        receiver.connect(peer)
-                    } label: {
-                        HStack {
-                            Label(peer.device.name, systemImage: peer.device.platform.symbolName)
-                            Spacer()
-                            if receiver.status(for: peer.id) == .connecting {
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .accessibilityIdentifier("mac-\(peer.device.name)")
+                    MacRow(peer: peer)
                 }
             } header: {
                 Text("Nearby Macs")
             } footer: {
-                Text("Make sure SideCast is running on your Mac and both devices have Wi-Fi turned on.")
+                Text("Make sure SideCast is running on your Mac and both devices have Wi-Fi turned on. This device appears on the Mac as “\(receiver.identity.device.name)”.")
             }
         }
+    }
+}
+
+private struct MacRow: View {
+    @Environment(ReceiverController.self) private var receiver
+    let peer: DiscoveredPeer
+
+    var body: some View {
+        let status = receiver.status(for: peer.id)
+        let paired = receiver.trustStore.peers.contains { $0.id == peer.id }
+        Button {
+            receiver.connect(peer)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: peer.device.platform.symbolName)
+                    .font(.title3)
+                    .frame(width: 32)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(peer.device.name)
+                        .foregroundStyle(.primary)
+                    Text(paired ? "Paired · Tap to connect" : "Tap to pair and connect")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if status == .connecting || status == .pairing {
+                    ProgressView()
+                }
+            }
+        }
+        .disabled(status == .connecting || status == .pairing)
+        .accessibilityIdentifier("mac-\(peer.device.name)")
     }
 }
 
@@ -83,17 +122,26 @@ private struct ConnectedView: View {
             Image(systemName: "hifispeaker.2.fill")
                 .font(.system(size: 64))
                 .foregroundStyle(.tint)
-            Text("Connected to \(session.peer?.name ?? "")")
-                .font(.title2)
-            if let stream = receiver.currentStream {
-                Text(stream.codec == .opus ? "Low latency" : "High quality")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                .symbolEffect(.pulse, isActive: receiver.currentStream == nil)
+            VStack(spacing: 6) {
+                Text("Connected to \(session.peer?.name ?? "")")
+                    .font(.title2)
+                    .multilineTextAlignment(.center)
+                Group {
+                    if let stream = receiver.currentStream {
+                        Text(stream.codec == .opus ? "Low latency" : "High quality")
+                    } else {
+                        Text("Choose this device as an app's output on your Mac.")
+                    }
+                }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
             }
             HStack {
                 Image(systemName: "speaker.fill")
                 Slider(value: Bindable(receiver).volume, in: 0...1)
-                    .accessibilityLabel(Text("Volume"))
+                    .accessibilityLabel(Text("SideCast volume"))
                 Image(systemName: "speaker.wave.3.fill")
             }
             .frame(maxWidth: 360)
@@ -102,8 +150,13 @@ private struct ConnectedView: View {
                 receiver.disconnect()
             }
             .buttonStyle(.bordered)
+            Text("Audio keeps playing when you lock the screen or switch apps.")
+                .font(.footnote)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
         }
         .padding()
+        .frame(maxWidth: 480)
     }
 }
 

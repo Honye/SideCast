@@ -2,7 +2,8 @@
 //  AppRowView.swift
 //  SideCast
 //
-//  One app in the menu bar list: output picker, volume slider, mute (FR-ROUTE-02, FR-VOL-01/02).
+//  App rows shared by the menu bar and the settings window: output picker, volume slider,
+//  mute (FR-ROUTE-02, FR-VOL-01/02), and in advanced mode per-process overrides (FR-ROUTE-10).
 //
 
 #if os(macOS)
@@ -12,78 +13,184 @@ import SwiftUI
 struct AppRowView: View {
     @Environment(SenderController.self) private var sender
     let app: AudioApp
+    @State private var showsProcesses = false
 
     var body: some View {
-        let rule = sender.rule(for: app)
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                AppIconView(bundleID: app.id)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(app.name)
-                        .lineLimit(1)
-                    if sender.offlineApps.contains(app.id) {
-                        Label("Device offline", systemImage: "exclamationmark.circle")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    }
-                }
-                Spacer(minLength: 4)
-                OutputPicker(app: app, selection: rule.target)
-            }
-            HStack(spacing: 6) {
+            RuleControls(
+                title: app.name,
+                iconBundleID: app.id,
+                ruleKey: app.id,
+                rule: sender.rule(forKey: app.id),
+                isOverridden: sender.ruleStore.rules[app.id] != nil,
+                choice: .target(sender.rule(forKey: app.id).target),
+                allowsInherit: false,
+                setTarget: { sender.setTarget($0, for: app) },
+                setVolume: { sender.setVolume($0, for: app) },
+                setMuted: { sender.setMuted($0, for: app) },
+                reset: { sender.resetRule(for: app.id) }
+            )
+            let groups = app.processGroups
+            if sender.advancedMode && groups.count > 1 {
                 Button {
-                    sender.setMuted(!rule.muted, for: app)
+                    withAnimation(.snappy) { showsProcesses.toggle() }
                 } label: {
-                    Image(systemName: rule.muted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                        .frame(width: 18)
+                    Label {
+                        Text("\(groups.count) processes")
+                    } icon: {
+                        Image(systemName: "chevron.right")
+                            .rotationEffect(.degrees(showsProcesses ? 90 : 0))
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.borderless)
-                .help(rule.muted ? Text("Unmute") : Text("Mute"))
-
-                Slider(
-                    value: Binding(
-                        get: { rule.volume },
-                        set: { sender.setVolume($0, for: app) }
-                    ),
-                    in: 0...1
-                )
-                .controlSize(.small)
-                .disabled(rule.muted)
-
-                LevelMeter(level: sender.levels[app.id] ?? 0)
-                Text("\(Int((rule.volume * 100).rounded()))%")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .frame(width: 36, alignment: .trailing)
+                .padding(.leading, 28)
+                .accessibilityValue(showsProcesses ? Text("Expanded") : Text("Collapsed"))
+                if showsProcesses {
+                    ForEach(groups) { group in
+                        ProcessGroupRow(app: app, group: group)
+                            .padding(.leading, 28)
+                    }
+                }
             }
         }
         .padding(.vertical, 2)
     }
 }
 
-private struct OutputPicker: View {
+private struct ProcessGroupRow: View {
     @Environment(SenderController.self) private var sender
     let app: AudioApp
-    let selection: OutputTarget
+    let group: ProcessGroup
 
     var body: some View {
-        Picker(
-            selection: Binding(get: { selection }, set: { sender.setTarget($0, for: app) })
-        ) {
-            Text("System Default").tag(OutputTarget.systemDefault)
-            Divider()
-            ForEach(sender.outputDevices) { device in
-                Text(device.name).tag(OutputTarget.device(uid: device.id))
-            }
-            if !sender.connectedReceivers.isEmpty {
-                Divider()
-                ForEach(sender.connectedReceivers) { receiver in
-                    Text(receiver.name).tag(OutputTarget.receiver(id: receiver.id))
+        let rule = sender.effectiveRule(for: group)
+        let overridden = sender.hasOverride(group)
+        let name = "\(app.name) · \(group.displayName)"
+        RuleControls(
+            title: group.displayName,
+            iconBundleID: nil,
+            ruleKey: group.id,
+            rule: rule,
+            isOverridden: overridden,
+            choice: overridden ? .target(rule.target) : .inherit,
+            allowsInherit: true,
+            setTarget: { target in sender.override(group, name: name) { $0.target = target } },
+            setVolume: { volume in sender.override(group, name: name) { $0.volume = volume } },
+            setMuted: { muted in sender.override(group, name: name) { $0.muted = muted } },
+            reset: { sender.resetRule(forKey: group.id) }
+        )
+        .opacity(group.isPlaying || overridden ? 1 : 0.6)
+    }
+}
+
+enum OutputChoice: Hashable {
+    /// Per-process row: follow the app's rule.
+    case inherit
+    case target(OutputTarget)
+}
+
+/// Picker + volume + mute for one rule key.
+struct RuleControls: View {
+    @Environment(SenderController.self) private var sender
+    let title: String
+    let iconBundleID: String?
+    let ruleKey: String
+    let rule: AppRule
+    let isOverridden: Bool
+    let choice: OutputChoice
+    let allowsInherit: Bool
+    let setTarget: (OutputTarget) -> Void
+    let setVolume: (Double) -> Void
+    let setMuted: (Bool) -> Void
+    let reset: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                if let iconBundleID {
+                    AppIconView(bundleID: iconBundleID)
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    if sender.offlineApps.contains(ruleKey) {
+                        Label("Device offline", systemImage: "exclamationmark.circle")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                }
+                Spacer(minLength: 4)
+                if isOverridden {
+                    Button(action: reset) {
+                        Image(systemName: "arrow.uturn.backward")
+                    }
+                    .buttonStyle(.borderless)
+                    .help(allowsInherit ? Text("Follow the app's setting") : Text("Reset to system default"))
+                }
+                OutputPicker(choice: choice, allowsInherit: allowsInherit) { newChoice in
+                    switch newChoice {
+                    case .inherit: reset()
+                    case .target(let target): setTarget(target)
+                    }
                 }
             }
-            if !isAvailable(selection) {
+            HStack(spacing: 6) {
+                Button {
+                    setMuted(!rule.muted)
+                } label: {
+                    Image(systemName: rule.muted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                        .frame(width: 18)
+                }
+                .buttonStyle(.borderless)
+                .help(rule.muted ? Text("Unmute") : Text("Mute"))
+                .accessibilityLabel(rule.muted ? Text("Unmute") : Text("Mute"))
+
+                Slider(value: Binding(get: { rule.volume }, set: setVolume), in: 0...1)
+                    .controlSize(.small)
+                    .disabled(rule.muted)
+                    .accessibilityLabel(Text("Volume"))
+
+                LevelMeter(level: sender.levels[ruleKey] ?? 0)
+                Text(rule.volume, format: .percent.precision(.fractionLength(0)))
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .frame(width: 38, alignment: .trailing)
+            }
+        }
+    }
+}
+
+private struct OutputPicker: View {
+    @Environment(SenderController.self) private var sender
+    let choice: OutputChoice
+    let allowsInherit: Bool
+    let onChange: (OutputChoice) -> Void
+
+    var body: some View {
+        Picker(selection: Binding(get: { choice }, set: onChange)) {
+            if allowsInherit {
+                Text("Same as app").tag(OutputChoice.inherit)
                 Divider()
-                Text(sender.displayName(for: selection)).tag(selection)
+            }
+            Text("System Default").tag(OutputChoice.target(.systemDefault))
+            Section("This Mac") {
+                ForEach(sender.outputDevices) { device in
+                    Text(device.name).tag(OutputChoice.target(.device(uid: device.id)))
+                }
+            }
+            if !sender.connectedReceivers.isEmpty {
+                Section("SideCast devices") {
+                    ForEach(sender.connectedReceivers) { receiver in
+                        Text(receiver.name).tag(OutputChoice.target(.receiver(id: receiver.id)))
+                    }
+                }
+            }
+            if case let .target(target) = choice, !isAvailable(target) {
+                Divider()
+                Text("\(sender.displayName(for: target)) (offline)").tag(choice)
             }
         } label: {
             EmptyView()
@@ -91,6 +198,7 @@ private struct OutputPicker: View {
         .labelsHidden()
         .fixedSize()
         .controlSize(.small)
+        .accessibilityLabel(Text("Output"))
     }
 
     private func isAvailable(_ target: OutputTarget) -> Bool {
@@ -102,7 +210,7 @@ private struct OutputPicker: View {
     }
 }
 
-/// A small bar showing the app's current audio level.
+/// A small bar showing the current audio level.
 private struct LevelMeter: View {
     let level: Float
 
@@ -111,12 +219,11 @@ private struct LevelMeter: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)
                 Capsule().fill(.green)
-                    .frame(width: proxy.size.width * CGFloat(min(max(level, 0), 1)))
+                    .frame(width: proxy.size.width * CGFloat(min(max(level * 2, 0), 1)))
             }
         }
         .frame(width: 28, height: 4)
-        .accessibilityLabel(Text("Level"))
-        .accessibilityValue(Text("\(Int(level * 100))%"))
+        .accessibilityHidden(true)
     }
 }
 

@@ -52,11 +52,13 @@ final class RuleStore {
         rules[appID] ?? AppRule()
     }
 
-    func update(_ appID: String, name: String?, _ change: (inout AppRule) -> Void) {
+    /// - Parameter keepPassthrough: keep the rule even if it equals the defaults (used for
+    ///   per-process overrides, where "default" still differs from inheriting the app's rule).
+    func update(_ appID: String, name: String?, keepPassthrough: Bool = false, _ change: (inout AppRule) -> Void) {
         var rule = rule(for: appID)
         change(&rule)
         if let name { rule.appName = name }
-        if rule.isPassthrough {
+        if rule.isPassthrough && !keepPassthrough {
             rules.removeValue(forKey: appID)
         } else {
             rules[appID] = rule

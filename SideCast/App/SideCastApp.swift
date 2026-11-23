@@ -5,6 +5,18 @@
 
 import SwiftUI
 
+#if os(macOS)
+/// Filled icon while a device is connected.
+private struct MenuBarIcon: View {
+    @Environment(SenderController.self) private var sender
+
+    var body: some View {
+        Image(systemName: sender.connectedReceivers.isEmpty ? "hifispeaker.2" : "hifispeaker.2.fill")
+            .accessibilityLabel(Text("SideCast"))
+    }
+}
+#endif
+
 @main
 struct SideCastApp: App {
 #if os(macOS)
@@ -15,7 +27,8 @@ struct SideCastApp: App {
             MenuBarView(openSettings: { appDelegate.settingsWindow.show() })
                 .environment(appDelegate.sender)
         } label: {
-            Image(systemName: "hifispeaker.2.fill")
+            MenuBarIcon()
+                .environment(appDelegate.sender)
         }
         .menuBarExtraStyle(.window)
     }

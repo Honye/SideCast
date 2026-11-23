@@ -27,13 +27,48 @@ struct AudioApp: Identifiable, Hashable {
 
     var isPlaying: Bool { processes.contains(where: \.isRunningOutput) }
     var processObjectIDs: [AudioObjectID] { processes.map(\.objectID) }
+
+    /// The app's processes grouped by kind (bundle ID), for per-process rules (FR-ROUTE-10).
+    var processGroups: [ProcessGroup] {
+        Dictionary(grouping: processes) { $0.bundleID ?? "pid:\($0.pid)" }
+            .map { kind, processes in
+                ProcessGroup(id: "\(id)#\(kind)", appID: id, kind: kind, processes: processes)
+            }
+            .sorted { $0.kind < $1.kind }
+    }
+}
+
+/// One kind of process inside an app, e.g. Chrome's renderer helpers.
+struct ProcessGroup: Identifiable, Hashable {
+    /// Rule key: "<app ID>#<kind>".
+    let id: String
+    let appID: String
+    let kind: String
+    let processes: [AudioProcess]
+
+    var isPlaying: Bool { processes.contains(where: \.isRunningOutput) }
+
+    var displayName: String {
+        if kind == appID {
+            return String(localized: "Main process")
+        }
+        if kind.hasPrefix("pid:") {
+            return String(localized: "Process \(String(kind.dropFirst(4)))")
+        }
+        if kind.hasPrefix(appID + ".") {
+            return String(kind.dropFirst(appID.count + 1))
+        }
+        return kind
+    }
 }
 
 enum AudioProcessScanner {
     static func scan() -> [AudioApp] {
         let ownPID = ProcessInfo.processInfo.processIdentifier
+        let ownBundleID = Bundle.main.bundleIdentifier
         var apps: [String: AudioApp] = [:]
-        for process in processes() where process.pid != ownPID {
+        // Skip SideCast itself, including a receiver copy running in the iOS Simulator.
+        for process in processes() where process.pid != ownPID && process.bundleID != ownBundleID {
             let owner = owningApplication(of: process.pid)
             if owner?.processIdentifier == ownPID { continue }
             let id = owner?.bundleIdentifier ?? process.bundleID ?? "pid:\(process.pid)"

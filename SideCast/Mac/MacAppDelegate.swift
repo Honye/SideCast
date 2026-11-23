@@ -8,10 +8,16 @@ import AppKit
 
 final class MacAppDelegate: NSObject, NSApplicationDelegate {
     let sender = SenderController()
-    private(set) lazy var settingsWindow = SettingsWindowController(sender: sender)
+    let preferences = AppPreferences()
+    private(set) lazy var settingsWindow = SettingsWindowController(sender: sender, preferences: preferences)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         sender.start()
+        // First launch: explain permissions and how to start (FR-PERM-01).
+        if !RuntimeEnvironment.isRunningTests, !UserDefaults.standard.bool(forKey: "onboarding.shown") {
+            UserDefaults.standard.set(true, forKey: "onboarding.shown")
+            settingsWindow.show(tab: .general)
+        }
 #if DEBUG
         DebugCommands.install(sender: sender, settings: settingsWindow)
 #endif

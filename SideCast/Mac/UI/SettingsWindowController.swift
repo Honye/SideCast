@@ -13,12 +13,17 @@ import SwiftUI
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private let sender: SenderController
+    private let preferences: AppPreferences
 
-    init(sender: SenderController) {
+    init(sender: SenderController, preferences: AppPreferences) {
         self.sender = sender
+        self.preferences = preferences
     }
 
-    func show() {
+    func show(tab: SettingsTab? = nil) {
+        if let tab {
+            UserDefaults.standard.set(tab.rawValue, forKey: "settings.tab")
+        }
         let window = self.window ?? makeWindow()
         self.window = window
         NSApp.setActivationPolicy(.regular)
@@ -39,7 +44,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
         window.title = String(localized: "SideCast Settings")
         window.contentViewController = NSHostingController(
-            rootView: SettingsView().environment(sender)
+            rootView: SettingsView().environment(sender).environment(preferences)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self

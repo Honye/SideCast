@@ -23,6 +23,8 @@ final class NetworkNode {
     static let serviceType = "_sidecast._tcp"
 
     private(set) var peers: [DiscoveredPeer] = []
+    /// The user denied local network access; nothing can be discovered (FR-PERM-02/03).
+    private(set) var localNetworkDenied = false
 
     @ObservationIgnored var onIncomingConnection: ((NWConnection) -> Void)?
     @ObservationIgnored var onPeersChanged: (() -> Void)?
@@ -119,14 +121,29 @@ final class NetworkNode {
         }
         browser.stateUpdateHandler = { [weak self] state in
             MainActor.assumeIsolated {
-                if case .failed(let error) = state {
+                guard let self else { return }
+                switch state {
+                case .ready:
+                    if self.localNetworkDenied { self.localNetworkDenied = false }
+                case .waiting(let error):
+                    self.localNetworkDenied = Self.isPolicyDenied(error)
+                case .failed(let error):
                     Log.net.error("Browser failed: \(error.localizedDescription, privacy: .public)")
-                    self?.scheduleRestart()
+                    self.localNetworkDenied = Self.isPolicyDenied(error)
+                    self.scheduleRestart()
+                default:
+                    break
                 }
             }
         }
         browser.start(queue: .main)
         self.browser = browser
+    }
+
+    /// kDNSServiceErr_PolicyDenied: local network privacy permission is off.
+    private static func isPolicyDenied(_ error: NWError) -> Bool {
+        if case .dns(let code) = error, code == -65_570 { return true }
+        return false
     }
 
     private func scheduleRestart() {
