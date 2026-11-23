@@ -16,6 +16,8 @@ extension PeerSessionError {
             String(localized: "This device is in use by \(name).")
         case .roleMismatch:
             String(localized: "Both devices are in the same mode.")
+        case .freeDeviceLimit:
+            String(localized: "This Mac uses the free version of SideCast, which connects one device at a time. SideCast Premium on this device or the Mac removes the limit.")
         case .authenticationFailed:
             String(localized: "The device could not be verified.")
         case .transportClosed:
@@ -28,7 +30,7 @@ extension PeerSessionError {
     /// Errors after which reconnecting automatically makes no sense.
     var isFinal: Bool {
         switch self {
-        case .pairingFailed, .pairingExpired, .peerBusy, .roleMismatch, .authenticationFailed:
+        case .pairingFailed, .pairingExpired, .peerBusy, .roleMismatch, .authenticationFailed, .freeDeviceLimit:
             true
         case .transportClosed, .protocolViolation:
             false

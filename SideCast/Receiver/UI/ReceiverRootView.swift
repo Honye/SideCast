@@ -77,6 +77,7 @@ private struct MacListView: View {
             } footer: {
                 Text("Make sure SideCast is running on your Mac and both devices have Wi-Fi turned on. This device appears on the Mac as “\(receiver.identity.device.name)”.")
             }
+            PremiumSection()
         }
     }
 }
@@ -116,6 +117,7 @@ private struct MacRow: View {
 private struct ConnectedView: View {
     @Environment(ReceiverController.self) private var receiver
     let session: PeerSession
+    @State private var showsPremium = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -154,9 +156,28 @@ private struct ConnectedView: View {
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+            Button {
+                showsPremium = true
+            } label: {
+                Label(
+                    receiver.store.isUnlocked || receiver.macPremium ? "Premium unlocked" : "SideCast Premium",
+                    systemImage: "sparkles"
+                )
+            }
+            .font(.callout)
         }
         .padding()
         .frame(maxWidth: 480)
+        .sheet(isPresented: $showsPremium) {
+            NavigationStack {
+                List { PremiumSection() }
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showsPremium = false }
+                        }
+                    }
+            }
+        }
     }
 }
 

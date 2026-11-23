@@ -35,24 +35,34 @@ struct SettingsView: View {
 
 private struct AppsSettingsView: View {
     @Environment(SenderController.self) private var sender
+    @AppStorage("settings.tab") private var tab: SettingsTab = .apps
 
     var body: some View {
         Form {
             if sender.hasWarnings {
                 WarningsView()
             }
-            Section {
-                if sender.visibleApps.isEmpty {
-                    Text("Apps that play sound appear here.")
-                        .foregroundStyle(.secondary)
+            if sender.isPremium {
+                Section {
+                    if sender.visibleApps.isEmpty {
+                        Text("Apps that play sound appear here.")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(sender.visibleApps) { app in
+                        AppRowView(app: app)
+                    }
+                } header: {
+                    Text("Apps")
+                } footer: {
+                    Text("Apps you don't change play through the Mac as usual. Your choices are remembered for each app.")
                 }
-                ForEach(sender.visibleApps) { app in
-                    AppRowView(app: app)
+            } else {
+                Section("Output") {
+                    FreeOutputRow()
                 }
-            } header: {
-                Text("Apps")
-            } footer: {
-                Text("Apps you don't change play through the Mac as usual. Your choices are remembered for each app.")
+                Section {
+                    UpgradeBanner { tab = .general }
+                }
             }
 
             let dormant = sender.dormantRules
@@ -162,6 +172,8 @@ private struct GeneralSettingsView: View {
         @Bindable var sender = sender
         @Bindable var preferences = preferences
         Form {
+            PremiumSettingsSection()
+
             Section("Startup") {
                 Toggle("Open SideCast when you log in", isOn: Binding(
                     get: { preferences.launchAtLogin },

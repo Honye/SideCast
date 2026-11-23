@@ -12,6 +12,9 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
     private(set) lazy var settingsWindow = SettingsWindowController(sender: sender, preferences: preferences)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        sender.onUpgradeNeeded = { [weak self] reason in
+            UpgradeAlert.present(reason) { self?.settingsWindow.show(tab: .general) }
+        }
         sender.start()
         // First launch: explain permissions and how to start (FR-PERM-01).
         if !RuntimeEnvironment.isRunningTests, !UserDefaults.standard.bool(forKey: "onboarding.shown") {

@@ -48,10 +48,17 @@ final class NWTransport: MessageTransport {
         })
     }
 
+    /// Closes after everything queued so far (e.g. a goodbye message) has been sent.
     func close() {
         guard !finished else { return }
         finished = true
-        connection.cancel()
+        connection.send(content: nil, contentContext: .finalMessage, isComplete: true, completion: .contentProcessed { [connection] _ in
+            connection.cancel()
+        })
+        // Don't wait forever for a peer that stopped reading.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [connection] in
+            connection.cancel()
+        }
     }
 
     private func handle(_ state: NWConnection.State) {

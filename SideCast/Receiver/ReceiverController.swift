@@ -28,6 +28,10 @@ final class ReceiverController {
         }
     }
     private(set) var currentStream: StreamConfig?
+    /// SideCast Premium bought on this device (App Store).
+    let store = StoreManager()
+    /// Whether the connected Mac has its own Premium license.
+    private(set) var macPremium = false
 
     @ObservationIgnored private var started = false
     @ObservationIgnored private let ring = FloatRingBuffer(capacity: 1 << 16)
@@ -53,6 +57,11 @@ final class ReceiverController {
         }
         node.start()
         nowPlaying.onDisconnect = { [weak self] in self?.disconnect() }
+        store.onChange = { [weak self] in
+            guard let self else { return }
+            self.activeSession?.send(.premiumStatus(unlocked: self.store.isUnlocked))
+        }
+        store.start()
         Log.app.info("Receiver started as \(self.identity.device.name, privacy: .public)")
     }
 
@@ -145,11 +154,13 @@ final class ReceiverController {
                     return
                 }
             }
+            session.send(.premiumStatus(unlocked: store.isUnlocked))
             startAudio(for: session)
         case .closed(let error):
             sessions.removeAll { $0 === session }
             if audioSessionID == session.id {
                 stopAudio()
+                macPremium = false
             }
             if let error, session.isInitiator || error.isFinal {
                 lastError = error.userMessage
@@ -214,6 +225,9 @@ final class ReceiverController {
             player.setTargetLatency(config.codec == .opus ? .lowLatency : .highQuality)
             audioReceiver?.setStream(config)
             currentStream = config
+        case .premiumStatus(let unlocked):
+            guard session.id == audioSessionID else { return }
+            macPremium = unlocked
         case .stopStream(let streamID):
             guard session.id == audioSessionID, currentStream?.streamID == streamID else { return }
             audioReceiver?.setStream(nil)

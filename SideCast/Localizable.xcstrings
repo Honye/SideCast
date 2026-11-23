@@ -54,12 +54,32 @@
     "000000": {
       "shouldTranslate": false
     },
+    "A one-time purchase. While this device is connected, your Mac can send each app to a different output, set each app's volume, and connect several devices at once.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一次性购买。本设备连接期间，你的 Mac 可以把不同应用输出到不同设备、单独调节每个应用的音量，并同时连接多台设备。"
+          }
+        }
+      }
+    },
     "A removed device has to enter a new pairing code the next time it connects.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "移除后，该设备下次连接时需要重新输入配对码。"
+          }
+        }
+      }
+    },
+    "Activate": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "激活"
           }
         }
       }
@@ -144,6 +164,16 @@
         }
       }
     },
+    "Buy SideCast Premium…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买 SideCast 高级版…"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "zh-Hans": {
@@ -224,6 +254,26 @@
         }
       }
     },
+    "Couldn't reach the license server. Check your internet connection and try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法连接许可证服务器，请检查网络后重试。"
+          }
+        }
+      }
+    },
+    "Deactivate on This Mac": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在这台 Mac 上停用"
+          }
+        }
+      }
+    },
     "Debug trace": {
       "shouldTranslate": false
     },
@@ -253,6 +303,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "断开"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
@@ -307,6 +367,16 @@
         }
       }
     },
+    "Free version": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费版"
+          }
+        }
+      }
+    },
     "General": {
       "localizations": {
         "zh-Hans": {
@@ -337,12 +407,42 @@
         }
       }
     },
+    "Learn about Premium…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "了解高级版…"
+          }
+        }
+      }
+    },
     "Lets you route and set the volume of each kind of process inside an app separately, for example a browser's helper processes.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "可对应用内不同类型的进程（例如浏览器的辅助进程）分别设置输出设备和音量。"
+          }
+        }
+      }
+    },
+    "License activation isn't available in this build yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本暂不支持激活许可证。"
+          }
+        }
+      }
+    },
+    "License key": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "许可证密钥"
           }
         }
       }
@@ -393,6 +493,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "低延迟适合视频、通话和游戏；高音质传输无损音频，延迟稍高。"
+          }
+        }
+      }
+    },
+    "Mac audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 声音"
           }
         }
       }
@@ -497,6 +607,16 @@
         }
       }
     },
+    "Not Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以后再说"
+          }
+        }
+      }
+    },
     "Not connected": {
       "localizations": {
         "zh-Hans": {
@@ -577,6 +697,16 @@
         }
       }
     },
+    "Output for all Mac audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 全部声音的输出"
+          }
+        }
+      }
+    },
     "Pair": {
       "localizations": {
         "zh-Hans": {
@@ -627,12 +757,42 @@
         }
       }
     },
+    "Per-app output and volume are part of SideCast Premium.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分应用设置输出和音量属于 SideCast 高级版功能。"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "权限"
+          }
+        }
+      }
+    },
+    "Premium adds per-app output and volume, and lets you connect several devices at once. It's a one-time purchase. If an iPad or iPhone bought Premium in the App Store, it's unlocked while that device is connected.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高级版可分应用设置输出和音量，并可同时连接多台设备，一次性购买。如果某台 iPad 或 iPhone 已在 App Store 购买高级版，它连接期间这台 Mac 也会解锁。"
+          }
+        }
+      }
+    },
+    "Premium unlocked": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高级版已解锁"
           }
         }
       }
@@ -697,6 +857,16 @@
         }
       }
     },
+    "Restore Purchases": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
+          }
+        }
+      }
+    },
     "Same as System": {
       "localizations": {
         "zh-Hans": {
@@ -727,6 +897,16 @@
         }
       }
     },
+    "Sends all of the Mac's sound to one place.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 Mac 的全部声音输出到同一个设备。"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "zh-Hans": {
@@ -739,6 +919,26 @@
     },
     "SideCast": {
       "shouldTranslate": false
+    },
+    "SideCast Premium": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 高级版"
+          }
+        }
+      }
+    },
+    "SideCast Premium is unlocked": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 高级版已解锁"
+          }
+        }
+      }
     },
     "SideCast Settings": {
       "localizations": {
@@ -810,6 +1010,16 @@
         }
       }
     },
+    "Status": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
     "System Default": {
       "localizations": {
         "zh-Hans": {
@@ -836,6 +1046,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "轻点以配对并连接"
+          }
+        }
+      }
+    },
+    "The App Store isn't available right now. Try again later.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法连接 App Store，请稍后再试。"
           }
         }
       }
@@ -880,6 +1100,26 @@
         }
       }
     },
+    "The free version connects one device at a time.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费版一次只能连接一台设备。"
+          }
+        }
+      }
+    },
+    "The free version connects one device at a time. With Premium you can connect several devices and send different apps to each.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费版一次只能连接一台设备。升级到高级版后，可以同时连接多台设备，并把不同应用分别输出到不同设备。"
+          }
+        }
+      }
+    },
     "The pairing code expired. Try again to get a new code.": {
       "localizations": {
         "zh-Hans": {
@@ -910,6 +1150,26 @@
         }
       }
     },
+    "This Mac (no change)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac（不改变）"
+          }
+        }
+      }
+    },
+    "This Mac uses the free version of SideCast, which connects one device at a time. SideCast Premium on this device or the Mac removes the limit.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 使用的是 SideCast 免费版，一次只能连接一台设备。在本设备或 Mac 上购买高级版即可取消此限制。"
+          }
+        }
+      }
+    },
     "This device is in use by %@.": {
       "localizations": {
         "zh-Hans": {
@@ -920,12 +1180,82 @@
         }
       }
     },
+    "This license key could not be activated.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法激活此许可证密钥。"
+          }
+        }
+      }
+    },
+    "This license key is not for SideCast.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此许可证密钥不属于 SideCast。"
+          }
+        }
+      }
+    },
+    "This needs SideCast Premium": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此功能需要 SideCast 高级版"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
     "Unavailable Device": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "不可用的设备"
+          }
+        }
+      }
+    },
+    "Unlocked": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已解锁"
+          }
+        }
+      }
+    },
+    "Unlocked by %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已由 %@ 解锁"
+          }
+        }
+      }
+    },
+    "Unlocked while connected to %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接 %@ 期间已解锁"
           }
         }
       }
@@ -956,6 +1286,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "等待输入配对码…"
+          }
+        }
+      }
+    },
+    "With Premium you can choose an output and volume for each app.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级到高级版后，可以为每个应用单独选择输出设备和音量。"
+          }
+        }
+      }
+    },
+    "Your license is no longer valid.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的许可证已失效。"
           }
         }
       }

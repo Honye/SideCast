@@ -28,7 +28,6 @@ nonisolated struct LocalIdentity: Sendable {
 
 enum IdentityStore {
     private static let deviceIDKey = "identity.deviceID"
-    private static let keychainService = "com.imarkr.SideCast"
     private static let keychainAccount = "identity-signing-key"
 
     static func loadOrCreate(role: DeviceRole) -> LocalIdentity {
@@ -42,50 +41,16 @@ enum IdentityStore {
         }
 
         let key: Curve25519.Signing.PrivateKey
-        if let data = readKeychain(), let stored = try? Curve25519.Signing.PrivateKey(rawRepresentation: data) {
+        if let data = Keychain.read(keychainAccount), let stored = try? Curve25519.Signing.PrivateKey(rawRepresentation: data) {
             key = stored
         } else {
             key = Curve25519.Signing.PrivateKey()
-            writeKeychain(key.rawRepresentation)
+            Keychain.write(key.rawRepresentation, for: keychainAccount)
         }
 
         return LocalIdentity(
             device: DeviceInfo(id: deviceID, name: DeviceName.current, platform: .current, role: role),
             signingKey: key
         )
-    }
-
-    private static func baseQuery() -> [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: keychainService,
-            kSecAttrAccount as String: keychainAccount,
-        ]
-    }
-
-    private static func readKeychain() -> Data? {
-        var query = baseQuery()
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess else {
-            if status != errSecItemNotFound {
-                Log.security.error("Keychain read failed: \(status)")
-            }
-            return nil
-        }
-        return result as? Data
-    }
-
-    private static func writeKeychain(_ data: Data) {
-        SecItemDelete(baseQuery() as CFDictionary)
-        var query = baseQuery()
-        query[kSecValueData as String] = data
-        query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        let status = SecItemAdd(query as CFDictionary, nil)
-        if status != errSecSuccess {
-            Log.security.error("Keychain write failed: \(status)")
-        }
     }
 }

@@ -47,7 +47,16 @@ nonisolated enum ControlMessage: Codable, Sendable, Equatable {
     case receiverInfo(audioPort: UInt16)
     case startStream(StreamConfig)
     case stopStream(streamID: UInt32)
+    /// Whether the sending device has SideCast Premium. Either side being unlocked unlocks the
+    /// premium features for the duration of the connection (FR-PAY-04).
+    case premiumStatus(unlocked: Bool)
     case ping(id: UInt64)
     case pong(id: UInt64)
     case goodbye(reason: String)
+}
+
+/// Well-known `goodbye` reasons the receiver explains to the user.
+nonisolated enum GoodbyeReason {
+    /// The Mac uses the free version and is already connected to another device (FR-CONN-09).
+    static let freeDeviceLimit = "free-device-limit"
 }

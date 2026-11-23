@@ -18,6 +18,7 @@ final class SenderController {
     let trustStore: TrustStore
     let node: NetworkNode
     let ruleStore: RuleStore
+    let license: LicenseManager
 
     // MARK: Connections
 
@@ -44,6 +45,26 @@ final class SenderController {
     private(set) var debugLines: [String] = []
 #endif
 
+    // MARK: Premium (FR-PAY-01~05)
+
+    /// Premium status reported by each connected receiver (App Store purchase on that device).
+    private(set) var receiverPremium: [UUID: Bool] = [:]
+    /// Free version: where all of the Mac's audio goes (FR-ROUTE-03).
+    var freeTarget: OutputTarget = SenderController.loadFreeTarget() {
+        didSet {
+            if let data = try? JSONEncoder().encode(freeTarget) {
+                UserDefaults.standard.set(data, forKey: "routing.freeTarget")
+            }
+            applyRoutes()
+        }
+    }
+    /// Asks the UI to explain that a feature needs Premium.
+    @ObservationIgnored var onUpgradeNeeded: ((UpgradeReason) -> Void)?
+    @ObservationIgnored var ownProcessObjects: [AudioObjectID] = []
+    @ObservationIgnored var readySince: [UUID: Date] = [:]
+    @ObservationIgnored var premiumStatusReceived: Set<UUID> = []
+    @ObservationIgnored var lastSentPremium: Bool?
+
     /// Audio mode per receiver (FR-MODE-01), remembered across launches (FR-MODE-04).
     private(set) var audioModes: [UUID: AudioMode] = SenderController.loadAudioModes()
 
@@ -64,7 +85,9 @@ final class SenderController {
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
         ruleStore = RuleStore()
+        license = LicenseManager()
         router.sinkProvider = { [weak self] id in self?.streams[id] }
+        license.onChange = { [weak self] in self?.premiumChanged() }
     }
 
     func start() {
@@ -78,6 +101,7 @@ final class SenderController {
         }
         node.start()
         startAudioMonitoring()
+        Task { await license.revalidate() }
         Log.app.info("Sender started as \(self.identity.device.name, privacy: .public)")
     }
 
@@ -119,6 +143,11 @@ final class SenderController {
     // MARK: - Connection actions
 
     func connect(_ peer: DiscoveredPeer) {
+        // Free version: one receiver at a time (FR-CONN-09).
+        if !isPremium, connectedReceivers.contains(where: { $0.id != peer.id }) {
+            onUpgradeNeeded?(.multipleDevices)
+            return
+        }
         wantedReceivers.insert(peer.id)
         lastErrors[peer.id] = nil
         guard session(for: peer.id) == nil else { return }
@@ -285,7 +314,7 @@ final class SenderController {
 
     private func poll() {
         var silent = false
-        for key in ruleStore.rules.keys {
+        for key in Array(ruleStore.rules.keys) + [Self.freeRouteKey] {
             guard let peak = router.takePeak(for: key) else { continue }
             levels[key] = peak
             if playingKeys.contains(key), peak == 0 {
@@ -319,6 +348,14 @@ final class SenderController {
     }
 
     private func refreshAudio() {
+        // SideCast's own processes, including a receiver copy in the iOS Simulator, must never be
+        // captured by the "all audio" tap, or its output would loop back into itself.
+        let ownPID = ProcessInfo.processInfo.processIdentifier
+        let ownBundleID = Bundle.main.bundleIdentifier
+        let own = AudioProcessScanner.processes()
+            .filter { $0.pid == ownPID || ($0.bundleID != nil && $0.bundleID == ownBundleID) }
+            .map(\.objectID)
+        if own != ownProcessObjects { ownProcessObjects = own }
         let scanned = AudioProcessScanner.scan()
         if scanned != apps { apps = scanned }
         let devices = OutputDeviceScanner.outputDevices()
@@ -328,12 +365,29 @@ final class SenderController {
         applyRoutes()
     }
 
+    /// Re-applies routing (used by the premium extension).
+    func refreshRoutes() {
+        router.invalidate()
+        applyRoutes()
+    }
+
+    func markFreeLimit(_ peerID: UUID) {
+        wantedReceivers.remove(peerID)
+        lastErrors[peerID] = String(localized: "The free version connects one device at a time.")
+    }
+
     private func applyRoutes() {
         var units: [RouteUnit] = []
         var offline: Set<String> = []
         var playing: Set<String> = []
         let connected = Set(connectedReceivers.map(\.id))
-        for app in apps where !app.processes.isEmpty {
+        if !isPremium {
+            // Free version: all of the Mac's audio to one place.
+            if let unit = freeRouteUnit(connected: connected, offline: &offline) {
+                units.append(unit)
+            }
+        }
+        for app in apps where isPremium && !app.processes.isEmpty {
             // Split the app's processes between the app rule and any per-kind rules.
             var buckets: [String: [AudioProcess]] = [:]
             for group in app.processGroups {
@@ -415,9 +469,22 @@ final class SenderController {
             for other in sessions where other !== session && other.peer?.id == peer.id {
                 other.close(reason: "Replaced")
             }
+            readySince[peer.id] = Date()
+            session.send(.premiumStatus(unlocked: license.isLicensed))
+            // Give the receiver a moment to report its own premium status before applying the
+            // free version's one-device limit.
+            DispatchQueue.main.asyncAfter(deadline: .now() + PremiumTiming.statusGracePeriod + 0.1) { [weak self] in
+                self?.enforceDeviceLimit()
+            }
             applyRoutes()
         case .closed(let error):
             sessions.removeAll { $0 === session }
+            if let peerID = session.peer?.id, !sessions.contains(where: { $0.peer?.id == peerID && $0.state == .ready }) {
+                receiverPremium.removeValue(forKey: peerID)
+                premiumStatusReceived.remove(peerID)
+                readySince.removeValue(forKey: peerID)
+                premiumChanged()
+            }
             if let peerID = session.peer?.id, !sessions.contains(where: { $0.peer?.id == peerID && $0.state == .ready }) {
                 streams.removeValue(forKey: peerID)?.stop()
                 audioPorts.removeValue(forKey: peerID)
@@ -446,6 +513,11 @@ final class SenderController {
             guard let peerID = session.peer?.id else { return }
             audioPorts[peerID] = port
             restartStream(for: peerID)
+        case .premiumStatus(let unlocked):
+            guard let peerID = session.peer?.id else { return }
+            premiumStatusReceived.insert(peerID)
+            receiverPremium[peerID] = unlocked
+            premiumChanged()
         default:
             Log.net.debug("Unhandled message \(String(describing: message), privacy: .public)")
         }

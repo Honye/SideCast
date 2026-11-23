@@ -18,6 +18,8 @@ enum PeerSessionError: Error, Equatable {
     case pairingFailed
     case pairingExpired
     case peerBusy(String)
+    /// The Mac's free version is already connected to another device.
+    case freeDeviceLimit
     case transportClosed
 }
 
@@ -228,9 +230,9 @@ final class PeerSession: Identifiable {
             trustStore.trust(peer, identityKey: peerIdentityKey)
             state = .ready
 
-        case .goodbye:
+        case let .goodbye(reason):
             transport.close()
-            state = .closed(nil)
+            state = .closed(reason == GoodbyeReason.freeDeviceLimit ? .freeDeviceLimit : nil)
 
         default:
             guard state == .ready else {
