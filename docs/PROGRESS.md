@@ -19,6 +19,10 @@ USB 有线（FR-CONN-03/04）属于 V1，不在 MVP 内。
 
 ## 更新日志
 
+### 2026-11-23 · 内购诊断信息
+- 接收端「SideCast 高级版」区新增可展开的「诊断信息」：商品 ID、Bundle ID、版本、App Store 环境（Xcode / 沙盒 / 正式）、商店地区、是否允许购买、商品加载结果（成功 / 未返回商品 / 具体错误）、当前权益、最近一次购买和恢复的结果；支持「重新检查」和「复制」。
+- 实测（iPad 模拟器，07:13）：商品已能从 App Store 测试环境加载（SideCast Premium，$4.99，非消耗型，可家人共享），说明 App Store Connect 上的商品已同步；模拟器未登录账号，环境显示 noAccount。
+
 ### 2026-11-23 · App Store Connect 内购商品
 - 在你的个人开发者账号（Chengyu Xiang，团队 JUWHF23XW6）下新建 App 记录：
   - 名称「SideCast - Mac Audio Output」：「SideCast」已被占用。设备上显示的名称仍是 SideCast。
