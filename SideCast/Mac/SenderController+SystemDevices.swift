@@ -13,7 +13,7 @@ import Foundation
 import os
 
 extension SenderController {
-    static func systemDeviceRouteKey(_ receiver: UUID) -> String {
+    nonisolated static func systemDeviceRouteKey(_ receiver: UUID) -> String {
         "system-device:\(receiver.uuidString)"
     }
 

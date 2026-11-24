@@ -1,6 +1,6 @@
 # SideCast 开发进度
 
-> 对应需求：[PRD.md](PRD.md) v0.5 · 当前阶段：**V1**
+> 对应需求：[PRD.md](PRD.md) v0.6 · 当前阶段：**V1**
 > 开发分支：`feature/v1`（每个里程碑提交一次，由你决定何时合并到 main）。MVP 已于 2026-11-24 合并到 main。
 
 ## V1 里程碑
@@ -11,7 +11,7 @@
 | V1-M2 | 屏幕镜像（ScreenCaptureKit + 硬件编码） | FR-SCREEN-01/03~10 | ✅ 完成（真实屏幕捕获待你授权「屏幕录制」后验证） |
 | V1-M3 | USB 有线（公开网络框架，有线优先、自动切换） | FR-CONN-03/04 | ✅ 完成（需你用真机插线验证） |
 | V1-M4 | 系统级虚拟音频设备（官网版驱动 + 安装器） | 3.2 节, 8.2 节 | ✅ 完成（已装机验证捕获、音量、静音；默认输出切换和 iPad 真机待你试） |
-| V1-M5 | Mac App Store 版（双版本构建、审核风险处理） | 3.2 节, 8.9 节 | ⏳ |
+| V1-M5 | Mac App Store 版（双版本构建、审核风险处理） | 3.2 节, 8.9 节 | ✅ 完成（上传审核、官网版签名公证需你操作） |
 
 ## MVP 里程碑（已完成）
 
@@ -26,6 +26,18 @@
 | M6 | 同 Apple ID 自动信任（iCloud） | FR-CONN-05 | ✅ 完成（待真机验证） |
 
 ## 更新日志
+
+### 2026-11-24 · V1-M5 Mac App Store 版
+- **按你的确认**：Mac App Store 版和 iPad / iPhone 版放在同一个 App Store 条目（`com.imarkr.SideCast`，官网版也用这个 ID）；App Store 版里「macOS 声音输出」仍显示，但写「此版本的 SideCast 不提供此功能」，不提官网；判断辅助进程归属的非公开接口只在 App Store 版去掉；官网版暂不做自动更新。PRD 升到 v0.6，改了 3.2 节的对应说明。
+- **两个版本怎么构建**：
+  - 工程新增 `AppStore` 构建配置。`Debug` / `Release` 是官网版，`AppStore` 是 Mac App Store 版，代码里用编译条件 `DISTRIBUTION_APP_STORE` 区分。iOS / visionOS 接收端不受影响。
+  - App Store 版在编译时去掉：音频驱动和它的安装包、打开安装器的代码、非公开接口的名字。已检查归档产物里确实没有这些内容，签名和沙盒正常。
+  - 注意：Xcode 里直接「Product › Archive」用的是 `Release`，得到的是官网版。App Store 版用下面的脚本，或在 Scheme 的 Archive 里把配置改成 `AppStore`。
+- **发布脚本**（`scripts/`）：
+  - `archive-app-store.sh`：归档 App Store 版，并检查里面没有驱动和非公开接口；归档出现在 Xcode 的 Organizer 里，从那里上传。已实际跑通（归档到临时目录）。
+  - `release-website.sh`：归档官网版 → 用 Developer ID 导出 → 用 Developer ID 重新签名驱动、重新生成并签名安装包 → 重新签名 App → 公证并装订 → 做成 DMG 再公证一次。因为你还没有 Developer ID 证书，只验证了它会在开头检查证书并提示缺什么；后面的步骤没有实际跑过。
+  - 驱动打包逻辑抽成 `Driver/Installer/make-packages.sh`，编译时和发布时共用。
+- 顺手修了上个里程碑留下的一个并发检查警告。单元测试 55 个、驱动测试全部通过；macOS（官网版 / App Store 版）和 iOS 都编译通过。用模拟 App Store 版的调试版本检查了设置页，显示符合预期。
 
 ### 2026-11-24 · V1-M4 系统级虚拟音频设备
 - **效果**：安装 SideCast 音频驱动后，每台已连接的接收端会以「名称 (SideCast)」出现在「系统设置 › 声音」和菜单栏的声音菜单里，macOS 和任何 App 都能选它作为输出。按你的确认：
@@ -231,6 +243,8 @@
 
 | 决策 | 原因 |
 |---|---|
+| 官网版 / App Store 版用构建配置区分（`AppStore` 配置 + 编译条件），不拆成两个 target | 一份代码、一个 target；App Store 版的差异在编译时去掉，不会把驱动或非公开接口带进审核包 |
+| 官网版发布时在导出后重新签名驱动、重新生成安装包 | 安装包里的驱动不会被 Xcode 导出时重签，必须用 Developer ID 单独签名才能通过公证 |
 | 单一多平台 target，用 `#if os(macOS)` 区分发送端/接收端 | 共用协议与加密代码；PRD 要求 Mac 接收模式与发送端是同一个 App |
 | 官网版也保持 App 沙盒 | 同一份代码后续可直接上 Mac App Store；系统级虚拟音频设备（V1）再以独立驱动安装 |
 | 控制通道走 TCP，音频（M3）走单独的 UDP | 控制消息要求可靠有序；音频要低延迟，丢包不重传 |
@@ -261,7 +275,7 @@
 | 问题 | 影响 | 计划 |
 |---|---|---|
 | 配对码校验用的是「HMAC + 6 位码」，没有使用 PAKE（如 SPAKE2）。若攻击者在配对那一刻实施中间人攻击，可离线穷举 6 位码 | 仅影响首次配对那几十秒、且需攻击者在同一网络主动劫持连接 | 后续换成 PAKE 协议；CryptoKit 没有现成的公开 PAKE 接口，需要自行实现或引入库 |
-| 「负责进程」接口不是公开 API | Mac App Store 审核可能不通过 | 官网版先用；上架 App Store 版前评估替代方案（只用父进程关系） |
+| 「负责进程」接口不是公开 API | Mac App Store 审核可能不通过 | 已处理（V1-M5）：只在官网版使用；App Store 版只按父进程归类，少数辅助进程可能单独显示成一个应用 |
 | 发往接收端的应用即使不出声，Mac 也持续发送静音包（高音质约 2.3 Mbps） | 占用少量带宽和电量 | 后续加静音检测，长时间无声时停发 |
 | 菜单栏弹出面板无法用自动化工具点开，界面验证主要在设置窗口里做 | 菜单栏面板与设置页共用同一套行组件，但面板本身只编译验证过 | 请你在实际使用时顺带看一下菜单栏面板 |
 | 从终端运行的命令行程序（如 afplay）会被归到启动它的应用下（例如终端） | 显示名可能不直观 | 符合系统的归属关系，暂不处理 |
@@ -276,6 +290,7 @@
 | Mac 作为接收端（PRD v0.5，2026-11-24） | 免费，视同已购买高级版 |
 | 屏幕镜像规则（2026-11-24） | 未购买的接收端也可接收镜像；同时镜像到多台需每台都已购买；只从 Mac 开始，接收端可停止；显示鼠标指针 |
 | USB 有线方案（2026-11-24） | 用公开网络框架，不用 usbmuxd；切换时可接受很短的停顿；真机由你测试 |
+| Mac App Store 版（2026-11-24） | 与 iOS 版同一个 App Store 条目；不可用功能只写「此版本不提供」；非公开接口只在 App Store 版去掉；官网版暂不做自动更新 |
 | 虚拟音频设备（2026-11-24） | 接收端连接时出现、断开后消失（重连后恢复为默认输出）；未购买的接收端也可用；Mac 上的音量调发出去的声音；App 内一键安装 / 卸载 |
 | V1 开发顺序（2026-11-24） | 接收端 → 屏幕镜像 → USB → 虚拟音频设备 → Mac App Store 版，分支 `feature/v1` |
 | 未购买的接收端能做什么 | 只能接收「其他声音」（没有单独设置的应用），单独设置过的应用照旧；同一时间最多连一台未购买的；已购买的不占名额 |
@@ -297,7 +312,8 @@
 | 验证真实屏幕镜像 | 运行 Mac 端，在设备行点「屏幕镜像」图标选择显示器。第一次 macOS 会请求「屏幕与系统录音」权限，允许后再试一次。之后请在 iPad 真机上看看清晰度和延迟 |
 | 试用 Mac 接收模式 | 需要两台 Mac：在其中一台的设置 › 通用里点「用作接收端…」，在另一台的菜单栏里应能看到它并把应用投过去 |
 | 验证虚拟音频设备 | 1. 用 Xcode 运行 Mac 端，在设置 › 设备 › macOS 声音输出 点「安装…」，在系统安装器里完成安装（要输管理员密码，声音会中断一下）。2. 连接 iPad：「系统设置 › 声音 › 输出」和菜单栏声音菜单里应出现「iPad 名称 (SideCast)」。3. 选它作为输出，播放音乐，应从 iPad 出声；按音量键应改变 iPad 上的音量，静音键应静音。4. 断开 iPad，系统应切回其他设备；重新连上后应自动切回 iPad。5. 试一下「卸载…」，设备应消失。也可以装好后告诉我，我用 iPad 模拟器在这台 Mac 上验证捕获和发送 |
-| 发布前签名 | 安装包目前没有签名。正式发布前需要在开发者账号里创建「Developer ID Application」和「Developer ID Installer」证书，用后者签名安装包，并对 App 做公证（M5 时一起处理） |
+| 发布官网版 | 1. 在 Xcode › Settings › Accounts › Manage Certificates 创建「Developer ID Application」和「Developer ID Installer」证书。2. 保存公证凭据：`xcrun notarytool store-credentials SideCast --apple-id <你的 Apple ID> --team-id JUWHF23XW6`（用 App 专用密码）。3. 运行 `scripts/release-website.sh`，产物在 `build/website/SideCast-<版本>.dmg`。第一次跑如果出错，把输出发给我 |
+| 上架 Mac App Store | 1. 在 App Store Connect 的 SideCast 条目里添加 macOS 平台，准备 Mac 截图和描述。2. 运行 `scripts/archive-app-store.sh`，在 Xcode Organizer 里「Distribute App › App Store Connect」上传。3. 加密出口合规：SideCast 用 CryptoKit 加密自己的连接，需要你在 App Store Connect 里如实回答（可在 Info.plist 加 `ITSAppUsesNonExemptEncryption`，告诉我结论我来加）。4. 审核备注建议说明：需要「录制系统音频」权限来按应用转发声音，需要本地网络来连接自己的 iPad / iPhone，Mac 端免费、无内购 |
 | Vision Pro | 如需我检查 Vision Pro 界面，请在 Xcode › Settings › Components 安装 visionOS 模拟器，或连接你的 Vision Pro |
 
 | 事项 | 说明 |

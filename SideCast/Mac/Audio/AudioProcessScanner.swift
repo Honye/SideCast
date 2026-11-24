@@ -115,12 +115,17 @@ enum AudioProcessScanner {
     private typealias ResponsibilityFunction = @convention(c) (pid_t) -> pid_t
 
     /// `responsibility_get_pid_responsible_for_pid` is not public API; it is looked up at runtime
-    /// and the parent process is used when it is unavailable.
+    /// and the parent process is used when it is unavailable. The Mac App Store version doesn't
+    /// use it at all (PRD 8.9).
     private static let responsibilityFunction: ResponsibilityFunction? = {
+#if DISTRIBUTION_APP_STORE
+        return nil
+#else
         guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "responsibility_get_pid_responsible_for_pid") else {
             return nil
         }
         return unsafeBitCast(symbol, to: ResponsibilityFunction.self)
+#endif
     }()
 
     private static func responsiblePID(of pid: pid_t) -> pid_t? {

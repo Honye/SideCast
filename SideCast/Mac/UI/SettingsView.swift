@@ -190,8 +190,25 @@ private struct SystemDevicesSection: View {
     @Environment(SenderController.self) private var sender
 
     var body: some View {
+        if SystemAudioDriver.isSupported {
+            available
+        } else {
+            // Mac App Store version: shown but unavailable, without pointing elsewhere (PRD 8.9).
+            Section("macOS sound output") {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Show devices in macOS Sound settings")
+                    Text("Not available in this version of SideCast.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var available: some View {
         let driver = sender.systemDriver
-        Section {
+        return Section {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Show devices in macOS Sound settings")

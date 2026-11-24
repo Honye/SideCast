@@ -784,6 +784,16 @@
         }
       }
     },
+    "Not available in this version of SideCast.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本的 SideCast 不提供此功能。"
+          }
+        }
+      }
+    },
     "Not connected": {
       "localizations": {
         "zh-Hans": {

@@ -6,6 +6,23 @@
 import Foundation
 
 nonisolated enum RuntimeEnvironment {
+    enum Distribution {
+        /// Developer ID, from the website: everything, including the audio driver.
+        case website
+        /// Mac App Store (and the iOS / visionOS receivers): no driver, no non-public APIs.
+        case appStore
+    }
+
+    /// How this build is distributed (PRD 3.2), from the SIDECAST_DISTRIBUTION build setting
+    /// (the AppStore build configuration sets it to APP_STORE).
+    static let distribution: Distribution = {
+#if DISTRIBUTION_APP_STORE || !os(macOS)
+        return .appStore
+#else
+        return .website
+#endif
+    }()
+
     /// True when the app is hosting unit tests. Networking and audio stay off then.
     static let isRunningTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
         || NSClassFromString("XCTestCase") != nil

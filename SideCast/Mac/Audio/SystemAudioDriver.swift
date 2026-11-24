@@ -25,6 +25,8 @@ final class SystemAudioDriver {
     static let uidPrefix = "com.imarkr.SideCast.receiver."
     static let devicesSelector = SystemAudioDriver.selector("scdv")
     static let versionSelector = SystemAudioDriver.selector("scvr")
+    /// Only the website version can install and use the driver (PRD 3.2).
+    static var isSupported: Bool { RuntimeEnvironment.distribution == .website }
     /// The driver drops devices it hasn't heard about for 10 s; refresh well before that.
     static let heartbeat: TimeInterval = 2
     /// The volume control's floor; anything at or below it is silence.
@@ -55,7 +57,7 @@ final class SystemAudioDriver {
 
     /// Watches for the driver being installed or removed.
     func startMonitoring(onChange: @escaping () -> Void) {
-        guard pluginListener == nil else { return }
+        guard Self.isSupported, pluginListener == nil else { return }
         var address = CAProperty.address(kAudioHardwarePropertyPlugInList)
         let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
             MainActor.assumeIsolated {
@@ -69,6 +71,7 @@ final class SystemAudioDriver {
 
     /// Asks Core Audio again whether the driver is loaded (e.g. after it restarted).
     func refreshPlugin() {
+        guard Self.isSupported else { return }
         var bundleID = Self.bundleID as CFString
         var address = CAProperty.address(kAudioHardwarePropertyTranslateBundleIDToPlugIn)
         var found = AudioObjectID(kAudioObjectUnknown)
@@ -183,7 +186,7 @@ final class SystemAudioDriver {
     }
 
     private func open(_ package: URL?) {
-        guard let package else { return }
+        guard Self.isSupported, let package else { return }
         waitingForInstaller = true
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
