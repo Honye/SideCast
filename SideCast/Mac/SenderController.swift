@@ -28,6 +28,10 @@ final class SenderController {
     private(set) var sessions: [PeerSession] = []
     /// Last failure per receiver, shown until the next attempt.
     private(set) var lastErrors: [UUID: String] = [:]
+    /// What each connected receiver's connection runs over (FR-CONN-03/04).
+    var links: [UUID: LinkKind] = [:]
+    /// When a switch to a better link was last tried, per receiver.
+    @ObservationIgnored var linkSwitchAttempts: [UUID: Date] = [:]
 
     // MARK: Audio
 
@@ -117,6 +121,10 @@ final class SenderController {
         }
         node.onPeersChanged = { [weak self] in
             self?.reconnectWantedReceivers()
+            self?.switchToBetterLinks()
+        }
+        node.onInterfacesChanged = { [weak self] in
+            self?.switchToBetterLinks()
         }
         node.start()
         accountDirectory.start()
@@ -146,8 +154,10 @@ final class SenderController {
         sessions.filter { $0.state == .ready }.compactMap(\.peer)
     }
 
+    /// The receiver's connected session, else one that's still connecting.
     func session(for peerID: UUID) -> PeerSession? {
-        sessions.last { !$0.state.isClosed && ($0.peer?.id == peerID || $0.expectedPeerID == peerID) }
+        sessions.last { $0.state == .ready && $0.peer?.id == peerID }
+            ?? sessions.last { !$0.state.isClosed && ($0.peer?.id == peerID || $0.expectedPeerID == peerID) }
     }
 
     func status(for peerID: UUID) -> LinkStatus {
@@ -166,6 +176,11 @@ final class SenderController {
         wantedReceivers.insert(peer.id)
         lastErrors[peer.id] = nil
         guard session(for: peer.id) == nil else { return }
+        openSession(to: peer)
+    }
+
+    /// Starts a connection over the best link to `peer` (wired first).
+    func openSession(to peer: DiscoveredPeer) {
         let session = makeSession(
             transport: NWTransport(connection: node.makeConnection(to: peer)),
             isInitiator: true
@@ -177,7 +192,9 @@ final class SenderController {
     func disconnect(_ peerID: UUID) {
         wantedReceivers.remove(peerID)
         reconnectWork.removeValue(forKey: peerID)?.cancel()
-        session(for: peerID)?.close(reason: "Disconnected by user")
+        for session in sessions where !session.state.isClosed && (session.peer?.id == peerID || session.expectedPeerID == peerID) {
+            session.close(reason: "Disconnected by user")
+        }
     }
 
     func forget(_ peerID: UUID) {
@@ -470,6 +487,10 @@ final class SenderController {
             guard let self, let session else { return }
             self.sessionChanged(session, state: state)
         }
+        (transport as? NWTransport)?.onPathChange = { [weak self] in
+            self?.refreshLinks()
+            self?.switchToBetterLinks()
+        }
         session.onMessage = { [weak self, weak session] message in
             guard let self, let session else { return }
             self.handle(message, from: session)
@@ -491,7 +512,8 @@ final class SenderController {
                 other.close(reason: "Replaced")
             }
             readySince[peer.id] = Date()
-            resumeMirroring(peer.id)
+            refreshLinks()
+            restartMirroringOnNewSession(peer.id)
             // Give the receiver a moment to report its premium status before applying the
             // limit of one unpaid device.
             DispatchQueue.main.asyncAfter(deadline: .now() + PremiumTiming.statusGracePeriod + 0.1) { [weak self] in
@@ -524,6 +546,7 @@ final class SenderController {
             if !sessions.contains(where: { $0.peer?.id == peerID && $0.state == .ready }) {
                 mirrorConnectionLost(peerID, willReconnect: wantedReceivers.contains(peerID))
             }
+            refreshLinks()
         default:
             break
         }

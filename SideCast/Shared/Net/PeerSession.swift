@@ -308,3 +308,15 @@ final class PeerSession: Identifiable {
         state = .closed(.transportClosed)
     }
 }
+
+extension PeerSession {
+    /// What this session's connection runs over (FR-CONN-03/04).
+    var linkKind: LinkKind {
+        (transport as? NWTransport)?.linkKind ?? .unknown
+    }
+
+    /// False while the connection can't send, e.g. right after its cable was pulled.
+    var linkIsViable: Bool {
+        (transport as? NWTransport)?.isViable ?? true
+    }
+}

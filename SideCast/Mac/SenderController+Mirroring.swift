@@ -54,6 +54,13 @@ extension SenderController {
         requestMirror(receiverID)
     }
 
+    /// Starts the stream again, e.g. on a new connection after a link switch.
+    func restartMirror(_ receiverID: UUID) {
+        guard mirroredDisplays[receiverID] != nil else { return }
+        endMirrorStream(receiverID, notifyReceiver: false)
+        requestMirror(receiverID)
+    }
+
     /// The connection dropped: the stream is gone; keep the wish only if we'll reconnect.
     func mirrorConnectionLost(_ receiverID: UUID, willReconnect: Bool) {
         endMirrorStream(receiverID, notifyReceiver: false)

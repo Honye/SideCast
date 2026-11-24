@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "%@ · %lld%%": {
       "localizations": {
         "zh-Hans": {
@@ -954,6 +964,16 @@
         }
       }
     },
+    "Peer-to-peer Wi-Fi": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点对点无线"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "zh-Hans": {
@@ -1477,6 +1497,16 @@
         }
       }
     },
+    "This device": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本机"
+          }
+        }
+      }
+    },
     "This device is in use by %@.": {
       "localizations": {
         "zh-Hans": {
@@ -1613,6 +1643,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "等待输入配对码…"
+          }
+        }
+      }
+    },
+    "Wi-Fi": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wi-Fi"
+          }
+        }
+      }
+    },
+    "Wired": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有线"
           }
         }
       }

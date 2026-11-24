@@ -14,8 +14,19 @@ import os
 struct DiscoveredPeer: Identifiable, Hashable {
     let device: DeviceInfo
     let endpoint: NWEndpoint
+    /// Interfaces the device was found on (Wi-Fi, peer-to-peer Wi-Fi, USB / Thunderbolt…).
+    var interfaces: [NWInterface] = []
 
     var id: UUID { device.id }
+
+    static func == (lhs: DiscoveredPeer, rhs: DiscoveredPeer) -> Bool {
+        lhs.device == rhs.device && lhs.endpoint == rhs.endpoint && lhs.interfaces.map(\.name) == rhs.interfaces.map(\.name)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(device)
+        hasher.combine(endpoint)
+    }
 }
 
 @Observable
@@ -33,6 +44,12 @@ final class NetworkNode {
     @ObservationIgnored private var listener: NWListener?
     @ObservationIgnored private var browser: NWBrowser?
     @ObservationIgnored private var restartWorkItem: DispatchWorkItem?
+    @ObservationIgnored private var pathMonitor: NWPathMonitor?
+    /// Names of the interfaces that are up right now. Bonjour can keep listing a device on an
+    /// interface for a while after a cable was pulled.
+    @ObservationIgnored private var liveInterfaces: Set<String>?
+    /// The set of usable interfaces changed (a cable plugged in or pulled).
+    @ObservationIgnored var onInterfacesChanged: (() -> Void)?
 
     init(identity: LocalIdentity) {
         self.identity = identity
@@ -53,6 +70,7 @@ final class NetworkNode {
     func start() {
         startListener()
         startBrowser()
+        startPathMonitor()
     }
 
     func stop() {
@@ -61,11 +79,53 @@ final class NetworkNode {
         browser?.cancel()
         listener = nil
         browser = nil
+        pathMonitor?.cancel()
+        pathMonitor = nil
         peers = []
     }
 
+    /// The peer's best interface that is up right now.
+    func liveInterfaces(of peer: DiscoveredPeer) -> [NWInterface] {
+        guard let liveInterfaces else { return peer.interfaces }
+        return peer.interfaces.filter { liveInterfaces.contains($0.name) }
+    }
+
+    /// The best link the peer can be reached over right now.
+    func bestLink(to peer: DiscoveredPeer) -> LinkKind {
+        liveInterfaces(of: peer).map(LinkKind.of).max() ?? .unknown
+    }
+
+    private func startPathMonitor() {
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            let names = Set(path.availableInterfaces.map(\.name))
+            MainActor.assumeIsolated {
+                guard let self, names != self.liveInterfaces else { return }
+                self.liveInterfaces = names
+                self.onInterfacesChanged?()
+            }
+        }
+        monitor.start(queue: .main)
+        pathMonitor = monitor
+    }
+
+    /// Connects over the best link the peer was found on: wired first (FR-CONN-04).
     func makeConnection(to peer: DiscoveredPeer) -> NWConnection {
-        NWConnection(to: peer.endpoint, using: Self.tcpParameters())
+        let parameters = Self.tcpParameters()
+        if let interface = liveInterfaces(of: peer).first(where: { LinkKind.of($0) == .wired }) {
+            parameters.requiredInterface = interface
+        }
+        return NWConnection(to: peer.endpoint, using: parameters)
+    }
+
+    /// Connects avoiding wired links, e.g. right after a cable was pulled.
+    func makeWirelessConnection(to peer: DiscoveredPeer) -> NWConnection {
+        let parameters = Self.tcpParameters()
+        parameters.prohibitedInterfaceTypes = [.wiredEthernet]
+        for interface in peer.interfaces where LinkKind.of(interface) == .wired {
+            parameters.prohibitedInterfaces = (parameters.prohibitedInterfaces ?? []) + [interface]
+        }
+        return NWConnection(to: peer.endpoint, using: parameters)
     }
 
     private var txtRecord: NWTXTRecord {
@@ -164,12 +224,20 @@ final class NetworkNode {
                   let id = txt["id"].flatMap(UUID.init(uuidString:)),
                   id != identity.device.id,
                   let platform = txt["platform"].flatMap(DevicePlatform.init(rawValue:)),
-                  let role = txt["role"].flatMap(DeviceRole.init(rawValue:)),
-                  byID[id] == nil else { continue }
+                  let role = txt["role"].flatMap(DeviceRole.init(rawValue:)) else { continue }
+            if var existing = byID[id] {
+                // The same device on another interface.
+                for interface in result.interfaces where !existing.interfaces.contains(where: { $0.name == interface.name }) {
+                    existing.interfaces.append(interface)
+                }
+                byID[id] = existing
+                continue
+            }
             let name = txt["name"] ?? platform.rawValue
             byID[id] = DiscoveredPeer(
                 device: DeviceInfo(id: id, name: name, platform: platform, role: role),
-                endpoint: result.endpoint
+                endpoint: result.endpoint,
+                interfaces: result.interfaces
             )
         }
         peers = byID.values.sorted { $0.device.name.localizedStandardCompare($1.device.name) == .orderedAscending }

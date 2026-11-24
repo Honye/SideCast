@@ -153,6 +153,9 @@ private struct ConnectedView: View {
                 Text("Connected to \(session.peer?.name ?? "")")
                     .font(.title2)
                     .multilineTextAlignment(.center)
+                LinkLabel(link: receiver.link)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                 Group {
                     if let stream = receiver.currentStream {
                         Text(stream.codec == .opus ? "Low latency" : "High quality")

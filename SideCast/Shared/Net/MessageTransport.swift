@@ -23,6 +23,10 @@ final class NWTransport: MessageTransport {
     var onReady: (() -> Void)?
     var onFrame: ((Data) -> Void)?
     var onClose: ((Error?) -> Void)?
+    /// The path changed: another interface, or it stopped being usable.
+    var onPathChange: (() -> Void)?
+    /// False while the connection can't currently send (e.g. its cable was pulled).
+    private(set) var isViable = true
 
     private var decoder = FrameDecoder()
     private var finished = false
@@ -33,9 +37,23 @@ final class NWTransport: MessageTransport {
 
     var remoteEndpoint: NWEndpoint? { connection.currentPath?.remoteEndpoint }
 
+    /// What the connection runs over right now; `.unknown` if it isn't usable.
+    var linkKind: LinkKind {
+        isViable ? LinkKind.of(connection.currentPath) : .unknown
+    }
+
     func start() {
         connection.stateUpdateHandler = { [weak self] state in
             MainActor.assumeIsolated { self?.handle(state) }
+        }
+        connection.pathUpdateHandler = { [weak self] _ in
+            MainActor.assumeIsolated { self?.onPathChange?() }
+        }
+        connection.viabilityUpdateHandler = { [weak self] viable in
+            MainActor.assumeIsolated {
+                self?.isViable = viable
+                self?.onPathChange?()
+            }
         }
         connection.start(queue: .main)
     }

@@ -145,6 +145,9 @@ private struct ConnectedCard: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Connected to \(session.peer?.name ?? "")")
                         .font(.callout.weight(.semibold))
+                    LinkLabel(link: receiver.link)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     Group {
                         if let stream = receiver.currentStream {
                             Text(stream.codec == .opus ? "Low latency" : "High quality")

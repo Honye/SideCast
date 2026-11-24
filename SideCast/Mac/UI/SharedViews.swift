@@ -32,7 +32,15 @@ struct ReceiverRow: View {
                             .help(Text("Premium"))
                     }
                 }
-                StatusText(status: status)
+                HStack(spacing: 6) {
+                    StatusText(status: status)
+                    if status == .connected, let link = sender.links[device.id] {
+                        LinkLabel(link: link)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .labelStyle(.titleAndIcon)
+                    }
+                }
             }
             Spacer(minLength: 4)
             if status == .connected {

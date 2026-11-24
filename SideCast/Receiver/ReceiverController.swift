@@ -39,6 +39,8 @@ final class ReceiverController {
         }
     }
     private(set) var currentStream: StreamConfig?
+    /// What the connection to the Mac runs over (FR-CONN-03).
+    private(set) var link: LinkKind = .unknown
     /// The Mac screen shown here, while the Mac mirrors to this device.
     private(set) var mirror: MirrorState?
     @ObservationIgnored let mirrorRenderer = MirrorRenderer()
@@ -175,6 +177,9 @@ final class ReceiverController {
 
     private func makeSession(transport: MessageTransport, isInitiator: Bool) -> PeerSession {
         let session = PeerSession(identity: identity, trustStore: trustStore, transport: transport, isInitiator: isInitiator)
+        (transport as? NWTransport)?.onPathChange = { [weak self] in
+            self?.refreshLink()
+        }
         session.busyCheck = { [weak self] mac in
             guard let active = self?.activeSession, let current = active.peer, current.id != mac.id else { return nil }
             return current.name
@@ -197,17 +202,18 @@ final class ReceiverController {
             guard let peer = session.peer else { return }
             Log.net.info("Connected to \(peer.name, privacy: .public)")
             lastError = nil
-            for other in sessions where other !== session && other.state == .ready {
-                if other.peer?.id == peer.id {
-                    other.close(reason: "Replaced")
-                } else {
-                    // Another Mac got in first; this one has to wait.
-                    session.close(reason: "Busy")
-                    return
-                }
+            if sessions.contains(where: { $0 !== session && $0.state == .ready && $0.peer?.id != peer.id }) {
+                // Another Mac got in first; this one has to wait.
+                session.close(reason: "Busy")
+                return
             }
             session.send(.premiumStatus(unlocked: hasPremium))
+            // Move audio to the new session before closing the one it replaces.
             startAudio(for: session)
+            for other in sessions where other !== session && other.state == .ready && other.peer?.id == peer.id {
+                other.close(reason: "Replaced")
+            }
+            refreshLink()
         case .closed(let error):
             sessions.removeAll { $0 === session }
             if audioSessionID == session.id {
@@ -216,6 +222,7 @@ final class ReceiverController {
             if mirrorSessionID == session.id {
                 endMirror()
             }
+            refreshLink()
             if let error, session.isInitiator || error.isFinal {
                 lastError = error.userMessage
             }
@@ -226,8 +233,23 @@ final class ReceiverController {
 
     // MARK: - Audio
 
+    private func refreshLink() {
+        let link = activeSession?.linkKind ?? .unknown
+        if link != self.link { self.link = link }
+    }
+
     private func startAudio(for session: PeerSession) {
-        stopAudio()
+        // The same Mac on a new link (e.g. a USB cable plugged in): keep the player running and
+        // only swap the network side, so the switch is a short gap at most (FR-CONN-04).
+        let sameMac = audioSessionID.flatMap { id in sessions.first { $0.id == id } }?.peer?.id == session.peer?.id
+            && player.isRunning
+        if sameMac {
+            audioReceiver?.stop()
+            audioReceiver = nil
+            currentStream = nil
+        } else {
+            stopAudio()
+        }
         guard let key = session.audioKey else { return }
         let receiver = AudioReceiver(key: key, ring: ring)
         do {
