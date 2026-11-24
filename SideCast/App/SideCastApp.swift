@@ -7,11 +7,21 @@ import SwiftUI
 
 #if os(macOS)
 /// Filled icon while a device is connected.
-private struct MenuBarIcon: View {
+private struct SenderMenuBarIcon: View {
     @Environment(SenderController.self) private var sender
 
     var body: some View {
         Image(systemName: sender.connectedReceivers.isEmpty ? "hifispeaker.2" : "hifispeaker.2.fill")
+            .accessibilityLabel(Text("SideCast"))
+    }
+}
+
+/// Receive mode: a single speaker, filled while a Mac is connected.
+private struct ReceiverMenuBarIcon: View {
+    @Environment(ReceiverController.self) private var receiver
+
+    var body: some View {
+        Image(systemName: receiver.activeSession == nil ? "hifispeaker" : "hifispeaker.fill")
             .accessibilityLabel(Text("SideCast"))
     }
 }
@@ -24,11 +34,21 @@ struct SideCastApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarView(openSettings: { appDelegate.settingsWindow.show() })
-                .environment(appDelegate.sender)
+            if let sender = appDelegate.sender {
+                MenuBarView(openSettings: { appDelegate.settingsWindow.show() })
+                    .environment(sender)
+            } else if let receiver = appDelegate.receiver {
+                ReceiverMenuView(openSettings: { appDelegate.settingsWindow.show() })
+                    .environment(receiver)
+            }
         } label: {
-            MenuBarIcon()
-                .environment(appDelegate.sender)
+            if let sender = appDelegate.sender {
+                SenderMenuBarIcon()
+                    .environment(sender)
+            } else if let receiver = appDelegate.receiver {
+                ReceiverMenuBarIcon()
+                    .environment(receiver)
+            }
         }
         .menuBarExtraStyle(.window)
     }

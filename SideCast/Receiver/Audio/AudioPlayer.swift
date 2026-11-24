@@ -3,10 +3,10 @@
 //  SideCast
 //
 //  Plays the jitter buffer through AVAudioEngine. Keeps running (with silence) for as long as a
-//  Mac is connected, which also keeps the app alive in the background (FR-RECV-03).
+//  Mac is connected, which also keeps the app alive in the background (FR-RECV-03). On a Mac in
+//  receive mode it plays to the Mac's current output device.
 //
 
-#if !os(macOS)
 import AVFoundation
 import Foundation
 import os
@@ -84,10 +84,12 @@ final class AudioPlayer {
 
     func start() throws {
         guard !isRunning else { return }
+#if !os(macOS)
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playback, mode: .default)
         try session.setPreferredIOBufferDuration(0.005)
         try session.setActive(true)
+#endif
 
         let format = AVAudioFormat(standardFormatWithSampleRate: AudioWireFormat.sampleRate, channels: 2)!
         let renderer = self.renderer
@@ -101,7 +103,7 @@ final class AudioPlayer {
         try engine.start()
         self.source = source
         isRunning = true
-
+#if !os(macOS)
         // After an interruption (e.g. a phone call) resume when the system recommends it.
         interruptionObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.resumptionRecommendationNotification,
@@ -115,6 +117,7 @@ final class AudioPlayer {
                 try? self?.engine.start()
             }
         }
+#endif
     }
 
     func stop() {
@@ -128,7 +131,8 @@ final class AudioPlayer {
         if let interruptionObserver {
             NotificationCenter.default.removeObserver(interruptionObserver)
         }
+#if !os(macOS)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+#endif
     }
 }
-#endif

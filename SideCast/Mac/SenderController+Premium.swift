@@ -63,7 +63,7 @@ extension SenderController {
     }
 
     static func loadAllAudioTarget() -> OutputTarget {
-        guard let data = UserDefaults.standard.data(forKey: "routing.freeTarget"),
+        guard let data = UserDefaults.standard.data(forKey: RuntimeEnvironment.profiled("routing.freeTarget")),
               let target = try? JSONDecoder().decode(OutputTarget.self, from: data) else { return .systemDefault }
         return target
     }

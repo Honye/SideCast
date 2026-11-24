@@ -20,6 +20,26 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+/// What this Mac does (FR-RECV-07): send its audio to other devices (the default), or play
+/// audio from another Mac. Changing it relaunches SideCast.
+enum MacAppMode: String {
+    case sender, receiver
+
+    private static let key = RuntimeEnvironment.profiled("app.mode")
+
+    /// The mode stored for the next launch.
+    static var stored: MacAppMode {
+        if let override = RuntimeEnvironment.modeOverride.flatMap(MacAppMode.init(rawValue:)) {
+            return override
+        }
+        return UserDefaults.standard.string(forKey: key).flatMap(MacAppMode.init(rawValue:)) ?? .sender
+    }
+
+    static func store(_ mode: MacAppMode) {
+        UserDefaults.standard.set(mode.rawValue, forKey: key)
+    }
+}
+
 @Observable
 final class AppPreferences {
     private(set) var launchAtLogin = false
@@ -65,10 +85,19 @@ final class AppPreferences {
         refreshLaunchAtLogin()
     }
 
+    /// Switches this Mac between sending and receiving, by relaunching SideCast.
+    func switchMode(to mode: MacAppMode) {
+        MacAppMode.store(mode)
+        relaunch()
+    }
+
     /// Starts a new instance of SideCast and quits this one.
     func relaunch() {
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.createsNewApplicationInstance = true
+        if let profile = RuntimeEnvironment.profile {
+            configuration.environment = ["SIDECAST_PROFILE": profile]
+        }
         NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, _ in
             DispatchQueue.main.async {
                 NSApp.terminate(nil)

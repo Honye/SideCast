@@ -57,7 +57,7 @@ final class SenderController {
     var allAudioTarget: OutputTarget = SenderController.loadAllAudioTarget() {
         didSet {
             if let data = try? JSONEncoder().encode(allAudioTarget) {
-                UserDefaults.standard.set(data, forKey: "routing.freeTarget")
+                UserDefaults.standard.set(data, forKey: RuntimeEnvironment.profiled("routing.freeTarget"))
             }
             applyRoutes()
         }
@@ -88,7 +88,7 @@ final class SenderController {
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
         accountDirectory = AccountDeviceDirectory(
-            store: RuntimeEnvironment.isRunningTests ? InMemoryKeyValueStore(account: .init()) : ICloudKeyValueStore(),
+            store: RuntimeEnvironment.usesICloud ? ICloudKeyValueStore() : InMemoryKeyValueStore(account: .init()),
             identity: identity
         )
         ruleStore = RuleStore()
@@ -244,9 +244,9 @@ final class SenderController {
     }
 
     /// Advanced mode: per-process-kind rules inside an app (FR-ROUTE-10).
-    var advancedMode: Bool = UserDefaults.standard.bool(forKey: "routing.advanced") {
+    var advancedMode: Bool = UserDefaults.standard.bool(forKey: RuntimeEnvironment.profiled("routing.advanced")) {
         didSet {
-            UserDefaults.standard.set(advancedMode, forKey: "routing.advanced")
+            UserDefaults.standard.set(advancedMode, forKey: RuntimeEnvironment.profiled("routing.advanced"))
             applyRoutes()
         }
     }
@@ -538,13 +538,13 @@ final class SenderController {
     func setAudioMode(_ mode: AudioMode, for receiverID: UUID) {
         audioModes[receiverID] = mode
         if let data = try? JSONEncoder().encode(audioModes.reduce(into: [String: AudioMode]()) { $0[$1.key.uuidString] = $1.value }) {
-            UserDefaults.standard.set(data, forKey: "audio.modes")
+            UserDefaults.standard.set(data, forKey: RuntimeEnvironment.profiled("audio.modes"))
         }
         restartStream(for: receiverID)
     }
 
     private static func loadAudioModes() -> [UUID: AudioMode] {
-        guard let data = UserDefaults.standard.data(forKey: "audio.modes"),
+        guard let data = UserDefaults.standard.data(forKey: RuntimeEnvironment.profiled("audio.modes")),
               let stored = try? JSONDecoder().decode([String: AudioMode].self, from: data) else { return [:] }
         return stored.reduce(into: [:]) { result, entry in
             if let id = UUID(uuidString: entry.key) { result[id] = entry.value }

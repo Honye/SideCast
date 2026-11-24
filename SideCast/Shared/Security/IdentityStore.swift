@@ -27,8 +27,8 @@ nonisolated struct LocalIdentity: Sendable {
 }
 
 enum IdentityStore {
-    private static let deviceIDKey = "identity.deviceID"
-    private static let keychainAccount = "identity-signing-key"
+    private static let deviceIDKey = RuntimeEnvironment.profiled("identity.deviceID")
+    private static let keychainAccount = RuntimeEnvironment.profiled("identity-signing-key")
 
     static func loadOrCreate(role: DeviceRole) -> LocalIdentity {
         let defaults = UserDefaults.standard
@@ -49,7 +49,12 @@ enum IdentityStore {
         }
 
         return LocalIdentity(
-            device: DeviceInfo(id: deviceID, name: DeviceName.current, platform: .current, role: role),
+            device: DeviceInfo(
+                id: deviceID,
+                name: RuntimeEnvironment.profile.map { "\(DeviceName.current) (\($0))" } ?? DeviceName.current,
+                platform: .current,
+                role: role
+            ),
             signingKey: key
         )
     }

@@ -194,6 +194,16 @@
         }
       }
     },
+    "Choose this Mac as an app's output on the other Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在另一台 Mac 上把某个应用的输出设为这台 Mac。"
+          }
+        }
+      }
+    },
     "Choose this device as an app's output on your Mac.": {
       "localizations": {
         "zh-Hans": {
@@ -230,6 +240,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已连接"
+          }
+        }
+      }
+    },
+    "Connected devices are disconnected and every app plays through this Mac as usual until you switch back. Your settings are kept.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接的设备会断开，所有应用照常从这台 Mac 播放，直到你切换回来。你的设置会保留。"
           }
         }
       }
@@ -424,6 +444,16 @@
         }
       }
     },
+    "In receive mode, another Mac can choose this Mac as an output, like an iPad. This Mac's own apps then play as usual, and SideCast restarts to switch.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在接收模式下，另一台 Mac 可以像选择 iPad 一样把这台 Mac 选为输出设备；这台 Mac 自己的应用照常播放。切换时 SideCast 会重新启动。"
+          }
+        }
+      }
+    },
     "Language": {
       "localizations": {
         "zh-Hans": {
@@ -494,6 +524,16 @@
         }
       }
     },
+    "Macs on your Apple ID connect without a pairing code. A removed Mac needs a new pairing code the next time it connects.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一 Apple ID 下的 Mac 无需配对码即可连接。移除的 Mac 下次连接时需要重新输入配对码。"
+          }
+        }
+      }
+    },
     "Main process": {
       "localizations": {
         "zh-Hans": {
@@ -550,6 +590,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "附近的设备"
+          }
+        }
+      }
+    },
+    "Needed to find and connect to your Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于查找并连接你的 Mac。"
           }
         }
       }
@@ -614,6 +664,16 @@
         }
       }
     },
+    "No paired Macs.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已配对的 Mac。"
+          }
+        }
+      }
+    },
     "No paired devices.": {
       "localizations": {
         "zh-Hans": {
@@ -644,12 +704,32 @@
         }
       }
     },
+    "Not paired yet": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未配对"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "好"
+          }
+        }
+      }
+    },
+    "Off. SideCast can't find your Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已关闭，SideCast 无法找到你的 Mac。"
           }
         }
       }
@@ -704,22 +784,22 @@
         }
       }
     },
-    "Open SideCast on your iPad to see it here.": {
+    "Open SideCast on your iPad, iPhone or Vision Pro, or turn on receive mode on another Mac, to see it here.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在 iPad 上打开 SideCast，它就会出现在这里。"
+            "value": "在 iPad、iPhone 或 Vision Pro 上打开 SideCast，或在另一台 Mac 上打开接收模式，它就会出现在这里。"
           }
         }
       }
     },
-    "Open SideCast on your iPad. It appears here when it's on the same Wi-Fi network or nearby.": {
+    "Open SideCast on your iPad, iPhone or Vision Pro, or turn on receive mode on another Mac. It appears here when it's on the same Wi-Fi network or nearby.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在 iPad 上打开 SideCast。当它与 Mac 在同一 Wi-Fi 网络或就在附近时，会显示在这里。"
+            "value": "在 iPad、iPhone 或 Vision Pro 上打开 SideCast，或在另一台 Mac 上打开接收模式。设备在同一 Wi-Fi 网络或在附近时会出现在这里。"
           }
         }
       }
@@ -784,12 +864,32 @@
         }
       }
     },
+    "Paired": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已配对"
+          }
+        }
+      }
+    },
     "Paired %@": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "配对于 %@"
+          }
+        }
+      }
+    },
+    "Paired Macs": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已配对的 Mac"
           }
         }
       }
@@ -864,6 +964,16 @@
         }
       }
     },
+    "Receive mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接收模式"
+          }
+        }
+      }
+    },
     "Remove": {
       "localizations": {
         "zh-Hans": {
@@ -910,6 +1020,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复购买"
+          }
+        }
+      }
+    },
+    "Same Apple ID": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一 Apple ID"
           }
         }
       }
@@ -1037,12 +1157,32 @@
         }
       }
     },
+    "SideCast needs local network access to find your Mac. Turn it on in System Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 需要本地网络权限才能找到你的 Mac。请在系统设置中打开。"
+          }
+        }
+      }
+    },
     "SideCast on the Mac is free, including per-app output and volume on this Mac. SideCast Premium is a one-time purchase in SideCast on each iPad, iPhone or Vision Pro. A device with Premium can receive single apps and can be connected alongside other devices; a device without it receives the other sound, one device at a time.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "Mac 上的 SideCast 免费，包括在这台 Mac 上分应用设置输出和音量。SideCast 高级版需要在每台 iPad、iPhone 或 Vision Pro 的 SideCast 中一次性购买。已购买的设备可以接收单个应用，并可与其他设备同时连接；未购买的设备只能接收「其他声音」，且同一时间只能连接一台。"
+          }
+        }
+      }
+    },
+    "SideCast stops receiving and starts sending this Mac's audio again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 将停止接收，重新开始发送这台 Mac 的声音。"
           }
         }
       }
@@ -1073,6 +1213,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "启动"
+          }
+        }
+      }
+    },
+    "Switch to Receive Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到接收模式"
+          }
+        }
+      }
+    },
+    "Switch to Send Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到发送模式"
           }
         }
       }
@@ -1197,12 +1357,42 @@
         }
       }
     },
+    "This Mac appears on the other Mac as “%@”.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 在另一台 Mac 上显示为“%@”。"
+          }
+        }
+      }
+    },
     "This Mac is already connected to another device without SideCast Premium. Buy Premium on this device to connect it alongside others.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "这台 Mac 已连接另一台未购买 SideCast 高级版的设备。在本设备上购买高级版后，即可与其他设备同时连接。"
+          }
+        }
+      }
+    },
+    "This Mac plays audio from another Mac": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 播放另一台 Mac 的声音"
+          }
+        }
+      }
+    },
+    "This Mac sends its audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台 Mac 发送自己的声音"
           }
         }
       }
@@ -1273,6 +1463,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "取消静音"
+          }
+        }
+      }
+    },
+    "Use as Receiver…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用作接收端…"
+          }
+        }
+      }
+    },
+    "Use this Mac as a receiver?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将这台 Mac 用作接收端？"
+          }
+        }
+      }
+    },
+    "Use this Mac to send audio?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用这台 Mac 发送声音？"
+          }
+        }
+      }
+    },
+    "Use to Send Audio…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改为发送声音…"
           }
         }
       }

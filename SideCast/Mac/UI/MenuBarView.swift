@@ -29,7 +29,7 @@ struct MenuBarView: View {
 
             Section {
                 if sender.receiverRows.isEmpty {
-                    Text("Open SideCast on your iPad to see it here.")
+                    Text("Open SideCast on your iPad, iPhone or Vision Pro, or turn on receive mode on another Mac, to see it here.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }

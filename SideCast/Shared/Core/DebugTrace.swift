@@ -11,7 +11,9 @@ import Foundation
 nonisolated enum DebugTrace {
 #if DEBUG
     private static let queue = DispatchQueue(label: "DebugTrace")
-    static let url = FileManager.default.temporaryDirectory.appendingPathComponent("sidecast-trace.log")
+    static let url = FileManager.default.temporaryDirectory.appendingPathComponent(
+        RuntimeEnvironment.profile.map { "sidecast-trace-\($0).log" } ?? "sidecast-trace.log"
+    )
     nonisolated(unsafe) private static var recentLines: [String] = []
 
     /// The latest trace lines, newest last.

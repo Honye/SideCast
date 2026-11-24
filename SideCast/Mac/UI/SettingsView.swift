@@ -112,7 +112,7 @@ private struct DevicesSettingsView: View {
             }
             Section {
                 if sender.receiverRows.isEmpty {
-                    Text("Open SideCast on your iPad. It appears here when it's on the same Wi-Fi network or nearby.")
+                    Text("Open SideCast on your iPad, iPhone or Vision Pro, or turn on receive mode on another Mac. It appears here when it's on the same Wi-Fi network or nearby.")
                         .foregroundStyle(.secondary)
                 }
                 ForEach(sender.receiverRows, id: \.device.id) { row in
@@ -187,49 +187,15 @@ private struct DevicesSettingsView: View {
 
 private struct GeneralSettingsView: View {
     @Environment(SenderController.self) private var sender
-    @Environment(AppPreferences.self) private var preferences
 
     var body: some View {
         @Bindable var sender = sender
-        @Bindable var preferences = preferences
         Form {
             PremiumInfoSection()
 
-            Section("Startup") {
-                Toggle("Open SideCast when you log in", isOn: Binding(
-                    get: { preferences.launchAtLogin },
-                    set: { preferences.setLaunchAtLogin($0) }
-                ))
-                if preferences.launchAtLoginNeedsApproval {
-                    HStack {
-                        Text("Allow SideCast in Login Items to finish turning this on.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Button("Open Login Items") { SystemSettingsLink.open(SystemSettingsLink.loginItems) }
-                            .controlSize(.small)
-                    }
-                }
-                if let error = preferences.launchAtLoginError {
-                    Text(error).font(.caption).foregroundStyle(.red)
-                }
-            }
-
-            Section("Language") {
-                Picker("Language", selection: $preferences.language) {
-                    Text("Same as System").tag(AppLanguage.system)
-                    Text(verbatim: "简体中文").tag(AppLanguage.simplifiedChinese)
-                    Text(verbatim: "English").tag(AppLanguage.english)
-                }
-                if preferences.needsRelaunchForLanguage {
-                    HStack {
-                        Text("Restart SideCast to use the new language.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Button("Restart Now") { preferences.relaunch() }
-                            .controlSize(.small)
-                    }
-                }
-            }
+            StartupSection()
+            LanguageSection()
+            ModeSection(mode: .sender)
 
             Section {
                 Toggle("Advanced mode", isOn: $sender.advancedMode)
@@ -257,7 +223,6 @@ private struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear { preferences.refreshLaunchAtLogin() }
     }
 }
 
@@ -279,6 +244,110 @@ private struct PermissionRow: View {
             Button("Open Settings") { SystemSettingsLink.open(url) }
                 .controlSize(.small)
         }
+    }
+}
+
+// MARK: - Shared by both modes
+
+/// Launch at login (Q14).
+struct StartupSection: View {
+    @Environment(AppPreferences.self) private var preferences
+
+    var body: some View {
+        Section("Startup") {
+            Toggle("Open SideCast when you log in", isOn: Binding(
+                get: { preferences.launchAtLogin },
+                set: { preferences.setLaunchAtLogin($0) }
+            ))
+            if preferences.launchAtLoginNeedsApproval {
+                HStack {
+                    Text("Allow SideCast in Login Items to finish turning this on.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button("Open Login Items") { SystemSettingsLink.open(SystemSettingsLink.loginItems) }
+                        .controlSize(.small)
+                }
+            }
+            if let error = preferences.launchAtLoginError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
+        }
+        .onAppear { preferences.refreshLaunchAtLogin() }
+    }
+}
+
+/// Interface language (7.5).
+struct LanguageSection: View {
+    @Environment(AppPreferences.self) private var preferences
+
+    var body: some View {
+        @Bindable var preferences = preferences
+        Section("Language") {
+            Picker("Language", selection: $preferences.language) {
+                Text("Same as System").tag(AppLanguage.system)
+                Text(verbatim: "简体中文").tag(AppLanguage.simplifiedChinese)
+                Text(verbatim: "English").tag(AppLanguage.english)
+            }
+            if preferences.needsRelaunchForLanguage {
+                HStack {
+                    Text("Restart SideCast to use the new language.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button("Restart Now") { preferences.relaunch() }
+                        .controlSize(.small)
+                }
+            }
+        }
+    }
+}
+
+/// Switches this Mac between sending and receiving (FR-RECV-07). Relaunches SideCast.
+struct ModeSection: View {
+    @Environment(AppPreferences.self) private var preferences
+    let mode: MacAppMode
+    @State private var confirming = false
+
+    var body: some View {
+        Section {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    switch mode {
+                    case .sender:
+                        Text("This Mac sends its audio")
+                    case .receiver:
+                        Text("This Mac plays audio from another Mac")
+                    }
+                }
+                Spacer()
+                Button {
+                    confirming = true
+                } label: {
+                    switch mode {
+                    case .sender: Text("Use as Receiver…")
+                    case .receiver: Text("Use to Send Audio…")
+                    }
+                }
+            }
+        } header: {
+            Text("Receive mode")
+        } footer: {
+            Text("In receive mode, another Mac can choose this Mac as an output, like an iPad. This Mac's own apps then play as usual, and SideCast restarts to switch.")
+        }
+        .confirmationDialog(confirmationTitle, isPresented: $confirming) {
+            Button(mode == .sender ? "Switch to Receive Mode" : "Switch to Send Mode") {
+                preferences.switchMode(to: mode == .sender ? .receiver : .sender)
+            }
+        } message: {
+            if mode == .sender {
+                Text("Connected devices are disconnected and every app plays through this Mac as usual until you switch back. Your settings are kept.")
+            } else {
+                Text("SideCast stops receiving and starts sending this Mac's audio again.")
+            }
+        }
+    }
+
+    private var confirmationTitle: Text {
+        mode == .sender ? Text("Use this Mac as a receiver?") : Text("Use this Mac to send audio?")
     }
 }
 #endif

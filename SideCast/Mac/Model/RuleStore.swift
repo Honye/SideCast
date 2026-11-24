@@ -38,7 +38,7 @@ final class RuleStore {
     private(set) var rules: [String: AppRule] = [:]
 
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let storageKey = "routing.rules"
+    @ObservationIgnored private let storageKey = RuntimeEnvironment.profiled("routing.rules")
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

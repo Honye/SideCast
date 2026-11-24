@@ -2,11 +2,10 @@
 //  ReceiverController.swift
 //  SideCast
 //
-//  Top-level state for the receiver side (iPad / iPhone / Vision Pro).
+//  Top-level state for the receiver side (iPad / iPhone / Vision Pro, and a Mac in receive mode).
 //  A receiver is connected to at most one Mac at a time (FR-CONN-10).
 //
 
-#if !os(macOS)
 import Foundation
 import Network
 import Observation
@@ -23,9 +22,9 @@ final class ReceiverController {
     private(set) var sessions: [PeerSession] = []
     private(set) var lastError: String?
     /// SideCast's own output volume on this device, 0…1 (FR-RECV-02).
-    var volume: Double = UserDefaults.standard.object(forKey: "receiver.volume") as? Double ?? 1 {
+    var volume: Double = UserDefaults.standard.object(forKey: RuntimeEnvironment.profiled("receiver.volume")) as? Double ?? 1 {
         didSet {
-            UserDefaults.standard.set(volume, forKey: "receiver.volume")
+            UserDefaults.standard.set(volume, forKey: RuntimeEnvironment.profiled("receiver.volume"))
             player.volume = Float(volume)
         }
     }
@@ -33,12 +32,25 @@ final class ReceiverController {
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
 
+    /// What this receiver tells the Mac. A Mac in receive mode is always treated as Premium
+    /// (PRD 4, v0.5): the Mac app has no purchases.
+    var hasPremium: Bool {
+#if os(macOS)
+        true
+#else
+        store.isUnlocked
+#endif
+    }
+
     @ObservationIgnored private var started = false
     @ObservationIgnored private let ring = FloatRingBuffer(capacity: 1 << 16)
     @ObservationIgnored private lazy var player = AudioPlayer(ring: ring)
     @ObservationIgnored private var audioReceiver: AudioReceiver?
     @ObservationIgnored private var audioSessionID: UUID?
+#if !os(macOS)
+    // Not on the Mac: a Now Playing entry there would take over the keyboard's play/pause key.
     @ObservationIgnored private let nowPlaying = NowPlayingController()
+#endif
 #if DEBUG
     @ObservationIgnored private var statsTimer: Timer?
 #endif
@@ -48,7 +60,7 @@ final class ReceiverController {
         trustStore = TrustStore()
         node = NetworkNode(identity: identity)
         accountDirectory = AccountDeviceDirectory(
-            store: RuntimeEnvironment.isRunningTests ? InMemoryKeyValueStore(account: .init()) : ICloudKeyValueStore(),
+            store: RuntimeEnvironment.usesICloud ? ICloudKeyValueStore() : InMemoryKeyValueStore(account: .init()),
             identity: identity
         )
         trustStore.accountTrust = { [accountDirectory] device, key in accountDirectory.contains(device, identityKey: key) }
@@ -62,13 +74,21 @@ final class ReceiverController {
         }
         node.start()
         accountDirectory.start()
+#if !os(macOS)
         nowPlaying.onDisconnect = { [weak self] in self?.disconnect() }
         store.onChange = { [weak self] in
             guard let self else { return }
-            self.activeSession?.send(.premiumStatus(unlocked: self.store.isUnlocked))
+            self.activeSession?.send(.premiumStatus(unlocked: self.hasPremium))
         }
         store.start()
+#endif
         Log.app.info("Receiver started as \(self.identity.device.name, privacy: .public)")
+    }
+
+    /// Disconnects and stops listening, e.g. when the Mac app quits.
+    func stop() {
+        disconnect()
+        node.stop()
     }
 
     // MARK: - Queries
@@ -111,6 +131,14 @@ final class ReceiverController {
         for session in sessions {
             session.close(reason: "Disconnected by receiver")
         }
+    }
+
+    /// Removes trust in a Mac: it has to pair again (FR-CONN-07).
+    func forget(_ peerID: UUID) {
+        for session in sessions where session.peer?.id == peerID {
+            session.close(reason: "Disconnected by receiver")
+        }
+        trustStore.remove(id: peerID)
     }
 
     func submitPairingCode(_ code: String) {
@@ -160,7 +188,7 @@ final class ReceiverController {
                     return
                 }
             }
-            session.send(.premiumStatus(unlocked: store.isUnlocked))
+            session.send(.premiumStatus(unlocked: hasPremium))
             startAudio(for: session)
         case .closed(let error):
             sessions.removeAll { $0 === session }
@@ -195,7 +223,9 @@ final class ReceiverController {
         }
         audioReceiver = receiver
         audioSessionID = session.id
+#if !os(macOS)
         nowPlaying.show(macName: session.peer?.name ?? "Mac")
+#endif
 #if DEBUG
         statsTimer?.invalidate()
         statsTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
@@ -217,7 +247,9 @@ final class ReceiverController {
         audioSessionID = nil
         currentStream = nil
         player.stop()
+#if !os(macOS)
         nowPlaying.hide()
+#endif
     }
 
     private func handle(_ message: ControlMessage, from session: PeerSession) {
@@ -239,4 +271,3 @@ final class ReceiverController {
         }
     }
 }
-#endif

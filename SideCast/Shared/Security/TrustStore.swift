@@ -26,8 +26,8 @@ final class TrustStore {
     /// Same Apple ID check (FR-CONN-05), provided by `AccountDeviceDirectory`.
     @ObservationIgnored var accountTrust: ((DeviceInfo, Data) -> Bool)?
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let storageKey = "trust.peers"
-    @ObservationIgnored private let revokedKey = "trust.revokedAccountDevices"
+    @ObservationIgnored private let storageKey = RuntimeEnvironment.profiled("trust.peers")
+    @ObservationIgnored private let revokedKey = RuntimeEnvironment.profiled("trust.revokedAccountDevices")
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults

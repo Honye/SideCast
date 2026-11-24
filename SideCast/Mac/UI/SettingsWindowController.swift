@@ -12,12 +12,10 @@ import SwiftUI
 
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
-    private let sender: SenderController
-    private let preferences: AppPreferences
+    private let rootView: AnyView
 
-    init(sender: SenderController, preferences: AppPreferences) {
-        self.sender = sender
-        self.preferences = preferences
+    init(rootView: some View) {
+        self.rootView = AnyView(rootView)
     }
 
     func show(tab: SettingsTab? = nil) {
@@ -43,9 +41,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             defer: false
         )
         window.title = String(localized: "SideCast Settings")
-        window.contentViewController = NSHostingController(
-            rootView: SettingsView().environment(sender).environment(preferences)
-        )
+        window.contentViewController = NSHostingController(rootView: rootView)
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.setFrameAutosaveName("SideCastSettings")

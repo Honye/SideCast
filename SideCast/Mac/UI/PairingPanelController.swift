@@ -17,6 +17,12 @@ final class PairingPanelController {
     func show(code: String, deviceName: String, onCancel: @escaping () -> Void) {
         guard shownCode != code else { return }
         shownCode = code
+#if DEBUG
+        // Only for side-by-side test instances, so a script can type the code.
+        if RuntimeEnvironment.profile != nil {
+            DebugTrace.write("pairing code \(code)")
+        }
+#endif
         let view = PairingCodeView(code: code, deviceName: deviceName) { [weak self] in
             onCancel()
             self?.hide()
