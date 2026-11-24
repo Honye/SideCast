@@ -2,11 +2,12 @@
 //  SenderController+Mirroring.swift
 //  SideCast
 //
-//  Screen mirroring (FR-SCREEN-01/04~07), as confirmed:
+//  Screen mirroring and extended display (FR-SCREEN-01/02/04~07), as confirmed:
 //  - Any connected receiver can be mirrored to, with or without Premium.
-//  - Mirroring to several receivers at once needs Premium on each of them (FR-SCREEN-05).
-//  - Mirroring starts on the Mac; the receiver can stop it.
+//  - Showing the screen on several receivers at once needs Premium on each (FR-SCREEN-05).
+//  - It starts on the Mac; the receiver can stop it.
 //  - The pointer is shown.
+//  - Extended display: website version only; a virtual display sized for the receiver.
 //
 
 #if os(macOS)
@@ -14,49 +15,65 @@ import CoreGraphics
 import Foundation
 import os
 
+/// What a receiver shows of this Mac.
+enum ScreenMode: Hashable {
+    /// A copy of one of the Mac's displays.
+    case mirror(CGDirectDisplayID)
+    /// A display of its own that windows can be moved to.
+    case extend
+}
+
+struct ExtendedDisplayError: LocalizedError {
+    var errorDescription: String? { String(localized: "SideCast couldn't create the extended display.") }
+}
+
 extension SenderController {
+    /// After a dropped connection, how long an extended display stays (with its windows) waiting
+    /// for the receiver to come back.
+    static let extendedDisplayGracePeriod: TimeInterval = 10
+
     func mirroredDisplay(for receiverID: UUID) -> CGDirectDisplayID? {
-        mirroredDisplays[receiverID]
+        if case .mirror(let display) = screenModes[receiverID] { return display }
+        return nil
+    }
+
+    func isExtending(_ receiverID: UUID) -> Bool {
+        screenModes[receiverID] == .extend
     }
 
     /// Starts (or switches) mirroring `display` to a connected receiver.
     func startMirroring(_ receiverID: UUID, display: CGDirectDisplayID) {
-        let others = mirroredDisplays.keys.filter { id in id != receiverID && connectedReceivers.contains { $0.id == id } }
-        guard MirrorPolicy.allows(
-            candidateHasPremium: isPremium(receiver: receiverID),
-            othersHavePremium: others.map { isPremium(receiver: $0) }
-        ) else {
-            onUpgradeNeeded?(.mirrorToSeveral)
-            return
-        }
-        screenError = nil
-        if mirroredDisplays[receiverID] != nil {
-            endMirrorStream(receiverID, notifyReceiver: true)
-        }
-        mirroredDisplays[receiverID] = display
-        requestMirror(receiverID)
+        start(receiverID, mode: .mirror(display))
+    }
+
+    /// Makes a connected receiver an extended display (FR-SCREEN-02).
+    func startExtending(_ receiverID: UUID) {
+        guard VirtualDisplay.isSupported else { return }
+        start(receiverID, mode: .extend)
     }
 
     func stopMirroring(_ receiverID: UUID, notifyReceiver: Bool = true) {
-        mirroredDisplays.removeValue(forKey: receiverID)
+        screenModes.removeValue(forKey: receiverID)
         endMirrorStream(receiverID, notifyReceiver: notifyReceiver)
+        removeVirtualDisplay(receiverID)
     }
 
     func stopAllMirroring() {
-        for id in Array(mirroredDisplays.keys) {
+        for id in Array(screenModes.keys) {
             stopMirroring(id)
         }
     }
 
-    /// After a (re)connection: continue mirroring if the user still wants it.
+    /// After a (re)connection: continue if the user still wants it.
     func resumeMirroring(_ receiverID: UUID) {
-        guard mirroredDisplays[receiverID] != nil, mirrorSessions[receiverID] == nil else { return }
+        guard screenModes[receiverID] != nil, mirrorSessions[receiverID] == nil else { return }
         requestMirror(receiverID)
     }
 
-    /// Starts the stream again, e.g. on a new connection after a link switch.
+    /// Starts the stream again, e.g. on a new connection after a link switch. An extended
+    /// display stays, so its windows don't move.
     func restartMirror(_ receiverID: UUID) {
-        guard mirroredDisplays[receiverID] != nil else { return }
+        guard screenModes[receiverID] != nil else { return }
         endMirrorStream(receiverID, notifyReceiver: false)
         requestMirror(receiverID)
     }
@@ -64,14 +81,17 @@ extension SenderController {
     /// The connection dropped: the stream is gone; keep the wish only if we'll reconnect.
     func mirrorConnectionLost(_ receiverID: UUID, willReconnect: Bool) {
         endMirrorStream(receiverID, notifyReceiver: false)
-        if !willReconnect {
-            mirroredDisplays.removeValue(forKey: receiverID)
+        if willReconnect {
+            scheduleVirtualDisplayRemoval(receiverID)
+        } else {
+            screenModes.removeValue(forKey: receiverID)
+            removeVirtualDisplay(receiverID)
         }
     }
 
-    /// Premium can change while mirroring (a refund, or a status that arrived late).
+    /// Premium can change while showing the screen (a refund, or a status that arrived late).
     func enforceMirrorPolicy() {
-        let active = mirroredDisplays.keys.filter { id in connectedReceivers.contains { $0.id == id } }
+        let active = screenModes.keys.filter { id in connectedReceivers.contains { $0.id == id } }
         guard active.count > 1 else { return }
         for id in active where premiumStatusReceived.contains(id) && !isPremium(receiver: id) {
             stopMirroring(id)
@@ -80,10 +100,60 @@ extension SenderController {
     }
 
     func mirrorReady(_ ready: MirrorReady, from receiverID: UUID, session: PeerSession) {
-        guard pendingMirrors[receiverID] == ready.streamID,
-              let display = mirroredDisplays[receiverID],
-              let key = session.videoKey,
-              let (host, interface) = streamEndpoint(of: session) else { return }
+        guard pendingMirrors[receiverID] == ready.streamID, let mode = screenModes[receiverID] else { return }
+        switch mode {
+        case .mirror(let display):
+            startMirrorSession(ready, display: display, receiverID: receiverID, session: session)
+        case .extend:
+            cancelVirtualDisplayRemoval(receiverID)
+            let pixels = CGSize(width: ready.maxWidth, height: ready.maxHeight)
+            if let existing = virtualDisplays[receiverID], existing.receiverPixels == pixels {
+                startMirrorSession(ready, display: existing.displayID, receiverID: receiverID, session: session)
+                return
+            }
+            virtualDisplays.removeValue(forKey: receiverID)
+            let name = connectedReceivers.first { $0.id == receiverID }?.name ?? "SideCast"
+            guard let display = VirtualDisplay(name: "\(name) (SideCast)", receiver: receiverID, receiverPixels: pixels) else {
+                mirrorEnded(receiverID, streamID: ready.streamID, error: ExtendedDisplayError())
+                return
+            }
+            virtualDisplays[receiverID] = display
+            Task {
+                let online = await display.waitUntilOnline()
+                guard pendingMirrors[receiverID] == ready.streamID, virtualDisplays[receiverID] === display else { return }
+                guard online else {
+                    mirrorEnded(receiverID, streamID: ready.streamID, error: ExtendedDisplayError())
+                    return
+                }
+                startMirrorSession(ready, display: display.displayID, receiverID: receiverID, session: session)
+            }
+        }
+    }
+
+    // MARK: - Private
+
+    private func start(_ receiverID: UUID, mode: ScreenMode) {
+        let others = screenModes.keys.filter { id in id != receiverID && connectedReceivers.contains { $0.id == id } }
+        guard MirrorPolicy.allows(
+            candidateHasPremium: isPremium(receiver: receiverID),
+            othersHavePremium: others.map { isPremium(receiver: $0) }
+        ) else {
+            onUpgradeNeeded?(.mirrorToSeveral)
+            return
+        }
+        screenError = nil
+        if screenModes[receiverID] != nil {
+            endMirrorStream(receiverID, notifyReceiver: true)
+        }
+        if mode != .extend {
+            removeVirtualDisplay(receiverID)
+        }
+        screenModes[receiverID] = mode
+        requestMirror(receiverID)
+    }
+
+    private func startMirrorSession(_ ready: MirrorReady, display: CGDirectDisplayID, receiverID: UUID, session: PeerSession) {
+        guard let key = session.videoKey, let (host, interface) = streamEndpoint(of: session) else { return }
         pendingMirrors.removeValue(forKey: receiverID)
         do {
             let mirror = try MirrorSession(
@@ -101,7 +171,7 @@ extension SenderController {
             Task {
                 do {
                     try await mirror.start()
-                    DebugTrace.write("mirror \(ready.streamID) to \(host):\(ready.port) started")
+                    DebugTrace.write("mirror \(ready.streamID) of display \(display) to \(host):\(ready.port) started")
                     sendRemoteInputStatus(to: receiverID, streamID: ready.streamID)
                 } catch {
                     mirrorEnded(receiverID, streamID: ready.streamID, error: error)
@@ -112,13 +182,17 @@ extension SenderController {
         }
     }
 
-    // MARK: - Private
-
     private func requestMirror(_ receiverID: UUID) {
-        guard let display = mirroredDisplays[receiverID],
+        guard let mode = screenModes[receiverID],
               let session = sessions.first(where: { $0.peer?.id == receiverID && $0.state == .ready }) else { return }
         nextMirrorStreamID &+= 1
-        let request = MirrorRequest(streamID: nextMirrorStreamID, displayName: MirrorDisplays.name(of: display))
+        let request: MirrorRequest
+        switch mode {
+        case .mirror(let display):
+            request = MirrorRequest(streamID: nextMirrorStreamID, displayName: MirrorDisplays.name(of: display))
+        case .extend:
+            request = MirrorRequest(streamID: nextMirrorStreamID, displayName: "", extended: true)
+        }
         pendingMirrors[receiverID] = request.streamID
         session.send(.startMirroring(request))
     }
@@ -136,12 +210,34 @@ extension SenderController {
 
     /// The stream stopped by itself: capture failed, permission missing, network gone.
     private func mirrorEnded(_ receiverID: UUID, streamID: UInt32, error: Error?) {
-        guard mirrorSessions[receiverID]?.streamID == streamID || pendingMirrors[receiverID] == nil else { return }
-        Log.audio.error("Mirroring ended: \(String(describing: error), privacy: .public)")
+        guard mirrorSessions[receiverID]?.streamID == streamID || pendingMirrors[receiverID] == streamID else { return }
+        Log.audio.error("Screen stream ended: \(String(describing: error), privacy: .public)")
         if let error {
             screenError = Self.describeScreenError(error)
         }
         stopMirroring(receiverID)
+    }
+
+    private func removeVirtualDisplay(_ receiverID: UUID) {
+        cancelVirtualDisplayRemoval(receiverID)
+        virtualDisplays.removeValue(forKey: receiverID)
+    }
+
+    private func scheduleVirtualDisplayRemoval(_ receiverID: UUID) {
+        guard virtualDisplays[receiverID] != nil else { return }
+        cancelVirtualDisplayRemoval(receiverID)
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, self.mirrorSessions[receiverID] == nil else { return }
+            // The receiver didn't come back: give the windows back to the other displays.
+            self.virtualDisplayRemovals.removeValue(forKey: receiverID)
+            self.virtualDisplays.removeValue(forKey: receiverID)
+        }
+        virtualDisplayRemovals[receiverID] = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.extendedDisplayGracePeriod, execute: work)
+    }
+
+    private func cancelVirtualDisplayRemoval(_ receiverID: UUID) {
+        virtualDisplayRemovals.removeValue(forKey: receiverID)?.cancel()
     }
 
     private static func describeScreenError(_ error: Error) -> String {

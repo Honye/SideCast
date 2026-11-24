@@ -14,7 +14,7 @@
 //  In receive mode: connect (mac: part of the name), pair (code), disconnect, volume (value), settings,
 //  menu (shows the menu bar popover's content in a window), stopmirror, pointer (kind, x, y, dx, dy:
 //  a touch control event on the mirrored picture), touch (enabled).
-//  Sender: mirror (receiver "first", display "stop" to stop).
+//  Sender: mirror (receiver "first", display "stop" to stop, "extend" for an extended display).
 //  With SIDECAST_PROFILE set, the notification name ends in ".<profile>" so instances don't mix.
 //
 
@@ -154,6 +154,8 @@ enum DebugCommands {
             guard let id = sender.connectedReceivers.first?.id else { return }
             if command["display"] as? String == "stop" {
                 sender.stopMirroring(id)
+            } else if command["display"] as? String == "extend" {
+                sender.startExtending(id)
             } else if let display = MirrorDisplays.available.first {
                 sender.startMirroring(id, display: display.id)
             }

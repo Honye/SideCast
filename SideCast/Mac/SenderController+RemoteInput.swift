@@ -13,8 +13,8 @@ import Foundation
 
 extension SenderController {
     func handlePointer(_ event: PointerEvent, from receiverID: UUID, session: PeerSession) {
-        guard let mirror = mirrorSessions[receiverID], mirror.streamID == event.streamID,
-              let display = mirroredDisplays[receiverID] else { return }
+        guard let mirror = mirrorSessions[receiverID], mirror.streamID == event.streamID else { return }
+        let display = mirror.displayID
         let status = RemoteInputInjector.status
         switch status {
         case .available:

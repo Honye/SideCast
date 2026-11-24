@@ -444,6 +444,26 @@
         }
       }
     },
+    "Extended Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扩展屏"
+          }
+        }
+      }
+    },
+    "Extended display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扩展屏"
+          }
+        }
+      }
+    },
     "Follow the app's setting": {
       "localizations": {
         "zh-Hans": {
@@ -1327,6 +1347,16 @@
         }
       }
     },
+    "SideCast couldn't create the extended display.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 无法创建扩展屏。"
+          }
+        }
+      }
+    },
     "SideCast devices": {
       "localizations": {
         "zh-Hans": {
@@ -1413,6 +1443,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "启动"
+          }
+        }
+      }
+    },
+    "Stop Extended Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止扩展屏"
           }
         }
       }
@@ -1743,6 +1783,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "更新…"
+          }
+        }
+      }
+    },
+    "Use as Extended Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用作扩展屏"
+          }
+        }
+      }
+    },
+    "Use as Extended Display (Not Available in This Version)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用作扩展屏（此版本不提供）"
           }
         }
       }

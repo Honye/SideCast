@@ -114,14 +114,19 @@ final class RemoteInputInjector {
     }()
 
     static var status: RemoteInputStatus {
-        guard isSupported else { return .unsupported }
+#if DISTRIBUTION_APP_STORE
+        return .unsupported
+#else
         return isDryRun || CGPreflightPostEventAccess() ? .available : .needsPermission
+#endif
     }
 
     /// Shows macOS's prompt (once; later it only adds SideCast to the list in System Settings).
     static func requestPermission() {
+#if !DISTRIBUTION_APP_STORE
         guard isSupported, !isDryRun else { return }
         _ = CGRequestPostEventAccess()
+#endif
     }
 
     private var planner = RemoteInputPlanner()
@@ -144,10 +149,13 @@ final class RemoteInputInjector {
                 FileHandle.standardError.write(Data("SideCast dry input: \(action)\n".utf8))
                 continue
             }
+#if !DISTRIBUTION_APP_STORE
             makeEvent(action)?.post(tap: .cghidEventTap)
+#endif
         }
     }
 
+#if !DISTRIBUTION_APP_STORE
     private func makeEvent(_ action: SyntheticInput) -> CGEvent? {
         func mouse(_ type: CGEventType, _ point: CGPoint, _ button: CGMouseButton, clicks: Int = 1) -> CGEvent? {
             let event = CGEvent(mouseEventSource: source, mouseType: type, mouseCursorPosition: point, mouseButton: button)
@@ -171,5 +179,6 @@ final class RemoteInputInjector {
             return CGEvent(scrollWheelEvent2Source: source, units: .pixel, wheelCount: 2, wheel1: dy, wheel2: dx, wheel3: 0)
         }
     }
+#endif
 }
 #endif

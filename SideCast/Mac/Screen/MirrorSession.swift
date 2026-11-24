@@ -205,10 +205,13 @@ enum MirrorDisplays {
         let name: String
     }
 
+    /// Displays that can be mirrored; SideCast's own extended displays are left out.
     static var available: [Display] {
         NSScreen.screens.compactMap { screen in
             guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
-            return Display(id: CGDirectDisplayID(number.uint32Value), name: screen.localizedName)
+            let id = CGDirectDisplayID(number.uint32Value)
+            guard !VirtualDisplay.isExtendedDisplay(id) else { return nil }
+            return Display(id: id, name: screen.localizedName)
         }
     }
 

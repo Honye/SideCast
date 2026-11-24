@@ -24,7 +24,7 @@ final class MirrorWindowController: NSObject, NSWindowDelegate {
         if let mirror = receiver.mirror {
             let window = self.window ?? makeWindow()
             self.window = window
-            window.title = String(localized: "\(mirror.displayName) · \(mirror.macName)")
+            window.title = String(localized: "\(mirror.title) · \(mirror.macName)")
             NSApp.setActivationPolicy(.regular)
             window.makeKeyAndOrderFront(nil)
             NSApp.activate()
@@ -124,8 +124,10 @@ private struct MirrorWindowControls: View {
                     .toggleStyle(.switch)
                     .controlSize(.mini)
             }
-            Button("Stop Mirroring", role: .destructive) {
+            Button(role: .destructive) {
                 receiver.stopMirroring()
+            } label: {
+                receiver.mirror?.extended == true ? Text("Stop Extended Display") : Text("Stop Mirroring")
             }
             .controlSize(.small)
         }

@@ -89,9 +89,12 @@ final class SenderController {
 
     // MARK: Screen mirroring (FR-SCREEN, see SenderController+Mirroring.swift)
 
-    /// The display mirrored to each receiver, for as long as the user wants it (kept across
+    /// What each receiver shows of this Mac, for as long as the user wants it (kept across
     /// reconnects; independent of audio routing, FR-SCREEN-06).
-    var mirroredDisplays: [UUID: CGDirectDisplayID] = [:]
+    var screenModes: [UUID: ScreenMode] = [:]
+    /// Extended displays (FR-SCREEN-02), per receiver.
+    @ObservationIgnored var virtualDisplays: [UUID: VirtualDisplay] = [:]
+    @ObservationIgnored var virtualDisplayRemovals: [UUID: DispatchWorkItem] = [:]
     /// Why mirroring couldn't start, e.g. screen recording isn't allowed.
     var screenError: String?
     @ObservationIgnored var mirrorSessions: [UUID: MirrorSession] = [:]

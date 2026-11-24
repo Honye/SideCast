@@ -82,6 +82,7 @@ struct MirrorMenu: View {
 
     var body: some View {
         let current = sender.mirroredDisplay(for: receiverID)
+        let extending = sender.isExtending(receiverID)
         Menu {
             ForEach(MirrorDisplays.available) { display in
                 Toggle(isOn: Binding(
@@ -97,17 +98,38 @@ struct MirrorMenu: View {
                     Text("Mirror \(display.name)")
                 }
             }
-            if current != nil {
+            Divider()
+            if VirtualDisplay.isSupported {
+                Toggle(isOn: Binding(
+                    get: { extending },
+                    set: { on in
+                        if on {
+                            sender.startExtending(receiverID)
+                        } else {
+                            sender.stopMirroring(receiverID)
+                        }
+                    }
+                )) {
+                    Text("Use as Extended Display")
+                }
+            } else {
+                // Mac App Store version: shown but unavailable (PRD 3.2, 8.9).
+                Button("Use as Extended Display (Not Available in This Version)") {}
+                    .disabled(true)
+            }
+            if current != nil || extending {
                 Divider()
-                Button("Stop Mirroring") { sender.stopMirroring(receiverID) }
+                Button { sender.stopMirroring(receiverID) } label: {
+                    extending ? Text("Stop Extended Display") : Text("Stop Mirroring")
+                }
             }
         } label: {
-            Image(systemName: current == nil ? "rectangle.on.rectangle" : "rectangle.inset.filled.on.rectangle")
+            Image(systemName: extending ? "display.2" : current == nil ? "rectangle.on.rectangle" : "rectangle.inset.filled.on.rectangle")
         }
         .menuIndicator(.hidden)
         .fixedSize()
         .controlSize(.small)
-        .help(current.map { Text("Mirroring \(MirrorDisplays.name(of: $0))") } ?? Text("Mirror screen"))
+        .help(extending ? Text("Extended display") : current.map { Text("Mirroring \(MirrorDisplays.name(of: $0))") } ?? Text("Mirror screen"))
         .accessibilityLabel(Text("Screen mirroring"))
     }
 }

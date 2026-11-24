@@ -14,9 +14,16 @@ import os
 
 /// A Mac screen being mirrored to this device (FR-SCREEN-01).
 struct MirrorState: Equatable {
+    /// What to call it in the UI: the mirrored display's name, or "Extended Display".
+    var title: String {
+        extended ? String(localized: "Extended Display") : displayName
+    }
+
     var streamID: UInt32
     var macName: String
     var displayName: String
+    /// This device is an extended display of the Mac rather than a copy (FR-SCREEN-02).
+    var extended = false
     /// Known once the first picture format arrives.
     var pictureSize: CGSize?
     /// Whether the Mac can act on touch control (FR-TOUCH); nil until it says.
@@ -410,7 +417,7 @@ extension ReceiverController {
         }
         videoReceiver = receiver
         mirrorSessionID = session.id
-        mirror = MirrorState(streamID: request.streamID, macName: session.peer?.name ?? "Mac", displayName: request.displayName)
+        mirror = MirrorState(streamID: request.streamID, macName: session.peer?.name ?? "Mac", displayName: request.displayName, extended: request.extended)
         onMirrorChanged?()
     }
 

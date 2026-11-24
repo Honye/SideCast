@@ -96,14 +96,16 @@ struct MirrorScreen: View {
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 Label {
-                    Text("\(mirror.displayName) · \(mirror.macName)")
+                    Text("\(mirror.title) · \(mirror.macName)")
                         .lineLimit(1)
                 } icon: {
-                    Image(systemName: "rectangle.on.rectangle")
+                    Image(systemName: mirror.extended ? "display.2" : "rectangle.on.rectangle")
                 }
                 .font(.callout)
-                Button("Stop Mirroring", role: .destructive) {
+                Button(role: .destructive) {
                     receiver.stopMirroring()
+                } label: {
+                    mirror.extended ? Text("Stop Extended Display") : Text("Stop Mirroring")
                 }
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("stop-mirroring")

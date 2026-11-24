@@ -38,6 +38,21 @@ nonisolated struct MirrorRequest: Codable, Hashable, Sendable {
     var streamID: UInt32
     /// Name of the Mac display being mirrored, for the receiver's UI.
     var displayName: String
+    /// The receiver is an extended display of its own rather than a copy (FR-SCREEN-02).
+    var extended = false
+
+    init(streamID: UInt32, displayName: String, extended: Bool = false) {
+        self.streamID = streamID
+        self.displayName = displayName
+        self.extended = extended
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        streamID = try container.decode(UInt32.self, forKey: .streamID)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        extended = try container.decodeIfPresent(Bool.self, forKey: .extended) ?? false
+    }
 }
 
 /// The receiver's answer: where to send the video and the largest picture worth sending.
