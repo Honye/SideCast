@@ -20,8 +20,7 @@ extension SenderController {
     /// Tells the driver which devices to show. Called on every route update, which also keeps
     /// the devices alive.
     func publishSystemDevices() {
-        // Test profiles share the driver with the main copy of SideCast; leave it alone.
-        guard RuntimeEnvironment.profile == nil else { return }
+        guard Self.publishesSystemDevices else { return }
         systemDriver.publish(connectedReceivers.map {
             SystemAudioDriver.Entry(uid: SystemAudioDriver.uid(for: $0.id), name: SystemAudioDriver.deviceName(for: $0.name))
         })
@@ -40,7 +39,11 @@ extension SenderController {
         }
         systemDevices = present
         observeVolume(of: Set(present.values))
-        systemDeviceGains = present.mapValues { systemDriver.gain(of: $0) }
+        let gains = present.mapValues { systemDriver.gain(of: $0) }
+        if gains != systemDeviceGains {
+            DebugTrace.write("system device gains \(gains.map { "\($0.key.uuidString.prefix(8))=\($0.value)" })")
+            systemDeviceGains = gains
+        }
 
         var memory = systemOutputMemory
         let restore = memory.update(previousDefault: previousDefault, currentDefault: defaultOutputUID, presentReceivers: Set(present.keys))
@@ -90,9 +93,18 @@ extension SenderController {
             systemOutputMemory = SystemOutputMemory(receiver: receiver, fallbackUID: nil)
             saveSystemOutputMemory()
         }
-        if RuntimeEnvironment.profile == nil {
+        if Self.publishesSystemDevices {
             systemDriver.publish([])
         }
+    }
+
+    /// Test profiles share the driver with the main copy of SideCast and leave it alone,
+    /// unless a debug build is started with SIDECAST_SYSTEM_DEVICES=1.
+    static var publishesSystemDevices: Bool {
+#if DEBUG
+        if ProcessInfo.processInfo.environment["SIDECAST_SYSTEM_DEVICES"] == "1" { return true }
+#endif
+        return RuntimeEnvironment.profile == nil
     }
 
     // MARK: - Helpers

@@ -388,7 +388,8 @@ final class SenderController {
 
     private func poll() {
         var silent = false
-        for key in Array(ruleStore.rules.keys) + [Self.allAudioRouteKey] {
+        let systemDeviceKeys = systemDevices.keys.map(Self.systemDeviceRouteKey)
+        for key in Array(ruleStore.rules.keys) + [Self.allAudioRouteKey] + systemDeviceKeys {
             guard let peak = router.takePeak(for: key) else { continue }
             levels[key] = peak
             if playingKeys.contains(key), peak == 0 {
