@@ -80,6 +80,7 @@ final class PeerSession: Identifiable {
     @ObservationIgnored private var pairingCodeIssuedAt: Date?
     @ObservationIgnored private var enteredCode: String?
     @ObservationIgnored private(set) var audioKey: SymmetricKey?
+    @ObservationIgnored private(set) var videoKey: SymmetricKey?
 
     private var role: DeviceRole { identity.device.role }
 
@@ -191,6 +192,7 @@ final class PeerSession: Identifiable {
         sealer = FrameSealer(key: keys.send)
         opener = FrameOpener(key: keys.receive)
         audioKey = keys.audio
+        videoKey = keys.video
         peer = hello.device
         peerIdentityKey = hello.identityKey
         localTrustsPeer = trustStore.isTrusted(hello.device, identityKey: hello.identityKey)

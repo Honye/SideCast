@@ -18,6 +18,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
     /// Set in receive mode.
     let receiver: ReceiverController?
     private(set) lazy var settingsWindow = makeSettingsWindow()
+    private var mirrorWindow: MirrorWindowController?
 
     override init() {
         sender = mode == .sender ? SenderController() : nil
@@ -32,7 +33,12 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
             }
             sender.start()
         }
-        receiver?.start()
+        if let receiver {
+            let mirrorWindow = MirrorWindowController(receiver: receiver)
+            receiver.onMirrorChanged = { [weak mirrorWindow] in mirrorWindow?.update() }
+            self.mirrorWindow = mirrorWindow
+            receiver.start()
+        }
         // First launch: explain permissions and how to start (FR-PERM-01).
         if mode == .sender, !RuntimeEnvironment.isRunningTests, !UserDefaults.standard.bool(forKey: RuntimeEnvironment.profiled("onboarding.shown")) {
             UserDefaults.standard.set(true, forKey: RuntimeEnvironment.profiled("onboarding.shown"))

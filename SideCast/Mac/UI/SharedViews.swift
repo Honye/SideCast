@@ -50,6 +50,9 @@ struct ReceiverRow: View {
                 .controlSize(.small)
                 .accessibilityLabel(Text("Audio mode"))
             }
+            if status == .connected {
+                MirrorMenu(receiverID: device.id)
+            }
             switch status {
             case .connected, .connecting, .pairing:
                 Button("Disconnect") { sender.disconnect(device.id) }
@@ -61,6 +64,43 @@ struct ReceiverRow: View {
                 }
             }
         }
+    }
+}
+
+/// Screen mirroring for one connected receiver (FR-SCREEN-01): pick a display, or stop.
+struct MirrorMenu: View {
+    @Environment(SenderController.self) private var sender
+    let receiverID: UUID
+
+    var body: some View {
+        let current = sender.mirroredDisplay(for: receiverID)
+        Menu {
+            ForEach(MirrorDisplays.available) { display in
+                Toggle(isOn: Binding(
+                    get: { current == display.id },
+                    set: { on in
+                        if on {
+                            sender.startMirroring(receiverID, display: display.id)
+                        } else {
+                            sender.stopMirroring(receiverID)
+                        }
+                    }
+                )) {
+                    Text("Mirror \(display.name)")
+                }
+            }
+            if current != nil {
+                Divider()
+                Button("Stop Mirroring") { sender.stopMirroring(receiverID) }
+            }
+        } label: {
+            Image(systemName: current == nil ? "rectangle.on.rectangle" : "rectangle.inset.filled.on.rectangle")
+        }
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .controlSize(.small)
+        .help(current.map { Text("Mirroring \(MirrorDisplays.name(of: $0))") } ?? Text("Mirror screen"))
+        .accessibilityLabel(Text("Screen mirroring"))
     }
 }
 
@@ -96,7 +136,7 @@ extension SenderController {
 
 extension SenderController {
     var hasWarnings: Bool {
-        node.localNetworkDenied || audioError != nil || capturedSilenceSuspected
+        node.localNetworkDenied || audioError != nil || capturedSilenceSuspected || screenError != nil
     }
 }
 
@@ -112,6 +152,9 @@ struct WarningsView: View {
                     action: Text("Open Settings"),
                     url: SystemSettingsLink.localNetwork
                 )
+            }
+            if let error = sender.screenError {
+                Warning(text: Text(error), action: Text("Open Settings"), url: SystemSettingsLink.screenCapture)
             }
             if let error = sender.audioError {
                 Warning(text: Text(error), action: Text("Open Settings"), url: SystemSettingsLink.audioCapture)

@@ -19,6 +19,8 @@ enum UpgradeReason {
     case singleAppToReceiver(name: String)
     /// A second receiver without Premium.
     case anotherUnpaidDevice
+    /// Mirroring to several receivers at once while one of them has no Premium (FR-SCREEN-05).
+    case mirrorToSeveral
 }
 
 enum PremiumTiming {
@@ -105,6 +107,7 @@ extension SenderController {
     /// Re-evaluates everything that depends on receivers' Premium status.
     func premiumChanged() {
         enforceDeviceLimit()
+        enforceMirrorPolicy()
         refreshRoutes()
     }
 

@@ -109,6 +109,8 @@ enum UpgradeAlert {
             alert.informativeText = String(localized: "To send a single app to \(name), buy SideCast Premium in SideCast on \(name). Until then \(name) can play the other sound.")
         case .anotherUnpaidDevice:
             alert.informativeText = String(localized: "Only one device without SideCast Premium can be connected at a time. Buy Premium in SideCast on the device to connect it alongside others.")
+        case .mirrorToSeveral:
+            alert.informativeText = String(localized: "To mirror to several devices at once, each of them needs SideCast Premium. Stop mirroring to the other device first, or buy Premium in SideCast on the devices.")
         }
         alert.addButton(withTitle: String(localized: "OK"))
         NSApp.activate()

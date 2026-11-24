@@ -12,7 +12,8 @@
 //  mode (receiver, lowLatency | highQuality), premium (receiver, unlocked: simulates a receiver's
 //  purchase), all (device: like route, for the "other sound" output), settings.
 //  In receive mode: connect (mac: part of the name), pair (code), disconnect, volume (value), settings,
-//  menu (shows the menu bar popover's content in a window).
+//  menu (shows the menu bar popover's content in a window), stopmirror.
+//  Sender: mirror (receiver "first", display "stop" to stop).
 //  With SIDECAST_PROFILE set, the notification name ends in ".<profile>" so instances don't mix.
 //
 
@@ -60,6 +61,8 @@ enum DebugCommands {
                 }
             case "disconnect":
                 receiver.disconnect()
+            case "stopmirror":
+                receiver.stopMirroring()
             case "volume":
                 if let volume = command["value"] as? Double {
                     receiver.volume = volume
@@ -133,6 +136,14 @@ enum DebugCommands {
         case "reset":
             if let appID = command["app"] as? String {
                 sender.resetRule(for: appID)
+            }
+        case "mirror":
+            // {"cmd":"mirror","receiver":"first"} mirrors the main display; "display":"stop" stops.
+            guard let id = sender.connectedReceivers.first?.id else { return }
+            if command["display"] as? String == "stop" {
+                sender.stopMirroring(id)
+            } else if let display = MirrorDisplays.available.first {
+                sender.startMirroring(id, display: display.id)
             }
         default:
             break

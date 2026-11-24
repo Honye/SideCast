@@ -118,6 +118,7 @@ final class AppPreferences {
 
 enum SystemSettingsLink {
     static let audioCapture = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AudioCapture")!
+    static let screenCapture = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!
     static let localNetwork = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork")!
     static let loginItems = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!
 

@@ -25,6 +25,8 @@ nonisolated struct SessionKeys: Sendable {
     let receive: SymmetricKey
     /// Key for audio packets (sender → receiver).
     let audio: SymmetricKey
+    /// Key for the screen mirroring stream (sender → receiver).
+    let video: SymmetricKey
 }
 
 nonisolated enum HandshakeCrypto {
@@ -58,9 +60,10 @@ nonisolated enum HandshakeCrypto {
         let initiatorToResponder = key("control initiator->responder")
         let responderToInitiator = key("control responder->initiator")
         let audio = key("audio sender->receiver")
+        let video = key("video sender->receiver")
         return isInitiator
-            ? SessionKeys(send: initiatorToResponder, receive: responderToInitiator, audio: audio)
-            : SessionKeys(send: responderToInitiator, receive: initiatorToResponder, audio: audio)
+            ? SessionKeys(send: initiatorToResponder, receive: responderToInitiator, audio: audio, video: video)
+            : SessionKeys(send: responderToInitiator, receive: initiatorToResponder, audio: audio, video: video)
     }
 
     /// The bytes a device signs with its identity key to authenticate itself.

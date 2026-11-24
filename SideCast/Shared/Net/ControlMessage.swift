@@ -33,6 +33,23 @@ nonisolated struct StreamConfig: Codable, Hashable, Sendable {
     var framesPerPacket: Int
 }
 
+/// A screen mirroring stream the Mac wants to start (FR-SCREEN-01).
+nonisolated struct MirrorRequest: Codable, Hashable, Sendable {
+    var streamID: UInt32
+    /// Name of the Mac display being mirrored, for the receiver's UI.
+    var displayName: String
+}
+
+/// The receiver's answer: where to send the video and the largest picture worth sending.
+nonisolated struct MirrorReady: Codable, Hashable, Sendable {
+    var streamID: UInt32
+    /// TCP port the receiver listens on for this stream.
+    var port: UInt16
+    /// The receiver's screen in pixels, landscape (width ≥ height).
+    var maxWidth: Int
+    var maxHeight: Int
+}
+
 /// Encrypted messages exchanged after the hellos.
 nonisolated enum ControlMessage: Codable, Sendable, Equatable {
     /// Identity proof: signature over the transcript, and whether the sender already trusts the peer.
@@ -47,6 +64,16 @@ nonisolated enum ControlMessage: Codable, Sendable, Equatable {
     case receiverInfo(audioPort: UInt16)
     case startStream(StreamConfig)
     case stopStream(streamID: UInt32)
+    /// Mac → receiver: start showing a mirrored screen. The receiver answers `mirrorReady`.
+    case startMirroring(MirrorRequest)
+    case mirrorReady(MirrorReady)
+    /// Either side: the stream ended. From the receiver it means the user stopped mirroring.
+    case stopMirroring(streamID: UInt32)
+    /// Receiver → Mac: the mirrored screen is (not) on screen, e.g. the app went to the
+    /// background (FR-SCREEN-07). The Mac pauses sending while hidden.
+    case mirrorVisibility(streamID: UInt32, visible: Bool)
+    /// Receiver → Mac: the decoder lost track; send a key frame.
+    case requestKeyframe(streamID: UInt32)
     /// Sent by a receiver: whether it bought SideCast Premium (FR-PAY-04).
     case premiumStatus(unlocked: Bool)
     case ping(id: UInt64)

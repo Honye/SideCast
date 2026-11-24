@@ -6,10 +6,20 @@
 //  A receiver is connected to at most one Mac at a time (FR-CONN-10).
 //
 
+import CoreGraphics
 import Foundation
 import Network
 import Observation
 import os
+
+/// A Mac screen being mirrored to this device (FR-SCREEN-01).
+struct MirrorState: Equatable {
+    var streamID: UInt32
+    var macName: String
+    var displayName: String
+    /// Known once the first picture format arrives.
+    var pictureSize: CGSize?
+}
 
 @Observable
 final class ReceiverController {
@@ -29,6 +39,14 @@ final class ReceiverController {
         }
     }
     private(set) var currentStream: StreamConfig?
+    /// The Mac screen shown here, while the Mac mirrors to this device.
+    private(set) var mirror: MirrorState?
+    @ObservationIgnored let mirrorRenderer = MirrorRenderer()
+    /// Called when mirroring starts or stops (the Mac receiver opens / closes its window).
+    @ObservationIgnored var onMirrorChanged: (() -> Void)?
+    @ObservationIgnored private var videoReceiver: VideoStreamReceiver?
+    @ObservationIgnored private var mirrorSessionID: UUID?
+    @ObservationIgnored private var mirrorVisible = true
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
 
@@ -195,6 +213,9 @@ final class ReceiverController {
             if audioSessionID == session.id {
                 stopAudio()
             }
+            if mirrorSessionID == session.id {
+                endMirror()
+            }
             if let error, session.isInitiator || error.isFinal {
                 lastError = error.userMessage
             }
@@ -231,7 +252,7 @@ final class ReceiverController {
         statsTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self, let receiver = self.audioReceiver else { return }
-                DebugTrace.write("rx packets=\(receiver.packetsReceived) lost=\(receiver.packetsLost) buffered=\(self.ring.available / 2) stream=\(self.currentStream?.codec.rawValue ?? "-") engine=\(self.player.isRunning)")
+                DebugTrace.write("rx packets=\(receiver.packetsReceived) lost=\(receiver.packetsLost) buffered=\(self.ring.available / 2) stream=\(self.currentStream?.codec.rawValue ?? "-") engine=\(self.player.isRunning) video=\(self.videoReceiver?.messagesReceived ?? 0) shown=\(self.mirrorRenderer.framesRendered)")
             }
         }
 #endif
@@ -262,6 +283,11 @@ final class ReceiverController {
             player.setTargetLatency(config.codec == .opus ? .lowLatency : .highQuality)
             audioReceiver?.setStream(config)
             currentStream = config
+        case .startMirroring(let request):
+            startMirror(request, session: session)
+        case .stopMirroring(let streamID):
+            guard mirror?.streamID == streamID else { return }
+            endMirror()
         case .stopStream(let streamID):
             guard session.id == audioSessionID, currentStream?.streamID == streamID else { return }
             audioReceiver?.setStream(nil)
@@ -269,5 +295,80 @@ final class ReceiverController {
         default:
             Log.net.debug("Unhandled message \(String(describing: message), privacy: .public)")
         }
+    }
+}
+
+// MARK: - Screen mirroring
+
+extension ReceiverController {
+    /// The user stopped mirroring here (confirmed: the receiver may stop it, only the Mac starts it).
+    func stopMirroring() {
+        guard let mirror else { return }
+        activeSession?.send(.stopMirroring(streamID: mirror.streamID))
+        endMirror()
+    }
+
+    /// The mirrored screen went off / on screen, e.g. the app moved to the background
+    /// (FR-SCREEN-07). The Mac pauses while hidden and sends a key frame when it's back.
+    func setMirrorVisible(_ visible: Bool) {
+        guard visible != mirrorVisible else { return }
+        mirrorVisible = visible
+        guard let mirror, let session = sessions.first(where: { $0.id == mirrorSessionID }) else { return }
+        if visible {
+            mirrorRenderer.reset()
+        }
+        session.send(.mirrorVisibility(streamID: mirror.streamID, visible: visible))
+    }
+
+    fileprivate func startMirror(_ request: MirrorRequest, session: PeerSession) {
+        endMirror()
+        guard let key = session.videoKey else { return }
+        let renderer = mirrorRenderer
+        renderer.reset()
+        renderer.onNeedKeyframe = { [weak self, weak session] in
+            guard let self, let mirror = self.mirror, self.mirrorVisible else { return }
+            session?.send(.requestKeyframe(streamID: mirror.streamID))
+        }
+        renderer.onSize = { [weak self] size in
+            self?.mirror?.pictureSize = size
+        }
+        let receiver = VideoStreamReceiver(key: key) { message in
+            renderer.handle(message)
+        }
+        let maxSize = ReceiverScreen.maxPixelSize
+        do {
+            try receiver.start { [weak self, weak session] port in
+                MainActor.assumeIsolated {
+                    guard let self, let session, self.mirror?.streamID == request.streamID else { return }
+                    session.send(.mirrorReady(MirrorReady(
+                        streamID: request.streamID,
+                        port: port,
+                        maxWidth: Int(maxSize.width),
+                        maxHeight: Int(maxSize.height)
+                    )))
+                    if !self.mirrorVisible {
+                        session.send(.mirrorVisibility(streamID: request.streamID, visible: false))
+                    }
+                }
+            }
+        } catch {
+            Log.net.error("Could not listen for video: \(error.localizedDescription, privacy: .public)")
+            session.send(.stopMirroring(streamID: request.streamID))
+            return
+        }
+        videoReceiver = receiver
+        mirrorSessionID = session.id
+        mirror = MirrorState(streamID: request.streamID, macName: session.peer?.name ?? "Mac", displayName: request.displayName)
+        onMirrorChanged?()
+    }
+
+    fileprivate func endMirror() {
+        guard mirror != nil || videoReceiver != nil else { return }
+        videoReceiver?.stop()
+        videoReceiver = nil
+        mirrorSessionID = nil
+        mirror = nil
+        mirrorRenderer.reset()
+        onMirrorChanged?()
     }
 }

@@ -7,6 +7,7 @@
 
 #if os(macOS)
 import CoreAudio
+import CoreGraphics
 import Foundation
 import Network
 import Observation
@@ -71,6 +72,18 @@ final class SenderController {
     /// Audio mode per receiver (FR-MODE-01), remembered across launches (FR-MODE-04).
     private(set) var audioModes: [UUID: AudioMode] = SenderController.loadAudioModes()
 
+    // MARK: Screen mirroring (FR-SCREEN, see SenderController+Mirroring.swift)
+
+    /// The display mirrored to each receiver, for as long as the user wants it (kept across
+    /// reconnects; independent of audio routing, FR-SCREEN-06).
+    var mirroredDisplays: [UUID: CGDirectDisplayID] = [:]
+    /// Why mirroring couldn't start, e.g. screen recording isn't allowed.
+    var screenError: String?
+    @ObservationIgnored var mirrorSessions: [UUID: MirrorSession] = [:]
+    /// Stream IDs asked of receivers that haven't answered `mirrorReady` yet.
+    @ObservationIgnored var pendingMirrors: [UUID: UInt32] = [:]
+    @ObservationIgnored var nextMirrorStreamID = UInt32.random(in: 1...UInt32.max / 2)
+
     @ObservationIgnored private let router = AudioRouter()
     @ObservationIgnored private var audioPorts: [UUID: UInt16] = [:]
     @ObservationIgnored private var streams: [UUID: RemoteAudioStream] = [:]
@@ -112,6 +125,7 @@ final class SenderController {
     }
 
     func stop() {
+        stopAllMirroring()
         for session in sessions {
             session.close(reason: "Mac quit")
         }
@@ -477,6 +491,7 @@ final class SenderController {
                 other.close(reason: "Replaced")
             }
             readySince[peer.id] = Date()
+            resumeMirroring(peer.id)
             // Give the receiver a moment to report its premium status before applying the
             // limit of one unpaid device.
             DispatchQueue.main.asyncAfter(deadline: .now() + PremiumTiming.statusGracePeriod + 0.1) { [weak self] in
@@ -506,6 +521,9 @@ final class SenderController {
                     scheduleReconnect(peerID)
                 }
             }
+            if !sessions.contains(where: { $0.peer?.id == peerID && $0.state == .ready }) {
+                mirrorConnectionLost(peerID, willReconnect: wantedReceivers.contains(peerID))
+            }
         default:
             break
         }
@@ -519,6 +537,19 @@ final class SenderController {
             guard let peerID = session.peer?.id else { return }
             audioPorts[peerID] = port
             restartStream(for: peerID)
+        case .mirrorReady(let ready):
+            guard let peerID = session.peer?.id else { return }
+            mirrorReady(ready, from: peerID, session: session)
+        case .stopMirroring(let streamID):
+            guard let peerID = session.peer?.id, mirrorSessions[peerID]?.streamID == streamID || pendingMirrors[peerID] == streamID else { return }
+            // The user stopped it on the receiver.
+            stopMirroring(peerID, notifyReceiver: false)
+        case .mirrorVisibility(let streamID, let visible):
+            guard let peerID = session.peer?.id, let mirror = mirrorSessions[peerID], mirror.streamID == streamID else { return }
+            mirror.setVisible(visible)
+        case .requestKeyframe(let streamID):
+            guard let peerID = session.peer?.id, let mirror = mirrorSessions[peerID], mirror.streamID == streamID else { return }
+            mirror.requestKeyframe()
         case .premiumStatus(let unlocked):
             guard let peerID = session.peer?.id else { return }
             premiumStatusReceived.insert(peerID)
@@ -552,12 +583,18 @@ final class SenderController {
     }
 
     /// (Re)creates the UDP stream to a connected receiver with its current mode.
+    /// The receiver's address on the control connection, used for the audio and video streams.
+    func streamEndpoint(of session: PeerSession) -> (host: NWEndpoint.Host, interface: NWInterface?)? {
+        guard let connection = (session.transport as? NWTransport)?.connection,
+              case let .hostPort(host, _)? = connection.currentPath?.remoteEndpoint else { return nil }
+        return (host, connection.currentPath?.availableInterfaces.first)
+    }
+
     private func restartStream(for receiverID: UUID) {
         guard let session = sessions.first(where: { $0.peer?.id == receiverID && $0.state == .ready }),
               let port = audioPorts[receiverID],
               let key = session.audioKey,
-              let connection = (session.transport as? NWTransport)?.connection,
-              case let .hostPort(host, _)? = connection.currentPath?.remoteEndpoint else { return }
+              let (host, interface) = streamEndpoint(of: session) else { return }
 
         if let old = streams.removeValue(forKey: receiverID) {
             old.stop()
@@ -578,7 +615,7 @@ final class SenderController {
                 key: key,
                 host: host,
                 port: port,
-                interface: connection.currentPath?.availableInterfaces.first
+                interface: interface
             )
             session.send(.startStream(config))
             stream.start()

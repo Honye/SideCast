@@ -8,8 +8,22 @@ import SwiftUI
 
 struct ReceiverRootView: View {
     @Environment(ReceiverController.self) private var receiver
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
+        content
+            .overlay {
+                if let mirror = receiver.mirror {
+                    MirrorScreen(mirror: mirror)
+                }
+            }
+            // In the background the system stops drawing; the Mac pauses meanwhile (FR-SCREEN-07).
+            .onChange(of: scenePhase) { _, phase in
+                receiver.setMirrorVisible(phase != .background)
+            }
+    }
+
+    private var content: some View {
         NavigationStack {
             Group {
                 if let session = receiver.activeSession {

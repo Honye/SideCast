@@ -354,6 +354,16 @@
         }
       }
     },
+    "Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示器"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "zh-Hans": {
@@ -550,6 +560,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "请确认 Mac 上的 SideCast 正在运行，且两台设备都已打开 Wi-Fi。本设备在 Mac 上显示为“%@”。"
+          }
+        }
+      }
+    },
+    "Mirror %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像“%@”"
+          }
+        }
+      }
+    },
+    "Mirror screen": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜像屏幕"
+          }
+        }
+      }
+    },
+    "Mirroring %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在镜像“%@”"
           }
         }
       }
@@ -1074,6 +1114,16 @@
         }
       }
     },
+    "Screen mirroring": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕镜像"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "zh-Hans": {
@@ -1147,6 +1197,16 @@
         }
       }
     },
+    "SideCast isn't allowed to record the screen.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 没有录制屏幕的权限。"
+          }
+        }
+      }
+    },
     "SideCast needs local network access to find your Mac. Turn it on in Settings.": {
       "localizations": {
         "zh-Hans": {
@@ -1213,6 +1273,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "启动"
+          }
+        }
+      }
+    },
+    "Stop Mirroring": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止镜像"
           }
         }
       }
@@ -1317,6 +1387,16 @@
         }
       }
     },
+    "The display isn't available any more.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该显示器已不可用。"
+          }
+        }
+      }
+    },
     "The pairing code expired. Try again to get a new code.": {
       "localizations": {
         "zh-Hans": {
@@ -1413,6 +1493,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "需要在该设备上购买 SideCast 高级版"
+          }
+        }
+      }
+    },
+    "To mirror to several devices at once, each of them needs SideCast Premium. Stop mirroring to the other device first, or buy Premium in SideCast on the devices.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要同时镜像到多台设备，每台设备都需要 SideCast 高级版。请先停止镜像到另一台设备，或在这些设备上的 SideCast 中购买高级版。"
           }
         }
       }
