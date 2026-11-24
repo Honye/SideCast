@@ -102,6 +102,7 @@ extension SenderController {
                 do {
                     try await mirror.start()
                     DebugTrace.write("mirror \(ready.streamID) to \(host):\(ready.port) started")
+                    sendRemoteInputStatus(to: receiverID, streamID: ready.streamID)
                 } catch {
                     mirrorEnded(receiverID, streamID: ready.streamID, error: error)
                 }
@@ -124,6 +125,7 @@ extension SenderController {
 
     private func endMirrorStream(_ receiverID: UUID, notifyReceiver: Bool) {
         let streamID = mirrorSessions[receiverID]?.streamID ?? pendingMirrors[receiverID]
+        endRemoteInput(receiverID, display: mirrorSessions[receiverID]?.displayID)
         mirrorSessions.removeValue(forKey: receiverID)?.stop()
         pendingMirrors.removeValue(forKey: receiverID)
         if notifyReceiver, let streamID,

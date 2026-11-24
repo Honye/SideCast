@@ -22,7 +22,7 @@ final class SystemAudioDriver {
     }
 
     static let bundleID = "com.imarkr.SideCast.AudioDriver"
-    static let uidPrefix = "com.imarkr.SideCast.receiver."
+    nonisolated static let uidPrefix = "com.imarkr.SideCast.receiver."
     static let devicesSelector = SystemAudioDriver.selector("scdv")
     static let versionSelector = SystemAudioDriver.selector("scvr")
     /// Only the website version can install and use the driver (PRD 3.2).
@@ -104,7 +104,7 @@ final class SystemAudioDriver {
     }
 
     /// The receiver a SideCast output device stands for, if `uid` is one.
-    static func receiver(forUID uid: String?) -> UUID? {
+    nonisolated static func receiver(forUID uid: String?) -> UUID? {
         guard let uid, uid.hasPrefix(uidPrefix) else { return nil }
         return UUID(uuidString: String(uid.dropFirst(uidPrefix.count)))
     }
@@ -216,7 +216,7 @@ final class SystemAudioDriver {
 
 /// Puts a receiver back as macOS's sound output when it reconnects, if it was the output when
 /// it went away and the user hasn't picked another device since.
-struct SystemOutputMemory: Codable, Equatable {
+nonisolated struct SystemOutputMemory: Codable, Equatable {
     /// The receiver whose device was the output when it disappeared.
     var receiver: UUID?
     /// What macOS switched to then; nil if not seen yet (e.g. SideCast quit meanwhile).

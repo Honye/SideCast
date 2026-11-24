@@ -273,6 +273,13 @@ private struct GeneralSettingsView: View {
                     detail: Text("Needed to take an app's sound and play it on another device or at another volume. SideCast never records or saves audio."),
                     url: SystemSettingsLink.audioCapture
                 )
+                if RemoteInputInjector.isSupported {
+                    PermissionRow(
+                        title: Text("Accessibility"),
+                        detail: Text("Needed for touch control: taps, drags and scrolling on a device's mirrored screen act on this Mac."),
+                        url: SystemSettingsLink.accessibility
+                    )
+                }
                 PermissionRow(
                     title: Text("Local network"),
                     detail: sender.node.localNetworkDenied

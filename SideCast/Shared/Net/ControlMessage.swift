@@ -74,6 +74,10 @@ nonisolated enum ControlMessage: Codable, Sendable, Equatable {
     case mirrorVisibility(streamID: UInt32, visible: Bool)
     /// Receiver → Mac: the decoder lost track; send a key frame.
     case requestKeyframe(streamID: UInt32)
+    /// Receiver → Mac: a touch (or mouse) action on the mirrored picture (FR-TOUCH).
+    case pointer(PointerEvent)
+    /// Mac → receiver: whether the Mac can act on `pointer` events for this stream.
+    case remoteInputStatus(streamID: UInt32, status: RemoteInputStatus)
     /// Sent by a receiver: whether it bought SideCast Premium (FR-PAY-04).
     case premiumStatus(unlocked: Bool)
     case ping(id: UInt64)

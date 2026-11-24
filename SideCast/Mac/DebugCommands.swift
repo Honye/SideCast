@@ -12,7 +12,8 @@
 //  mode (receiver, lowLatency | highQuality), premium (receiver, unlocked: simulates a receiver's
 //  purchase), all (device: like route, for the "other sound" output), settings.
 //  In receive mode: connect (mac: part of the name), pair (code), disconnect, volume (value), settings,
-//  menu (shows the menu bar popover's content in a window), stopmirror.
+//  menu (shows the menu bar popover's content in a window), stopmirror, pointer (kind, x, y, dx, dy:
+//  a touch control event on the mirrored picture), touch (enabled).
 //  Sender: mirror (receiver "first", display "stop" to stop).
 //  With SIDECAST_PROFILE set, the notification name ends in ".<profile>" so instances don't mix.
 //
@@ -63,6 +64,17 @@ enum DebugCommands {
                 receiver.disconnect()
             case "stopmirror":
                 receiver.stopMirroring()
+            case "pointer":
+                // kind: down / move / up / click / rightClick / scroll; x, y: 0…1; dx, dy.
+                if let kind = (command["kind"] as? String).flatMap(PointerEvent.Kind.init(rawValue:)) {
+                    let point = CGPoint(x: command["x"] as? Double ?? 0.5, y: command["y"] as? Double ?? 0.5)
+                    let delta = CGSize(width: command["dx"] as? Double ?? 0, height: command["dy"] as? Double ?? 0)
+                    receiver.sendPointer(kind, at: point, delta: delta)
+                }
+            case "touch":
+                if let enabled = command["enabled"] as? Bool {
+                    receiver.touchControlEnabled = enabled
+                }
             case "volume":
                 if let volume = command["value"] as? Double {
                     receiver.volume = volume

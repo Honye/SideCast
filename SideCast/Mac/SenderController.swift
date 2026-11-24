@@ -99,6 +99,14 @@ final class SenderController {
     @ObservationIgnored var pendingMirrors: [UUID: UInt32] = [:]
     @ObservationIgnored var nextMirrorStreamID = UInt32.random(in: 1...UInt32.max / 2)
 
+    // MARK: Touch control (FR-TOUCH, see SenderController+RemoteInput.swift)
+
+    /// A receiver tried touch control but SideCast isn't allowed to control this Mac yet.
+    var inputPermissionNeeded = false
+    @ObservationIgnored var inputInjectors: [UUID: RemoteInputInjector] = [:]
+    @ObservationIgnored var inputPermissionRequested = false
+    @ObservationIgnored var lastRemoteInputStatus: RemoteInputStatus?
+
     @ObservationIgnored private let router = AudioRouter()
     @ObservationIgnored private var audioPorts: [UUID: UInt16] = [:]
     @ObservationIgnored private var streams: [UUID: RemoteAudioStream] = [:]
@@ -404,6 +412,7 @@ final class SenderController {
 #endif
         }
         if silent != capturedSilenceSuspected { capturedSilenceSuspected = silent }
+        refreshRemoteInputStatus()
 #if DEBUG
         debugLines = DebugTrace.recent()
 #endif
@@ -629,6 +638,9 @@ final class SenderController {
         case .requestKeyframe(let streamID):
             guard let peerID = session.peer?.id, let mirror = mirrorSessions[peerID], mirror.streamID == streamID else { return }
             mirror.requestKeyframe()
+        case .pointer(let event):
+            guard let peerID = session.peer?.id else { return }
+            handlePointer(event, from: peerID, session: session)
         case .premiumStatus(let unlocked):
             guard let peerID = session.peer?.id else { return }
             premiumStatusReceived.insert(peerID)

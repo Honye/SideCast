@@ -94,6 +94,16 @@
         }
       }
     },
+    "Accessibility": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "辅助功能"
+          }
+        }
+      }
+    },
     "Advanced mode": {
       "localizations": {
         "zh-Hans": {
@@ -644,6 +654,16 @@
         }
       }
     },
+    "Mouse Control": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鼠标控制"
+          }
+        }
+      }
+    },
     "Mute": {
       "localizations": {
         "zh-Hans": {
@@ -680,6 +700,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "附近的设备"
+          }
+        }
+      }
+    },
+    "Needed for touch control: taps, drags and scrolling on a device's mirrored screen act on this Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控控制需要此权限：在设备的镜像画面上点按、拖动和滚动，会作用到这台 Mac。"
           }
         }
       }
@@ -840,6 +870,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "已关闭，SideCast 无法找到你的设备。"
+          }
+        }
+      }
+    },
+    "On the Mac, allow SideCast in System Settings › Privacy & Security › Accessibility.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在 Mac 的「系统设置 › 隐私与安全性 › 辅助功能」中允许 SideCast。"
+          }
+        }
+      }
+    },
+    "On the other Mac, allow SideCast in System Settings › Privacy & Security › Accessibility.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在另一台 Mac 的「系统设置 › 隐私与安全性 › 辅助功能」中允许 SideCast。"
           }
         }
       }
@@ -1200,6 +1250,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "设置…"
+          }
+        }
+      }
+    },
+    "Show Controls": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示控制项"
           }
         }
       }
@@ -1603,6 +1663,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "要把单个应用投到 %1$@，请在 %2$@ 的 SideCast 中购买高级版。在此之前，%3$@ 可以播放「其他声音」。"
+          }
+        }
+      }
+    },
+    "To use touch control from your devices, allow SideCast in Accessibility settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要从你的设备使用触控控制，请在「辅助功能」设置中允许 SideCast。"
+          }
+        }
+      }
+    },
+    "Touch Control": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控控制"
           }
         }
       }

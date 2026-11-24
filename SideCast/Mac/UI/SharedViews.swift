@@ -144,7 +144,7 @@ extension SenderController {
 
 extension SenderController {
     var hasWarnings: Bool {
-        node.localNetworkDenied || audioError != nil || capturedSilenceSuspected || screenError != nil
+        node.localNetworkDenied || audioError != nil || capturedSilenceSuspected || screenError != nil || inputPermissionNeeded
     }
 }
 
@@ -163,6 +163,13 @@ struct WarningsView: View {
             }
             if let error = sender.screenError {
                 Warning(text: Text(error), action: Text("Open Settings"), url: SystemSettingsLink.screenCapture)
+            }
+            if sender.inputPermissionNeeded {
+                Warning(
+                    text: Text("To use touch control from your devices, allow SideCast in Accessibility settings."),
+                    action: Text("Open Settings"),
+                    url: SystemSettingsLink.accessibility
+                )
             }
             if let error = sender.audioError {
                 Warning(text: Text(error), action: Text("Open Settings"), url: SystemSettingsLink.audioCapture)

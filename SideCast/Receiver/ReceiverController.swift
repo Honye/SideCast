@@ -19,6 +19,8 @@ struct MirrorState: Equatable {
     var displayName: String
     /// Known once the first picture format arrives.
     var pictureSize: CGSize?
+    /// Whether the Mac can act on touch control (FR-TOUCH); nil until it says.
+    var inputStatus: RemoteInputStatus?
 }
 
 @Observable
@@ -49,6 +51,10 @@ final class ReceiverController {
     @ObservationIgnored private var videoReceiver: VideoStreamReceiver?
     @ObservationIgnored private var mirrorSessionID: UUID?
     @ObservationIgnored private var mirrorVisible = true
+    /// Touches on the mirrored screen control the Mac (FR-TOUCH-05). Remembered on this device.
+    var touchControlEnabled: Bool = UserDefaults.standard.object(forKey: RuntimeEnvironment.profiled("receiver.touchControl")) as? Bool ?? true {
+        didSet { UserDefaults.standard.set(touchControlEnabled, forKey: RuntimeEnvironment.profiled("receiver.touchControl")) }
+    }
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
 
@@ -310,6 +316,9 @@ final class ReceiverController {
         case .stopMirroring(let streamID):
             guard mirror?.streamID == streamID else { return }
             endMirror()
+        case .remoteInputStatus(let streamID, let status):
+            guard mirror?.streamID == streamID, session.id == mirrorSessionID else { return }
+            mirror?.inputStatus = status
         case .stopStream(let streamID):
             guard session.id == audioSessionID, currentStream?.streamID == streamID else { return }
             audioReceiver?.setStream(nil)
@@ -323,6 +332,27 @@ final class ReceiverController {
 // MARK: - Screen mirroring
 
 extension ReceiverController {
+    /// Touches act on the Mac: turned on here, and the Mac's SideCast supports it.
+    var touchControlActive: Bool {
+        touchControlEnabled && mirror != nil && mirror?.inputStatus != .unsupported
+    }
+
+    /// Sends a touch (or mouse) action on the mirrored picture to the Mac (FR-TOUCH).
+    func sendPointer(_ kind: PointerEvent.Kind, at point: CGPoint, delta: CGSize = .zero, deltaUnit: PointerEvent.DeltaUnit = .picture) {
+        guard touchControlActive, let mirror,
+              let session = sessions.first(where: { $0.id == mirrorSessionID }) else {
+            DebugTrace.write("pointer \(kind) dropped: active=\(touchControlActive) mirror=\(mirror != nil) session=\(mirrorSessionID.map { id in sessions.contains { $0.id == id } } ?? false)")
+            return
+        }
+#if DEBUG
+        if kind != .move { DebugTrace.write("pointer \(kind) \(point)") }
+#endif
+        session.send(.pointer(PointerEvent(
+            streamID: mirror.streamID, kind: kind,
+            x: point.x, y: point.y, dx: delta.width, dy: delta.height, deltaUnit: deltaUnit
+        )))
+    }
+
     /// The user stopped mirroring here (confirmed: the receiver may stop it, only the Mac starts it).
     func stopMirroring() {
         guard let mirror else { return }
