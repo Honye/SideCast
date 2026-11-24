@@ -154,6 +154,26 @@
         }
       }
     },
+    "Audio driver installed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装音频驱动"
+          }
+        }
+      }
+    },
+    "Audio driver not installed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安装音频驱动"
+          }
+        }
+      }
+    },
     "Audio keeps playing when you lock the screen or switch apps.": {
       "localizations": {
         "zh-Hans": {
@@ -470,6 +490,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "在接收模式下，另一台 Mac 可以像选择 iPad 一样把这台 Mac 选为输出设备；这台 Mac 自己的应用照常播放。切换时 SideCast 会重新启动。"
+          }
+        }
+      }
+    },
+    "Installed. This version of SideCast includes a newer driver.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装。当前版本的 SideCast 带有更新的驱动。"
+          }
+        }
+      }
+    },
+    "Install…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装…"
           }
         }
       }
@@ -1154,6 +1194,16 @@
         }
       }
     },
+    "Show devices in macOS Sound settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 macOS 声音设置中显示设备"
+          }
+        }
+      }
+    },
     "SideCast": {
       "shouldTranslate": false
     },
@@ -1577,12 +1627,32 @@
         }
       }
     },
+    "Uninstall…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载…"
+          }
+        }
+      }
+    },
     "Unmute": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "取消静音"
+          }
+        }
+      }
+    },
+    "Update…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新…"
           }
         }
       }
@@ -1667,6 +1737,16 @@
         }
       }
     },
+    "With the SideCast audio driver, each connected device appears as “Name (SideCast)” in System Settings › Sound and in the sound menu, so macOS and any app can play to it. Its volume on this Mac sets how loud SideCast plays on that device. Installing or removing the driver needs an administrator password, and sound on this Mac stops for a moment.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 SideCast 音频驱动后，每台已连接的设备会以「名称 (SideCast)」出现在「系统设置 › 声音」和菜单栏的声音菜单中，macOS 和任何 App 都可以把声音输出到它。在这台 Mac 上调它的音量，就是调 SideCast 在那台设备上播放的音量。安装或卸载驱动需要管理员密码，期间这台 Mac 的声音会中断片刻。"
+          }
+        }
+      }
+    },
     "Your devices on iCloud": {
       "localizations": {
         "zh-Hans": {
@@ -1693,6 +1773,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS 会在 SideCast 首次需要时请求这些权限，你也可以在「系统设置 › 隐私与安全性」中更改。"
+          }
+        }
+      }
+    },
+    "macOS sound output": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 声音输出"
           }
         }
       }

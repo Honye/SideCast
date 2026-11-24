@@ -1,0 +1,6 @@
+#!/bin/sh
+# The uninstaller package has no files; this script removes the driver and restarts Core Audio.
+rm -rf "/Library/Audio/Plug-Ins/HAL/SideCastAudio.driver"
+pkgutil --forget com.imarkr.SideCast.AudioDriver >/dev/null 2>&1
+launchctl kickstart -k system/com.apple.audio.coreaudiod 2>/dev/null || killall coreaudiod
+exit 0

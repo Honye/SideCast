@@ -124,6 +124,8 @@ private struct DevicesSettingsView: View {
                 Text("Low latency suits video, calls and games. High quality sends lossless audio with a little more delay.")
             }
 
+            SystemDevicesSection()
+
             Section {
                 if sender.trustStore.peers.isEmpty {
                     Text("No paired devices.")
@@ -180,6 +182,51 @@ private struct DevicesSettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+/// Connected devices as macOS output devices, through the SideCast audio driver (PRD 3.2).
+private struct SystemDevicesSection: View {
+    @Environment(SenderController.self) private var sender
+
+    var body: some View {
+        let driver = sender.systemDriver
+        Section {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Show devices in macOS Sound settings")
+                    Group {
+                        if !driver.isInstalled {
+                            Text("Audio driver not installed")
+                        } else if driver.updateAvailable {
+                            Text("Installed. This version of SideCast includes a newer driver.")
+                        } else {
+                            Text("Audio driver installed")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if driver.waitingForInstaller {
+                    ProgressView().controlSize(.small)
+                }
+                if driver.bundledVersion != nil {
+                    if !driver.isInstalled {
+                        Button("Install…") { driver.install() }
+                    } else {
+                        if driver.updateAvailable {
+                            Button("Update…") { driver.install() }
+                        }
+                        Button("Uninstall…") { driver.uninstall() }
+                    }
+                }
+            }
+        } header: {
+            Text("macOS sound output")
+        } footer: {
+            Text("With the SideCast audio driver, each connected device appears as “Name (SideCast)” in System Settings › Sound and in the sound menu, so macOS and any app can play to it. Its volume on this Mac sets how loud SideCast plays on that device. Installing or removing the driver needs an administrator password, and sound on this Mac stops for a moment.")
+        }
     }
 }
 

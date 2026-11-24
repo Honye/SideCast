@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs after the SideCast audio driver is installed: restart Core Audio so it loads the driver.
+# Sound on this Mac stops for a moment.
+launchctl kickstart -k system/com.apple.audio.coreaudiod 2>/dev/null || killall coreaudiod
+exit 0

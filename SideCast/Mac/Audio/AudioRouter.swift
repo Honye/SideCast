@@ -31,6 +31,8 @@ struct RouteUnit: Equatable {
     /// When true, `processes` are excluded and every other process is captured (the free
     /// version's "all Mac audio" route).
     var capturesAllExcept = false
+    /// With `capturesAllExcept`: only capture what is played to this device.
+    var deviceUID: String?
 }
 
 final class AudioRouter {
@@ -56,9 +58,14 @@ final class AudioRouter {
                 if let tap = taps[unit.key] {
                     try tap.update(processes: unit.processes)
                 } else {
-                    taps[unit.key] = unit.capturesAllExcept
-                        ? try ProcessTap(name: "SideCast · \(unit.name)", excluding: unit.processes)
-                        : try ProcessTap(name: "SideCast · \(unit.name)", processes: unit.processes)
+                    let name = "SideCast · \(unit.name)"
+                    if let deviceUID = unit.deviceUID {
+                        taps[unit.key] = try ProcessTap(name: name, excluding: unit.processes, deviceUID: deviceUID)
+                    } else if unit.capturesAllExcept {
+                        taps[unit.key] = try ProcessTap(name: name, excluding: unit.processes)
+                    } else {
+                        taps[unit.key] = try ProcessTap(name: name, processes: unit.processes)
+                    }
                 }
             } catch {
                 record(error, context: "tap for \(unit.key)")

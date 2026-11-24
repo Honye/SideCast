@@ -29,6 +29,13 @@ final class ProcessTap {
         try self.init(description: description, name: name, processes: processes)
     }
 
+    /// Taps what every process except the given ones plays to one device (a SideCast output
+    /// device from the audio driver).
+    convenience init(name: String, excluding processes: [AudioObjectID], deviceUID: String) throws {
+        let description = CATapDescription(excludingProcesses: processes, deviceUID: deviceUID, stream: 0)
+        try self.init(description: description, name: name, processes: processes)
+    }
+
     private init(description: CATapDescription, name: String, processes: [AudioObjectID]) throws {
         description.uuid = UUID()
         description.name = name

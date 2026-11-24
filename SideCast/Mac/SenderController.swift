@@ -73,6 +73,17 @@ final class SenderController {
     @ObservationIgnored var readySince: [UUID: Date] = [:]
     @ObservationIgnored var premiumStatusReceived: Set<UUID> = []
 
+    // MARK: macOS output devices (website version, see SenderController+SystemDevices.swift)
+
+    /// The audio driver that shows connected receivers in macOS's sound output list.
+    let systemDriver = SystemAudioDriver()
+    /// Receivers the driver shows as an output device right now, with that device.
+    @ObservationIgnored var systemDevices: [UUID: AudioObjectID] = [:]
+    /// Each receiver's gain from its output device's volume and mute.
+    @ObservationIgnored var systemDeviceGains: [UUID: Float] = [:]
+    @ObservationIgnored var systemOutputMemory = SenderController.loadSystemOutputMemory()
+    @ObservationIgnored var volumeListeners: [AudioObjectID: AudioObjectPropertyListenerBlock] = [:]
+
     /// Audio mode per receiver (FR-MODE-01), remembered across launches (FR-MODE-04).
     private(set) var audioModes: [UUID: AudioMode] = SenderController.loadAudioModes()
 
@@ -133,6 +144,7 @@ final class SenderController {
     }
 
     func stop() {
+        stopSystemDevices()
         stopAllMirroring()
         for session in sessions {
             session.close(reason: "Mac quit")
@@ -319,7 +331,28 @@ final class SenderController {
     // MARK: - Audio monitoring
 
     private func startAudioMonitoring() {
+        addAudioListeners()
+        // Installing or removing the audio driver restarts Core Audio, which drops every tap
+        // and aggregate device SideCast made.
+        var restarted = CAProperty.address(kAudioHardwarePropertyServiceRestarted)
+        AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &restarted, .main) { [weak self] _, _ in
+            MainActor.assumeIsolated { self?.audioServiceRestarted() }
+        }
+        systemDriver.startMonitoring { [weak self] in self?.scheduleAudioRefresh() }
+        // Playing state of each process changes without a list change; poll it with the meters.
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.poll() }
+        }
+        refreshAudio()
+    }
+
+    private func addAudioListeners() {
         let system = AudioObjectID(kAudioObjectSystemObject)
+        for (address, block) in listeners {
+            var address = address
+            AudioObjectRemovePropertyListenerBlock(system, &address, .main, block)
+        }
+        listeners = []
         for selector in [
             kAudioHardwarePropertyProcessObjectList,
             kAudioHardwarePropertyDevices,
@@ -332,11 +365,20 @@ final class SenderController {
             AudioObjectAddPropertyListenerBlock(system, &address, .main, block)
             listeners.append((address, block))
         }
-        // Playing state of each process changes without a list change; poll it with the meters.
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.poll() }
+    }
+
+    private func audioServiceRestarted() {
+        Log.audio.info("Core Audio restarted; rebuilding routes")
+        DebugTrace.write("coreaudiod restarted")
+        router.stopAll()
+        volumeListeners = [:]
+        systemDriver.refreshPlugin()
+        addAudioListeners()
+        // Give Core Audio a moment to load its drivers again.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.router.invalidate()
+            self?.refreshAudio()
         }
-        refreshAudio()
     }
 
     private var pollCount = 0
@@ -370,7 +412,7 @@ final class SenderController {
         }
     }
 
-    private func scheduleAudioRefresh() {
+    func scheduleAudioRefresh() {
         guard !refreshScheduled else { return }
         refreshScheduled = true
         DispatchQueue.main.async { [weak self] in
@@ -390,10 +432,13 @@ final class SenderController {
         if own != ownProcessObjects { ownProcessObjects = own }
         let scanned = AudioProcessScanner.scan()
         if scanned != apps { apps = scanned }
-        let devices = OutputDeviceScanner.outputDevices()
+        // SideCast's own output devices stand for receivers, which are listed as such.
+        let devices = OutputDeviceScanner.outputDevices().filter { SystemAudioDriver.receiver(forUID: $0.id) == nil }
         if devices != outputDevices { outputDevices = devices }
+        let previousDefault = defaultOutputUID
         let defaultUID = OutputDeviceScanner.defaultOutputDeviceUID()
         if defaultUID != defaultOutputUID { defaultOutputUID = defaultUID }
+        refreshSystemDevices(previousDefault: previousDefault)
         applyRoutes()
     }
 
@@ -409,6 +454,7 @@ final class SenderController {
     }
 
     private func applyRoutes() {
+        publishSystemDevices()
         var units: [RouteUnit] = []
         var offline: Set<String> = []
         var playing: Set<String> = []
@@ -430,7 +476,12 @@ final class SenderController {
                 switch rule.target {
                 case .systemDefault:
                     guard let uid = defaultOutputUID else { continue }
-                    target = .device(uid)
+                    if let receiver = SystemAudioDriver.receiver(forUID: uid) {
+                        // macOS plays to a receiver through SideCast's output device.
+                        target = connected.contains(receiver) ? .receiver(receiver) : .discard
+                    } else {
+                        target = .device(uid)
+                    }
                 case .device(let uid):
                     if outputDevices.contains(where: { $0.id == uid }) {
                         target = .device(uid)
@@ -465,7 +516,11 @@ final class SenderController {
         let routed = units.flatMap(\.processes)
         if let unit = allAudioRouteUnit(connected: connected, excluding: routed, offline: &offline) {
             units.append(unit)
+        } else {
+            // What macOS (or an app's own setting) plays to a receiver's output device.
+            units += systemDeviceRouteUnits(connected: connected, excluding: routed)
         }
+        units = units.map(applyingSystemDeviceGain)
         playingKeys = playing
         if offline != offlineApps { offlineApps = offline }
         if needsPremium != premiumRequired { premiumRequired = needsPremium }

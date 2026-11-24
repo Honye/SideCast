@@ -13,6 +13,7 @@
   },
   "files": [
     { "kind": "folder", "path": "SideCast", "target-membership": [ "SideCast" ] },
+    { "kind": "folder", "path": "Driver/Source", "target-membership": [ "SideCastAudioDriver" ] },
     { "kind": "folder", "path": "SideCastTests", "target-membership": [ "SideCastTests" ] },
     { "kind": "folder", "path": "SideCastUITests", "target-membership": [ "SideCastUITests" ] },
     {
@@ -20,6 +21,7 @@
       "name": "Products",
       "children": [
         { "path": "<PRODUCTS>/SideCast.app", "id": "BFECF87530B45DE400931585", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/SideCastAudio.driver", "id": "5C1DECA57D0000000000A002", "type": "wrapper.cfbundle", "index": false },
         { "path": "<PRODUCTS>/SideCastTests.xctest", "id": "BFECF88230B45DE400931585", "type": "wrapper.cfbundle", "index": false },
         { "path": "<PRODUCTS>/SideCastUITests.xctest", "id": "BFECF88C30B45DE400931585", "type": "wrapper.cfbundle", "index": false },
       ],
@@ -27,14 +29,67 @@
   ],
   "targets": [
     {
-      "name": "SideCast",
-      "id": "BFECF87430B45DE400931585",
-      "product": "Products/SideCast.app",
-      "product-type": "application",
+      "name": "SideCastAudioDriver",
+      "id": "5C1DECA57D0000000000A001",
+      "product": "Products/SideCastAudio.driver",
+      "product-type": "bundle",
       "build-phases": [
         "compile-sources",
         "frameworks",
         "resources",
+      ],
+      "build-settings": {
+        "CODE_SIGN_STYLE": "Automatic",
+        "CURRENT_PROJECT_VERSION": "1",
+        "DEVELOPMENT_TEAM": "JUWHF23XW6",
+        "ENABLE_HARDENED_RUNTIME": "YES",
+        "GCC_PREPROCESSOR_DEFINITIONS": [
+          "$(inherited)",
+          "kSideCastDriverVersion=$(SIDECAST_DRIVER_VERSION)",
+        ],
+        "GENERATE_INFOPLIST_FILE": "NO",
+        "INFOPLIST_FILE": "Driver/Info.plist",
+        "INSTALL_PATH": "/Library/Audio/Plug-Ins/HAL",
+        "MACOSX_DEPLOYMENT_TARGET": "27.0",
+        "MARKETING_VERSION": "1.0",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.imarkr.SideCast.AudioDriver",
+        "PRODUCT_NAME": "SideCastAudio",
+        "SDKROOT": "macosx",
+        "SIDECAST_DRIVER_VERSION": "1",
+        "SKIP_INSTALL": "YES",
+        "SUPPORTED_PLATFORMS": "macosx",
+        "WARNING_CFLAGS": "-Wno-four-char-constants",
+        "WRAPPER_EXTENSION": "driver",
+      },
+    }, {
+      "name": "SideCast",
+      "id": "BFECF87430B45DE400931585",
+      "product": "Products/SideCast.app",
+      "product-type": "application",
+      "dependencies": [
+        { "target": "SideCastAudioDriver", "platforms": [ "macos" ] },
+      ],
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        "resources",
+        {
+          "kind": "script",
+          "name": "Package Audio Driver",
+          "input-paths": [
+            "$(SRCROOT)/Driver/Installer/build-packages.sh",
+            "$(SRCROOT)/Driver/Installer/postinstall",
+            "$(SRCROOT)/Driver/Installer/uninstall-postinstall",
+            "$(BUILT_PRODUCTS_DIR)/SideCastAudio.driver/Contents/Info.plist",
+            "$(BUILT_PRODUCTS_DIR)/SideCastAudio.driver/Contents/MacOS/SideCastAudio",
+          ],
+          "output-paths": [
+            "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/SideCast Audio Driver.pkg",
+            "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Uninstall SideCast Audio Driver.pkg",
+          ],
+          "shell": "/bin/sh",
+          "script": "\"$SRCROOT/Driver/Installer/build-packages.sh\"\n",
+        },
       ],
       "build-settings": {
         "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
@@ -50,6 +105,7 @@
         "ENABLE_INCOMING_NETWORK_CONNECTIONS": "YES",
         "ENABLE_OUTGOING_NETWORK_CONNECTIONS": "YES",
         "ENABLE_PREVIEWS": "YES",
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         "ENABLE_USER_SELECTED_FILES": "readonly",
         "GENERATE_INFOPLIST_FILE": "YES",
         "INFOPLIST_FILE": "Config/SideCast-Info.plist",
