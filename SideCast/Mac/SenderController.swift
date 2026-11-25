@@ -237,6 +237,11 @@ final class SenderController {
         accountDirectory.remove(id: peerID)
     }
 
+    /// The first-launch guide confirmed system audio recording is allowed.
+    func confirmAudioCapture() {
+        if !audioCaptureConfirmed { audioCaptureConfirmed = true }
+    }
+
     func cancelPairing(_ session: PeerSession) {
         if let id = session.peer?.id {
             wantedReceivers.remove(id)

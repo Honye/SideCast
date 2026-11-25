@@ -125,12 +125,42 @@
         }
       }
     },
+    "Allow Screen Recording…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许屏幕录制…"
+          }
+        }
+      }
+    },
     "Allow SideCast in Login Items to finish turning this on.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "请在「登录项」中允许 SideCast 以完成开启。"
+          }
+        }
+      }
+    },
+    "Allow System Audio Recording…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许录制系统音频…"
+          }
+        }
+      }
+    },
+    "Allow Touch Control…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许触控控制…"
           }
         }
       }
@@ -175,6 +205,16 @@
         }
       }
     },
+    "Audio driver": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频驱动"
+          }
+        }
+      }
+    },
     "Audio driver installed": {
       "localizations": {
         "zh-Hans": {
@@ -215,6 +255,16 @@
         }
       }
     },
+    "Back": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一步"
+          }
+        }
+      }
+    },
     "Both devices are in the same mode.": {
       "localizations": {
         "zh-Hans": {
@@ -241,6 +291,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "重新检查"
+          }
+        }
+      }
+    },
+    "Choose Allow in the message from macOS…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在 macOS 的提示中选择「允许」…"
           }
         }
       }
@@ -285,6 +345,16 @@
         }
       }
     },
+    "Connect a Device": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接设备"
+          }
+        }
+      }
+    },
     "Connected": {
       "localizations": {
         "zh-Hans": {
@@ -321,6 +391,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在连接…"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "Control Your Mac by Touch": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用触控操作 Mac"
           }
         }
       }
@@ -486,6 +576,26 @@
         }
       }
     },
+    "Find Your Devices": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查找你的设备"
+          }
+        }
+      }
+    },
+    "Finish in the installer…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在安装器中完成…"
+          }
+        }
+      }
+    },
     "Follow the app's setting": {
       "localizations": {
         "zh-Hans": {
@@ -526,6 +636,26 @@
         }
       }
     },
+    "Get Started": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始"
+          }
+        }
+      }
+    },
+    "Go through the permissions step by step.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一步一步完成各项授权。"
+          }
+        }
+      }
+    },
     "High quality": {
       "localizations": {
         "zh-Hans": {
@@ -542,6 +672,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "在接收模式下，另一台 Mac 可以像选择 iPad 一样把这台 Mac 选为输出设备；这台 Mac 自己的应用照常播放。切换时 SideCast 会重新启动。"
+          }
+        }
+      }
+    },
+    "Install Audio Driver…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装音频驱动…"
+          }
+        }
+      }
+    },
+    "Install SideCast from the App Store on your iPad, iPhone or Vision Pro and open it, or turn on receive mode on another Mac. Then connect to it here. Devices on your Apple ID connect right away; others show a pairing code to enter on the device.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 iPad、iPhone 或 Vision Pro 上从 App Store 安装并打开 SideCast，或在另一台 Mac 上打开接收模式，然后在这里连接。登录同一 Apple ID 的设备会直接连上，其他设备会显示配对码，在设备上输入即可。"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
           }
         }
       }
@@ -616,12 +776,32 @@
         }
       }
     },
+    "Local network access is off.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地网络权限已关闭。"
+          }
+        }
+      }
+    },
     "Looking for Macs running SideCast…": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "正在查找运行 SideCast 的 Mac…"
+          }
+        }
+      }
+    },
+    "Looking for devices…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在查找设备…"
           }
         }
       }
@@ -877,12 +1057,32 @@
         }
       }
     },
+    "Not Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以后再说"
+          }
+        }
+      }
+    },
     "Not allowed": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "未授权"
+          }
+        }
+      }
+    },
+    "Not allowed yet. If you declined, turn on SideCast in System Settings, then check again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未授权。如果你选择了拒绝，请在系统设置中打开 SideCast，然后再检查一次。"
           }
         }
       }
@@ -913,6 +1113,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "尚未配对"
+          }
+        }
+      }
+    },
+    "Not yet": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未完成"
           }
         }
       }
@@ -1033,6 +1243,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "登录时打开 SideCast"
+          }
+        }
+      }
+    },
+    "Open System Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开系统设置"
+          }
+        }
+      }
+    },
+    "Optional. Needed to mirror your Mac's screen to a device or use a device as an extended display. If macOS says SideCast has to be reopened, you can do that after this guide.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选。把 Mac 的屏幕镜像到设备上，或把设备用作扩展屏时需要。如果 macOS 提示需要重新打开 SideCast，可以在引导结束后再操作。"
+          }
+        }
+      }
+    },
+    "Optional. With the SideCast audio driver, each connected device also appears in System Settings › Sound and the sound menu, so any app can play to it. Installing needs an administrator password, and sound on this Mac stops for a moment.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选。安装 SideCast 音频驱动后，每台已连接的设备也会出现在「系统设置 › 声音」和声音菜单中，任何 App 都能输出到它。安装需要管理员密码，期间这台 Mac 的声音会中断片刻。"
+          }
+        }
+      }
+    },
+    "Optional. With touch control, taps, drags and scrolling on a device's mirrored screen act on this Mac. macOS lists this under Accessibility.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选。开启触控控制后，在设备的镜像画面上点按、拖动和滚动会作用到这台 Mac。macOS 把这项权限列在「辅助功能」下。"
           }
         }
       }
@@ -1197,6 +1447,16 @@
         }
       }
     },
+    "Ready": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已就绪"
+          }
+        }
+      }
+    },
     "Receive mode": {
       "localizations": {
         "zh-Hans": {
@@ -1357,6 +1617,36 @@
         }
       }
     },
+    "Show Devices in Sound Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在声音设置中显示设备"
+          }
+        }
+      }
+    },
+    "Show Setup Guide…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示使用引导…"
+          }
+        }
+      }
+    },
+    "Show Your Screen": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示你的屏幕"
+          }
+        }
+      }
+    },
     "Show devices in macOS Sound settings": {
       "localizations": {
         "zh-Hans": {
@@ -1460,6 +1750,16 @@
         }
       }
     },
+    "SideCast lives in the menu bar. Click its icon to choose where each app plays, set volumes and show your screen on a device.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 在菜单栏里。点它的图标，可以选择每个应用从哪里播放、调节音量，以及把屏幕显示到设备上。"
+          }
+        }
+      }
+    },
     "SideCast needs local network access to find your Mac. Turn it on in Settings.": {
       "localizations": {
         "zh-Hans": {
@@ -1490,12 +1790,32 @@
         }
       }
     },
+    "SideCast plays your Mac's sound on your iPad, iPhone, Vision Pro or another Mac, and can show your screen there too. You can send each app to a different device and set its own volume.\n\nA few permissions are needed first. This takes about a minute.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 可以把 Mac 的声音放到 iPad、iPhone、Vision Pro 或另一台 Mac 上播放，也能把屏幕显示过去。每个应用都可以发到不同的设备，并单独调节音量。\n\n开始前需要授予几项权限，大约一分钟。"
+          }
+        }
+      }
+    },
     "SideCast stops receiving and starts sending this Mac's audio again.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "SideCast 将停止接收，重新开始发送这台 Mac 的声音。"
+          }
+        }
+      }
+    },
+    "SideCast uses the local network to find your devices nearby and connect to them. If macOS asks whether SideCast may find devices on your local network, choose Allow.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 通过本地网络查找并连接附近的设备。如果 macOS 询问是否允许 SideCast 查找本地网络上的设备，请选择「允许」。"
           }
         }
       }
@@ -1510,6 +1830,16 @@
         }
       }
     },
+    "Skipped": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已跳过"
+          }
+        }
+      }
+    },
     "Sound from apps you haven't set separately.": {
       "localizations": {
         "zh-Hans": {
@@ -1520,12 +1850,32 @@
         }
       }
     },
+    "Start Using SideCast": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始使用 SideCast"
+          }
+        }
+      }
+    },
     "Startup": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "启动"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %1$lld 步，共 %2$lld 步"
           }
         }
       }
@@ -1586,6 +1936,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "录制系统音频"
+          }
+        }
+      }
+    },
+    "Take App Sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取应用的声音"
           }
         }
       }
@@ -1780,6 +2140,16 @@
         }
       }
     },
+    "To play an app on another device, or at another volume, SideCast takes that app's sound. macOS calls this “system audio recording”. SideCast never records or saves audio.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要把应用放到其他设备上播放，或调节它的音量，SideCast 需要获取这个应用的声音。macOS 称之为「录制系统音频」。SideCast 不会录制或保存音频。"
+          }
+        }
+      }
+    },
     "To send a single app to %@, buy SideCast Premium in SideCast on %@. Until then %@ can play the other sound.": {
       "localizations": {
         "zh-Hans": {
@@ -1801,6 +2171,16 @@
       }
     },
     "Touch Control": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控控制"
+          }
+        }
+      }
+    },
+    "Touch control": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1940,12 +2320,32 @@
         }
       }
     },
+    "Waiting for macOS…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待 macOS…"
+          }
+        }
+      }
+    },
     "Waiting for pairing code…": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "等待输入配对码…"
+          }
+        }
+      }
+    },
+    "Welcome to SideCast": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎使用 SideCast"
           }
         }
       }
@@ -1976,6 +2376,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装 SideCast 音频驱动后，每台已连接的设备会以「名称 (SideCast)」出现在「系统设置 › 声音」和菜单栏的声音菜单中，macOS 和任何 App 都可以把声音输出到它。在这台 Mac 上调它的音量，就是调 SideCast 在那台设备上播放的音量。安装或卸载驱动需要管理员密码，期间这台 Mac 的声音会中断片刻。"
+          }
+        }
+      }
+    },
+    "You can change these any time in Settings › General.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你可以随时在「设置 › 通用」中更改这些设置。"
+          }
+        }
+      }
+    },
+    "You're All Set": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置完成"
           }
         }
       }

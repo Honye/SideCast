@@ -30,7 +30,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     func windowWillClose(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        DockIcon.hideIfNoWindows(closing: notification.object as? NSWindow)
     }
 
     private func makeWindow() -> NSWindow {

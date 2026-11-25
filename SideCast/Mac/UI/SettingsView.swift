@@ -264,6 +264,7 @@ private struct SystemDevicesSection: View {
 
 private struct GeneralSettingsView: View {
     @Environment(SenderController.self) private var sender
+    @Environment(\.showOnboarding) private var showOnboarding
     /// Checked while the page is open, so a permission granted in System Settings shows up.
     @State private var accessibilityGranted = false
     @State private var screenRecordingGranted = false
@@ -315,6 +316,16 @@ private struct GeneralSettingsView: View {
                     status: sender.node.localNetworkDenied ? .denied : sender.node.localNetworkConfirmed ? .granted : .unknown,
                     url: SystemSettingsLink.localNetwork
                 )
+                if let showOnboarding {
+                    HStack {
+                        Text("Go through the permissions step by step.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Show Setup Guide…") { showOnboarding() }
+                            .controlSize(.small)
+                    }
+                }
             } header: {
                 Text("Permissions")
             } footer: {
