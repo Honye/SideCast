@@ -136,6 +136,12 @@ final class MirrorSession {
         host: NWEndpoint.Host,
         interface: NWInterface?
     ) throws {
+#if DEBUG
+        // Reproduces a failed setup (e.g. the encoder can't be created): SIDECAST_FAIL_MIRROR_SETUP=1.
+        if ProcessInfo.processInfo.environment["SIDECAST_FAIL_MIRROR_SETUP"] == "1" {
+            throw MirrorSetupError()
+        }
+#endif
         self.receiverID = receiverID
         self.streamID = ready.streamID
         self.displayID = displayID

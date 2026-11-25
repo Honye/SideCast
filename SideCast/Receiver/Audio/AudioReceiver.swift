@@ -19,7 +19,7 @@ nonisolated final class AudioReceiver: @unchecked Sendable {
     private var connections: [NWConnection] = []
     private var config: StreamConfig?
     private var decoder: AudioPacketDecoder?
-    private var lastSequence: UInt32?
+    private var reorder = PacketReorderBuffer<Data>(maxHeld: 4)
     private var decodeBuffer = [Float](repeating: 0, count: 4_096)
     private(set) var packetsReceived = 0
     private(set) var packetsLost = 0
@@ -62,7 +62,7 @@ nonisolated final class AudioReceiver: @unchecked Sendable {
     func setStream(_ config: StreamConfig?) {
         queue.async { [self] in
             self.config = config
-            lastSequence = nil
+            reorder = PacketReorderBuffer(maxHeld: config.map { PacketReorderBuffer<Data>.maxHeld(framesPerPacket: $0.framesPerPacket) } ?? 4)
             decoder = config.flatMap { try? makeDecoder(for: $0.codec) }
         }
     }
@@ -80,23 +80,26 @@ nonisolated final class AudioReceiver: @unchecked Sendable {
     }
 
     private func handle(_ datagram: Data) {
-        guard let config, let decoder,
+        guard let config, decoder != nil,
               let (header, payload) = try? AudioPacket.open(datagram, key: key),
               header.streamID == config.streamID, header.codec == config.codec else { return }
-
-        if let last = lastSequence {
-            let delta = Int32(bitPattern: header.sequence &- last)
-            guard delta > 0 else { return } // late or duplicate
-            if delta > 1 {
-                // Fill lost packets with silence, at most 100 ms.
-                let lost = Int(delta - 1)
+        packetsReceived += 1
+        // Packets that arrive a little out of order are put back in order (test report,
+        // 2026-11-25); only packets that never come are replaced with silence.
+        for output in reorder.insert(sequence: header.sequence, payload: payload) {
+            switch output {
+            case .packet(let payload):
+                play(payload)
+            case .missing(let lost):
+                // At most 100 ms of silence.
                 packetsLost += lost
                 ring.writeSilence(count: min(lost * config.framesPerPacket, 4_800) * 2)
             }
         }
-        lastSequence = header.sequence
-        packetsReceived += 1
+    }
 
+    private func play(_ payload: Data) {
+        guard let decoder else { return }
         let frames = decodeBuffer.withUnsafeMutableBufferPointer { buffer in
             (try? decoder.decode(payload, into: buffer.baseAddress!, maxFrames: buffer.count / 2)) ?? 0
         }

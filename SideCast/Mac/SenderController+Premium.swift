@@ -24,8 +24,9 @@ enum UpgradeReason {
 }
 
 enum PremiumTiming {
-    /// How long a newly connected receiver has to report its premium status.
-    static let statusGracePeriod: TimeInterval = 2
+    /// How long a newly connected receiver has to report its premium status. Receivers report
+    /// once StoreKit has read their purchases, which can take a few seconds after launch.
+    static let statusGracePeriod: TimeInterval = 10
 }
 
 /// The limit of one connected receiver without Premium (FR-CONN-09), as a pure function.

@@ -55,6 +55,8 @@ final class PeerSession: Identifiable {
         }
     }
     private(set) var peer: DeviceInfo?
+    /// Why the other side said goodbye, if it did.
+    @ObservationIgnored private(set) var peerGoodbyeReason: String?
     /// For outgoing connections: the device we expect to reach. The handshake fails otherwise.
     var expectedPeerID: UUID?
 
@@ -233,6 +235,7 @@ final class PeerSession: Identifiable {
             state = .ready
 
         case let .goodbye(reason):
+            peerGoodbyeReason = reason
             transport.close()
             state = .closed(reason == GoodbyeReason.freeDeviceLimit ? .freeDeviceLimit : nil)
 

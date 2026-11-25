@@ -36,8 +36,16 @@ struct DeviceLimitPolicyTests {
         let pending = connection(nil, since: now.addingTimeInterval(-0.5))
         #expect(DeviceLimitPolicy.connectionsToClose([unpaid, pending], now: now).isEmpty)
         // After the grace period, an unknown status counts as unpaid.
-        let late = DeviceLimitPolicy.Connection(id: pending.id, hasPremium: nil, readySince: now.addingTimeInterval(-5))
+        let late = DeviceLimitPolicy.Connection(id: pending.id, hasPremium: nil, readySince: now.addingTimeInterval(-(PremiumTiming.statusGracePeriod + 1)))
         #expect(DeviceLimitPolicy.connectionsToClose([unpaid, late], now: now) == [late.id])
+    }
+
+    @Test func slowStoreKitStillCountsAsPending() {
+        // A receiver that bought Premium reports only after StoreKit read its purchases,
+        // which can take a few seconds after launch (test report, 2026-11-25).
+        let unpaid = connection(false)
+        let slow = connection(nil, since: now.addingTimeInterval(-5))
+        #expect(DeviceLimitPolicy.connectionsToClose([unpaid, slow], now: now).isEmpty)
     }
 }
 #endif

@@ -616,6 +616,11 @@ final class SenderController {
             }
             applyRoutes()
             guard let peerID = session.peer?.id ?? session.expectedPeerID else { return }
+            if session.peerGoodbyeReason == GoodbyeReason.userDisconnected {
+                // Disconnected on the device: stay disconnected until someone connects again.
+                wantedReceivers.remove(peerID)
+                reconnectWork.removeValue(forKey: peerID)?.cancel()
+            }
             if let error {
                 lastErrors[peerID] = error.userMessage
                 if error.isFinal {

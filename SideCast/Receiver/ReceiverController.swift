@@ -65,6 +65,15 @@ final class ReceiverController {
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
 
+    /// Whether `hasPremium` is final yet (the App Store purchases have been read).
+    var premiumStatusKnown: Bool {
+#if os(macOS)
+        true
+#else
+        store.entitlementsChecked
+#endif
+    }
+
     /// What this receiver tells the Mac. A Mac in receive mode is always treated as Premium
     /// (PRD 4, v0.5): the Mac app has no purchases.
     var hasPremium: Bool {
@@ -110,7 +119,7 @@ final class ReceiverController {
 #if !os(macOS)
         nowPlaying.onDisconnect = { [weak self] in self?.disconnect() }
         store.onChange = { [weak self] in
-            guard let self else { return }
+            guard let self, self.premiumStatusKnown else { return }
             self.activeSession?.send(.premiumStatus(unlocked: self.hasPremium))
         }
         store.start()
@@ -162,14 +171,14 @@ final class ReceiverController {
 
     func disconnect() {
         for session in sessions {
-            session.close(reason: "Disconnected by receiver")
+            session.close(reason: GoodbyeReason.userDisconnected)
         }
     }
 
     /// Removes trust in a Mac: it has to pair again (FR-CONN-07).
     func forget(_ peerID: UUID) {
         for session in sessions where session.peer?.id == peerID {
-            session.close(reason: "Disconnected by receiver")
+            session.close(reason: GoodbyeReason.userDisconnected)
         }
         trustStore.remove(id: peerID)
     }
@@ -220,7 +229,11 @@ final class ReceiverController {
                 session.close(reason: "Busy")
                 return
             }
-            session.send(.premiumStatus(unlocked: hasPremium))
+            // Report Premium only once it's known: a device that bought it would otherwise say
+            // "not bought" right after launch and could be disconnected by the Mac's limit.
+            if premiumStatusKnown {
+                session.send(.premiumStatus(unlocked: hasPremium))
+            }
             // Move audio to the new session before closing the one it replaces.
             startAudio(for: session)
             for other in sessions where other !== session && other.state == .ready && other.peer?.id == peer.id {

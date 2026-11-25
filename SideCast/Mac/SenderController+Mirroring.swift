@@ -23,6 +23,10 @@ enum ScreenMode: Hashable {
     case extend
 }
 
+struct MirrorSetupError: LocalizedError {
+    var errorDescription: String? { String(localized: "SideCast couldn't start showing the screen.") }
+}
+
 struct ExtendedDisplayError: LocalizedError {
     var errorDescription: String? { String(localized: "SideCast couldn't create the extended display.") }
 }
@@ -152,9 +156,13 @@ extension SenderController {
         requestMirror(receiverID)
     }
 
+    /// Starts capturing and sending. The stream stays pending until the session exists, so a
+    /// failure here still ends it properly: the receiver is told and the error shown.
     private func startMirrorSession(_ ready: MirrorReady, display: CGDirectDisplayID, receiverID: UUID, session: PeerSession) {
-        guard let key = session.videoKey, let (host, interface) = streamEndpoint(of: session) else { return }
-        pendingMirrors.removeValue(forKey: receiverID)
+        guard let key = session.videoKey, let (host, interface) = streamEndpoint(of: session) else {
+            mirrorEnded(receiverID, streamID: ready.streamID, error: MirrorSetupError())
+            return
+        }
         do {
             let mirror = try MirrorSession(
                 receiverID: receiverID,
@@ -168,6 +176,7 @@ extension SenderController {
                 self?.mirrorEnded(receiverID, streamID: ready.streamID, error: error)
             }
             mirrorSessions[receiverID] = mirror
+            pendingMirrors.removeValue(forKey: receiverID)
             Task {
                 do {
                     try await mirror.start()

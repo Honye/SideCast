@@ -104,4 +104,7 @@ nonisolated enum ControlMessage: Codable, Sendable, Equatable {
 nonisolated enum GoodbyeReason {
     /// The Mac is already connected to another receiver without Premium (FR-CONN-09).
     static let freeDeviceLimit = "free-device-limit"
+    /// The user disconnected on the receiver; the Mac must not reconnect by itself. The value
+    /// is what earlier versions already sent.
+    static let userDisconnected = "Disconnected by receiver"
 }

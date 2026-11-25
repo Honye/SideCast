@@ -35,6 +35,28 @@ struct RouteUnit: Equatable {
     var deviceUID: String?
 }
 
+/// When to try a failed setup again: after 1, 2, 4… seconds, at most 30.
+nonisolated struct RetryBackoff: Equatable {
+    static let maxDelay: TimeInterval = 30
+    private(set) var failures = 0
+    private(set) var nextAttempt: Date?
+
+    mutating func recordFailure(at now: Date) {
+        failures += 1
+        nextAttempt = now.addingTimeInterval(min(pow(2, Double(failures - 1)), Self.maxDelay))
+    }
+
+    mutating func recordSuccess() {
+        failures = 0
+        nextAttempt = nil
+    }
+
+    func isDue(at now: Date) -> Bool {
+        guard let nextAttempt else { return false }
+        return now >= nextAttempt
+    }
+}
+
 final class AudioRouter {
     /// Returns the network sink for a connected receiver.
     var sinkProvider: ((UUID) -> AudioFrameSink?)?
@@ -44,10 +66,13 @@ final class AudioRouter {
     private var engines: [RouteTarget: DestinationEngine] = [:]
     private var lastUnits: [RouteUnit] = []
     private var lastDefaultDevice: String?
+    /// A tap or destination failed: the same setup is tried again later, so a temporary error
+    /// doesn't leave apps silent.
+    private var retry = RetryBackoff()
 
-    func apply(_ units: [RouteUnit], defaultDeviceUID: String?) {
+    func apply(_ units: [RouteUnit], defaultDeviceUID: String?, now: Date = Date()) {
         let units = units.sorted { $0.key < $1.key }
-        guard units != lastUnits || defaultDeviceUID != lastDefaultDevice else { return }
+        guard units != lastUnits || defaultDeviceUID != lastDefaultDevice || retry.isDue(at: now) else { return }
         lastUnits = units
         lastDefaultDevice = defaultDeviceUID
         lastError = nil
@@ -94,6 +119,12 @@ final class AudioRouter {
         for key in taps.keys where !keys.contains(key) {
             taps.removeValue(forKey: key)
         }
+        if lastError != nil {
+            retry.recordFailure(at: now)
+            DebugTrace.write("routing failed \(retry.failures) time(s); retrying at \(retry.nextAttempt.map { "\($0)" } ?? "-")")
+        } else {
+            retry.recordSuccess()
+        }
     }
 
     /// Forces the next `apply` to reconfigure, e.g. after a receiver's sink changed.
@@ -115,6 +146,7 @@ final class AudioRouter {
         engines = [:]
         taps = [:]
         lastUnits = []
+        retry.recordSuccess()
     }
 
     private func configure(_ target: RouteTarget, members: [DestinationEngine.Member], defaultDeviceUID: String?) {

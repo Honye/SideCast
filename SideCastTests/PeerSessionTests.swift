@@ -90,6 +90,19 @@ struct PeerSessionTests {
         #expect(macTrust.peers.isEmpty)
     }
 
+    @Test func recordsWhyThePeerSaidGoodbye() throws {
+        let (mac, pad, link) = connect()
+        pad.submitPairingCode(try #require(pairingCode(of: mac)))
+        link.drain()
+        #expect(mac.state == .ready)
+        // The user disconnected on the iPad: the Mac must know, so it doesn't reconnect.
+        pad.close(reason: GoodbyeReason.userDisconnected)
+        link.drain()
+        #expect(mac.state == .closed(nil))
+        #expect(mac.peerGoodbyeReason == GoodbyeReason.userDisconnected)
+        #expect(pad.peerGoodbyeReason == nil)
+    }
+
     @Test func busyReceiverRejectsAnotherMac() {
         macTrust.trust(padIdentity.device, identityKey: padIdentity.publicKey)
         padTrust.trust(macIdentity.device, identityKey: macIdentity.publicKey)

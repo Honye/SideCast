@@ -51,6 +51,9 @@ final class StoreManager {
     static let premiumProductID = "com.imarkr.SideCast.premium"
 
     private(set) var isUnlocked = false
+    /// The purchases on this device have been read once since launch; until then `isUnlocked`
+    /// may still be false for a device that bought Premium.
+    private(set) var entitlementsChecked = false
     private(set) var product: Product?
     /// The product couldn't be loaded (offline, or not set up in App Store Connect yet).
     private(set) var productUnavailable = false
@@ -135,7 +138,9 @@ final class StoreManager {
             }
         }
         diagnostics.entitlements = found.isEmpty ? "none" : found.joined(separator: "; ")
-        if unlocked != isUnlocked {
+        let firstCheck = !entitlementsChecked
+        entitlementsChecked = true
+        if unlocked != isUnlocked || firstCheck {
             isUnlocked = unlocked
             onChange?()
         }

@@ -1430,6 +1430,16 @@
         }
       }
     },
+    "SideCast couldn't start showing the screen.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideCast 无法开始显示屏幕。"
+          }
+        }
+      }
+    },
     "SideCast devices": {
       "localizations": {
         "zh-Hans": {
