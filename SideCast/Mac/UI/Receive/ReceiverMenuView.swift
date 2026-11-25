@@ -52,14 +52,7 @@ struct ReceiverMenuView: View {
             }
 
             Divider()
-            HStack {
-                Button("Settings…", action: openSettings)
-                Spacer()
-                Button("Quit SideCast") {
-                    NSApplication.shared.terminate(nil)
-                }
-            }
-            .buttonStyle(.borderless)
+            MenuFooter(openSettings: openSettings)
         }
         .padding()
         .frame(width: 340)

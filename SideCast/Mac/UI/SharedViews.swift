@@ -6,6 +6,7 @@
 //
 
 #if os(macOS)
+import AppKit
 import SwiftUI
 
 /// One nearby receiver: status, audio mode, connect / disconnect.
@@ -167,6 +168,36 @@ extension SenderController {
 extension SenderController {
     var hasWarnings: Bool {
         node.localNetworkDenied || audioError != nil || capturedSilenceSuspected || screenError != nil || inputPermissionNeeded
+    }
+}
+
+/// Bottom of the menu bar popover (both modes): Settings and Quit as icon buttons; the names
+/// show as tooltips and are read by VoiceOver.
+struct MenuFooter: View {
+    @Environment(\.dismiss) private var dismiss
+    let openSettings: () -> Void
+
+    var body: some View {
+        HStack {
+            Button {
+                dismiss()
+                openSettings()
+            } label: {
+                Label("Settings…", systemImage: "gearshape")
+            }
+            .help(Text("Settings…"))
+            Spacer()
+            Button {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit SideCast", systemImage: "power")
+            }
+            .help(Text("Quit SideCast"))
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
+        .imageScale(.large)
+        .foregroundStyle(.secondary)
     }
 }
 
