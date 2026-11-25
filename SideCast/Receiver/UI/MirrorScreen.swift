@@ -4,9 +4,9 @@
 //
 //  The mirrored Mac screen on iPad / iPhone / Vision Pro: full screen, letterboxed. The controls
 //  show what is being mirrored, a button to stop mirroring (confirmed: the receiver may stop it)
-//  and the touch control switch (FR-TOUCH-05). With touch control on, touches go to the Mac and
-//  the button in the corner brings up the controls (touches pause while they are up); otherwise
-//  a tap does.
+//  and the touch control switch (FR-TOUCH-05) with its mode, trackpad or direct (FR-TOUCH-07).
+//  With touch control on, touches go to the Mac and the button in the corner brings up the
+//  controls (touches pause while they are up); otherwise a tap does.
 //
 
 #if !os(macOS)
@@ -33,9 +33,12 @@ struct MirrorScreen: View {
             }
             if let pictureSize = mirror.pictureSize {
                 if receiver.touchControlActive && !showsControls {
-                    TouchInputView(pictureSize: pictureSize) { kind, point, delta in
-                        receiver.sendPointer(kind, at: point, delta: delta)
-                    }
+                    TouchInputView(
+                        pictureSize: pictureSize,
+                        mode: receiver.touchControlMode,
+                        send: { kind, point, delta in receiver.sendPointer(kind, at: point, delta: delta) },
+                        sendTrackpad: { kind, delta in receiver.sendTrackpad(kind, delta: delta) }
+                    )
                 }
             } else {
                 ProgressView()
@@ -117,6 +120,22 @@ struct MirrorScreen: View {
                 .font(.callout)
                 .accessibilityIdentifier("touch-control-toggle")
                 .onChange(of: receiver.touchControlEnabled) { scheduleHide() }
+                if receiver.touchControlEnabled {
+                    Picker("Touch Mode", selection: $receiver.touchControlMode) {
+                        Text("Trackpad").tag(TouchControlMode.trackpad)
+                        Text("Direct Touch").tag(TouchControlMode.direct)
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityIdentifier("touch-mode-picker")
+                    .onChange(of: receiver.touchControlMode) { scheduleHide() }
+                    Text(receiver.touchControlMode == .trackpad
+                         ? "Slide to move the pointer, tap to click. Long-press, then slide to drag. Two fingers: tap to right-click, slide to scroll."
+                         : "Tap or drag where you want the pointer. Two fingers: tap to right-click, slide to scroll.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if receiver.touchControlEnabled, mirror.inputStatus == .needsPermission {
                     Text("On the Mac, allow SideCast in System Settings › Privacy & Security › Accessibility.")
                         .font(.caption)

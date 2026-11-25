@@ -34,6 +34,11 @@ nonisolated struct PointerEvent: Codable, Hashable, Sendable {
     var dy: Double = 0
     /// What `dx` / `dy` are measured in.
     var deltaUnit: DeltaUnit = .picture
+    /// Trackpad mode (FR-TOUCH-07): the action happens where the Mac's pointer is, and a `move`
+    /// moves it by `dx` / `dy` (fractions of the picture). `x` / `y` still carry the receiver's
+    /// estimate of the pointer, which Macs that predate this field use instead. Optional so
+    /// messages without it still decode.
+    var relative: Bool? = nil
 
     enum DeltaUnit: String, Codable, Sendable {
         /// Fractions of the picture's width / height: touches, so the content follows the finger.
@@ -41,6 +46,15 @@ nonisolated struct PointerEvent: Codable, Hashable, Sendable {
         /// Points, as from a mouse wheel or trackpad, scrolled as they are.
         case points
     }
+}
+
+/// How a receiver's touches move the Mac's pointer.
+nonisolated enum TouchControlMode: String, Codable, CaseIterable, Sendable {
+    /// Slide anywhere to move the pointer, tap to click where it is (FR-TOUCH-07). The default:
+    /// the finger doesn't hide the pointer.
+    case trackpad
+    /// The pointer jumps to the finger (FR-TOUCH-01~04).
+    case direct
 }
 
 /// Whether the Mac can act on pointer events right now.
@@ -91,5 +105,29 @@ nonisolated enum PictureGeometry {
         let rect = fittedRect(picture: picture, in: bounds)
         guard rect.width > 0, rect.height > 0 else { return .zero }
         return CGSize(width: delta.width / rect.width, height: delta.height / rect.height)
+    }
+}
+
+/// Trackpad mode (FR-TOUCH-07): how far a finger slide moves the Mac's pointer.
+nonisolated enum TrackpadMotion {
+    /// Finger speed (view points per second) up to which the pointer follows 1:1.
+    static let slowSpeed: CGFloat = 200
+    /// Finger speed at which the gain reaches `maxGain`.
+    static let fastSpeed: CGFloat = 1600
+    static let maxGain: CGFloat = 2.5
+
+    /// Slow slides are precise; fast ones cover more of the screen.
+    static func gain(speed: CGFloat) -> CGFloat {
+        guard speed > slowSpeed else { return 1 }
+        let progress = min((speed - slowSpeed) / (fastSpeed - slowSpeed), 1)
+        return 1 + (maxGain - 1) * progress
+    }
+
+    /// A finger movement in the view as a pointer movement in fractions of the picture: sliding
+    /// slowly across the whole picture moves the pointer across the whole Mac display.
+    static func pictureDelta(viewDelta: CGSize, velocity: CGPoint, picture: CGSize, in bounds: CGSize) -> CGSize {
+        let delta = PictureGeometry.normalizedDelta(viewDelta, picture: picture, in: bounds)
+        let gain = gain(speed: hypot(velocity.x, velocity.y))
+        return CGSize(width: delta.width * gain, height: delta.height * gain)
     }
 }

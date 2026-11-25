@@ -62,6 +62,14 @@ final class ReceiverController {
     var touchControlEnabled: Bool = UserDefaults.standard.object(forKey: RuntimeEnvironment.profiled("receiver.touchControl")) as? Bool ?? true {
         didSet { UserDefaults.standard.set(touchControlEnabled, forKey: RuntimeEnvironment.profiled("receiver.touchControl")) }
     }
+    /// How touches move the Mac's pointer (FR-TOUCH-07). Remembered on this device.
+    var touchControlMode: TouchControlMode = UserDefaults.standard.string(forKey: RuntimeEnvironment.profiled("receiver.touchMode"))
+        .flatMap(TouchControlMode.init(rawValue:)) ?? .trackpad {
+        didSet { UserDefaults.standard.set(touchControlMode.rawValue, forKey: RuntimeEnvironment.profiled("receiver.touchMode")) }
+    }
+    /// Trackpad mode: where this receiver thinks the Mac's pointer is, as a fraction of the
+    /// picture. Macs that predate trackpad mode click here.
+    @ObservationIgnored var trackpadCursor = CGPoint(x: 0.5, y: 0.5)
     /// SideCast Premium bought on this device (App Store).
     let store = StoreManager()
 
@@ -358,7 +366,8 @@ extension ReceiverController {
     }
 
     /// Sends a touch (or mouse) action on the mirrored picture to the Mac (FR-TOUCH).
-    func sendPointer(_ kind: PointerEvent.Kind, at point: CGPoint, delta: CGSize = .zero, deltaUnit: PointerEvent.DeltaUnit = .picture) {
+    /// `relative`: trackpad mode, see `PointerEvent.relative`.
+    func sendPointer(_ kind: PointerEvent.Kind, at point: CGPoint, delta: CGSize = .zero, deltaUnit: PointerEvent.DeltaUnit = .picture, relative: Bool = false) {
         guard touchControlActive, let mirror,
               let session = sessions.first(where: { $0.id == mirrorSessionID }) else {
             DebugTrace.write("pointer \(kind) dropped: active=\(touchControlActive) mirror=\(mirror != nil) session=\(mirrorSessionID.map { id in sessions.contains { $0.id == id } } ?? false)")
@@ -369,8 +378,21 @@ extension ReceiverController {
 #endif
         session.send(.pointer(PointerEvent(
             streamID: mirror.streamID, kind: kind,
-            x: point.x, y: point.y, dx: delta.width, dy: delta.height, deltaUnit: deltaUnit
+            x: point.x, y: point.y, dx: delta.width, dy: delta.height, deltaUnit: deltaUnit,
+            relative: relative ? true : nil
         )))
+    }
+
+    /// Trackpad mode (FR-TOUCH-07): an action where the Mac's pointer is. For `move`, `delta`
+    /// is how far to move it; for `scroll`, how far to scroll; both in fractions of the picture.
+    func sendTrackpad(_ kind: PointerEvent.Kind, delta: CGSize = .zero) {
+        if kind == .move {
+            trackpadCursor = CGPoint(
+                x: min(max(trackpadCursor.x + delta.width, 0), 1),
+                y: min(max(trackpadCursor.y + delta.height, 0), 1)
+            )
+        }
+        sendPointer(kind, at: trackpadCursor, delta: delta, relative: true)
     }
 
     /// The user stopped mirroring here (confirmed: the receiver may stop it, only the Mac starts it).
@@ -394,6 +416,7 @@ extension ReceiverController {
 
     fileprivate func startMirror(_ request: MirrorRequest, session: PeerSession) {
         endMirror()
+        trackpadCursor = CGPoint(x: 0.5, y: 0.5)
         guard let key = session.videoKey else { return }
         let renderer = mirrorRenderer
         renderer.reset()

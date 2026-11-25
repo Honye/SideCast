@@ -496,6 +496,16 @@
         }
       }
     },
+    "Direct Touch": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接触控"
+          }
+        }
+      }
+    },
     "Disconnect": {
       "localizations": {
         "zh-Hans": {
@@ -1840,6 +1850,16 @@
         }
       }
     },
+    "Slide to move the pointer, tap to click. Long-press, then slide to drag. Two fingers: tap to right-click, slide to scroll.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑动移动指针，轻点即点按。长按后滑动可拖移。双指：轻点为右键，滑动为滚动。"
+          }
+        }
+      }
+    },
     "Sound from apps you haven't set separately.": {
       "localizations": {
         "zh-Hans": {
@@ -1946,6 +1966,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "获取应用的声音"
+          }
+        }
+      }
+    },
+    "Tap or drag where you want the pointer. Two fingers: tap to right-click, slide to scroll.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在想要指针所在的位置轻点或拖移。双指：轻点为右键，滑动为滚动。"
           }
         }
       }
@@ -2180,12 +2210,32 @@
         }
       }
     },
+    "Touch Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控方式"
+          }
+        }
+      }
+    },
     "Touch control": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "触控控制"
+          }
+        }
+      }
+    },
+    "Trackpad": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控板"
           }
         }
       }

@@ -49,6 +49,35 @@ struct PointerMessageTests {
             #expect(decoded == message)
         }
     }
+
+    @Test func trackpadEventsRoundTripAndOlderEventsStillDecode() throws {
+        var trackpad = PointerEvent(streamID: 7, kind: .move, x: 0.5, y: 0.5, dx: 0.01, dy: 0.02)
+        trackpad.relative = true
+        let decoded = try JSONDecoder().decode(PointerEvent.self, from: JSONEncoder().encode(trackpad))
+        #expect(decoded == trackpad)
+        // What receivers without trackpad mode send.
+        let old = Data(#"{"streamID":7,"kind":"click","x":0.5,"y":0.5,"dx":0,"dy":0,"deltaUnit":"picture"}"#.utf8)
+        #expect(try JSONDecoder().decode(PointerEvent.self, from: old).relative == nil)
+    }
+}
+
+struct TrackpadMotionTests {
+    @Test func slowSlidesFollowTheFingerAcrossThePicture() {
+        // A 1000×500 view showing a 2:1 picture fills it.
+        let delta = TrackpadMotion.pictureDelta(
+            viewDelta: CGSize(width: 100, height: 50), velocity: CGPoint(x: 50, y: 0),
+            picture: CGSize(width: 2000, height: 1000), in: CGSize(width: 1000, height: 500)
+        )
+        #expect(delta == CGSize(width: 0.1, height: 0.1))
+    }
+
+    @Test func fastSlidesGoFurtherUpToALimit() {
+        #expect(TrackpadMotion.gain(speed: 0) == 1)
+        #expect(TrackpadMotion.gain(speed: TrackpadMotion.slowSpeed) == 1)
+        let medium = TrackpadMotion.gain(speed: 900)
+        #expect(medium > 1 && medium < TrackpadMotion.maxGain)
+        #expect(TrackpadMotion.gain(speed: 10_000) == TrackpadMotion.maxGain)
+    }
 }
 
 #if os(macOS)
@@ -126,6 +155,62 @@ struct RemoteInputPlannerTests {
         _ = planner.plan(event(.down, 0.5, 0.5), bounds: bounds, time: 0)
         #expect(planner.release(bounds: bounds) == [.leftUp(CGPoint(x: bounds.midX, y: bounds.midY), clicks: 1)])
         #expect(planner.release(bounds: bounds).isEmpty)
+    }
+
+    func trackpad(_ kind: PointerEvent.Kind, _ x: Double = 0.5, _ y: Double = 0.5, dx: Double = 0, dy: Double = 0) -> PointerEvent {
+        var event = PointerEvent(streamID: 1, kind: kind, x: x, y: y, dx: dx, dy: dy)
+        event.relative = true
+        return event
+    }
+
+    @Test func trackpadMovesStartFromTheRealPointer() {
+        var planner = RemoteInputPlanner()
+        let cursor = CGPoint(x: 1512 + 100, y: 100)
+        // 10% of the display's width to the right, from the pointer, not from x / y.
+        #expect(planner.plan(trackpad(.move, dx: 0.1), bounds: bounds, cursor: cursor, time: 0)
+            == [.move(CGPoint(x: 1512 + 292, y: 100))])
+    }
+
+    @Test func trackpadMovesContinueFromTheLastPointWhileSliding() {
+        var planner = RemoteInputPlanner()
+        _ = planner.plan(trackpad(.move, dx: 0.1), bounds: bounds, cursor: CGPoint(x: 1612, y: 100), time: 0)
+        // The system still reports the old position right after posting.
+        #expect(planner.plan(trackpad(.move, dx: 0.1), bounds: bounds, cursor: CGPoint(x: 1612, y: 100), time: 0.05)
+            == [.move(CGPoint(x: 1512 + 484, y: 100))])
+        // After a pause, the real pointer counts again (someone may have moved the mouse).
+        #expect(planner.plan(trackpad(.move, dx: 0.1), bounds: bounds, cursor: CGPoint(x: 1612, y: 100), time: 5)
+            == [.move(CGPoint(x: 1512 + 292, y: 100))])
+    }
+
+    @Test func trackpadBringsThePointerOverFromAnotherDisplay() {
+        var planner = RemoteInputPlanner()
+        // The pointer is on the main display: start from the receiver's estimate instead.
+        #expect(planner.plan(trackpad(.move, 0.5, 0.5, dx: 0.1), bounds: bounds, cursor: CGPoint(x: 200, y: 200), time: 0)
+            == [.move(CGPoint(x: 1512 + 1152, y: 540))])
+    }
+
+    @Test func trackpadMovesStayOnTheDisplay() {
+        var planner = RemoteInputPlanner()
+        #expect(planner.plan(trackpad(.move, dx: 5, dy: -5), bounds: bounds, cursor: CGPoint(x: 1612, y: 100), time: 0)
+            == [.move(CGPoint(x: 1512 + 1919, y: 0))])
+    }
+
+    @Test func trackpadClicksWhereThePointerIs() {
+        var planner = RemoteInputPlanner()
+        let cursor = CGPoint(x: 1512 + 300, y: 400)
+        #expect(planner.plan(trackpad(.click, 0.9, 0.9), bounds: bounds, cursor: cursor, time: 0)
+            == [.move(cursor), .leftDown(cursor, clicks: 1), .leftUp(cursor, clicks: 1)])
+        #expect(planner.plan(trackpad(.rightClick, 0.9, 0.9), bounds: bounds, cursor: cursor, time: 5)
+            == [.move(cursor), .rightDown(cursor), .rightUp(cursor)])
+    }
+
+    @Test func trackpadDragsFromThePointer() {
+        var planner = RemoteInputPlanner()
+        let cursor = CGPoint(x: 1512 + 300, y: 400)
+        let end = CGPoint(x: 1512 + 492, y: 400)
+        #expect(planner.plan(trackpad(.down), bounds: bounds, cursor: cursor, time: 0) == [.move(cursor), .leftDown(cursor, clicks: 1)])
+        #expect(planner.plan(trackpad(.move, dx: 0.1), bounds: bounds, cursor: cursor, time: 0.1) == [.leftDrag(end, clicks: 1)])
+        #expect(planner.plan(trackpad(.up), bounds: bounds, cursor: cursor, time: 0.2) == [.leftUp(end, clicks: 1)])
     }
 
     @Test func onlyTheWebsiteVersionInjects() {

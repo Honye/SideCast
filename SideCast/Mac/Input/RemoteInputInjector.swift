@@ -31,18 +31,54 @@ nonisolated enum SyntheticInput: Equatable {
 nonisolated struct RemoteInputPlanner {
     static let multiClickInterval: TimeInterval = 0.4
     static let multiClickDistance: CGFloat = 8
+    /// Trackpad events this close together continue from the point posted last: the system's
+    /// cursor position can lag behind what was just posted.
+    static let continuationInterval: TimeInterval = 0.5
 
     private(set) var isPressed = false
     private var clickCount = 1
     private var lastPress: (time: TimeInterval, point: CGPoint)?
     private var scrollRemainder = CGSize.zero
+    private var lastPoint: (time: TimeInterval, point: CGPoint)?
 
-    /// `bounds`: the mirrored display in global coordinates.
-    mutating func plan(_ event: PointerEvent, bounds: CGRect, time: TimeInterval) -> [SyntheticInput] {
+    /// `bounds`: the mirrored display in global coordinates. `cursor`: where the Mac's pointer
+    /// is now, for trackpad (relative) events; nil if unknown.
+    mutating func plan(_ event: PointerEvent, bounds: CGRect, cursor: CGPoint? = nil, time: TimeInterval) -> [SyntheticInput] {
         let point = CGPoint(
             x: bounds.minX + min(max(event.x, 0), 1) * bounds.width,
             y: bounds.minY + min(max(event.y, 0), 1) * bounds.height
         )
+        guard event.relative == true else {
+            lastPoint = (time, point)
+            return plan(event, at: point, bounds: bounds, time: time)
+        }
+        // Trackpad mode: act where the pointer is, not where the finger is.
+        var start = Self.clamp(point, to: bounds)
+        if let last = lastPoint, time - last.time <= Self.continuationInterval, bounds.contains(last.point) {
+            start = last.point
+        } else if let cursor, bounds.contains(cursor) {
+            start = cursor
+        }
+        var target = start
+        if event.kind == .move {
+            target = Self.clamp(CGPoint(
+                x: start.x + event.dx * bounds.width,
+                y: start.y + event.dy * bounds.height
+            ), to: bounds)
+        }
+        lastPoint = (time, target)
+        return plan(event, at: target, bounds: bounds, time: time)
+    }
+
+    /// A point inside the display: `CGRect.contains` excludes the maximum edges.
+    private static func clamp(_ point: CGPoint, to bounds: CGRect) -> CGPoint {
+        CGPoint(
+            x: min(max(point.x, bounds.minX), bounds.maxX - 1),
+            y: min(max(point.y, bounds.minY), bounds.maxY - 1)
+        )
+    }
+
+    private mutating func plan(_ event: PointerEvent, at point: CGPoint, bounds: CGRect, time: TimeInterval) -> [SyntheticInput] {
         switch event.kind {
         case .down:
             var actions: [SyntheticInput] = []
@@ -134,7 +170,9 @@ final class RemoteInputInjector {
 
     func handle(_ event: PointerEvent, display: CGDirectDisplayID) {
         let bounds = CGDisplayBounds(display)
-        post(planner.plan(event, bounds: bounds, time: ProcessInfo.processInfo.systemUptime))
+        // Dry runs don't move the real pointer, so it would only mislead.
+        let cursor = Self.isDryRun ? nil : CGEvent(source: nil)?.location
+        post(planner.plan(event, bounds: bounds, cursor: cursor, time: ProcessInfo.processInfo.systemUptime))
     }
 
     func release(display: CGDirectDisplayID) {
