@@ -105,6 +105,8 @@ private struct AppsSettingsView: View {
 
 private struct DevicesSettingsView: View {
     @Environment(SenderController.self) private var sender
+    /// The iCloud device waiting for the user to confirm its removal.
+    @State private var removingAccountDevice: AccountDevice?
 
     var body: some View {
         Form {
@@ -158,24 +160,19 @@ private struct DevicesSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(sender.accountDirectory.devices) { entry in
-                    let revoked = sender.trustStore.revokedAccountDevices.contains(entry.id)
                     HStack {
                         Label(entry.device.name, systemImage: entry.device.platform.symbolName)
                         Spacer()
-                        Text(revoked ? "Needs a pairing code" : "Trusted automatically")
+                        Text("Trusted automatically")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        if revoked {
-                            Button("Allow") { sender.trustStore.allowAccountDevice(id: entry.id) }
-                        } else {
-                            Button("Remove", role: .destructive) { sender.forget(entry.id) }
-                        }
+                        Button("Remove", role: .destructive) { removingAccountDevice = entry }
                     }
                 }
             } header: {
                 Text("Your devices on iCloud")
             } footer: {
-                Text("Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud.")
+                Text("Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud. Removing a device takes it off this list on all your devices; it comes back by itself when it opens SideCast again.")
             }
 
             Section("This Mac") {
@@ -183,6 +180,21 @@ private struct DevicesSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .confirmationDialog(
+            Text("Remove “\(removingAccountDevice?.device.name ?? "")” from your devices on iCloud?"),
+            isPresented: Binding(
+                get: { removingAccountDevice != nil },
+                set: { if !$0 { removingAccountDevice = nil } }
+            ),
+            presenting: removingAccountDevice
+        ) { entry in
+            Button("Remove", role: .destructive) {
+                sender.removeAccountDevice(entry.id)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("It's disconnected and taken off the list on all your devices. It comes back by itself, without a pairing code, when it opens SideCast again.")
+        }
     }
 }
 

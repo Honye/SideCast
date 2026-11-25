@@ -95,7 +95,6 @@ private struct SenderRow: View {
         let status = receiver.status(for: peer.id)
         let paired = receiver.trustStore.peers.contains { $0.id == peer.id }
         let sameAccount = receiver.accountDirectory.containsDevice(id: peer.id)
-            && !receiver.trustStore.revokedAccountDevices.contains(peer.id)
         HStack(spacing: 10) {
             Image(systemName: peer.device.platform.symbolName)
                 .frame(width: 24)

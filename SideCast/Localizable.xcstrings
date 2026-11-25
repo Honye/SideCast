@@ -115,6 +115,7 @@
       }
     },
     "Allow": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -375,11 +376,22 @@
       }
     },
     "Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "登录同一 Apple ID 的设备无需配对码即可连接。SideCast 只会在你的 iCloud 中保存各设备的名称和公钥。"
+          }
+        }
+      }
+    },
+    "Devices signed in to the same Apple ID connect without a pairing code. SideCast stores only each device's name and public key in your iCloud. Removing a device takes it off this list on all your devices; it comes back by itself when it opens SideCast again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录同一 Apple ID 的设备无需配对码即可连接。SideCast 只会在你的 iCloud 中保存各设备的名称和公钥。移除后，这台设备会从你所有设备的列表中消失；它再次打开 SideCast 时会自动回来。"
           }
         }
       }
@@ -550,6 +562,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "安装…"
+          }
+        }
+      }
+    },
+    "It's disconnected and taken off the list on all your devices. It comes back by itself, without a pairing code, when it opens SideCast again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它会被断开连接，并从你所有设备的列表中移除。它再次打开 SideCast 时会自动回来，不需要配对码。"
           }
         }
       }
@@ -795,6 +817,7 @@
       }
     },
     "Needs a pairing code": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1190,6 +1213,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除"
+          }
+        }
+      }
+    },
+    "Remove “%@” from your devices on iCloud?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要从「你在 iCloud 上的设备」中移除「%@」吗？"
           }
         }
       }

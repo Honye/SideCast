@@ -104,7 +104,6 @@ private struct MacRow: View {
         let status = receiver.status(for: peer.id)
         let paired = receiver.trustStore.peers.contains { $0.id == peer.id }
         let sameAccount = receiver.accountDirectory.containsDevice(id: peer.id)
-            && !receiver.trustStore.revokedAccountDevices.contains(peer.id)
         Button {
             receiver.connect(peer)
         } label: {

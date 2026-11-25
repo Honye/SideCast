@@ -230,6 +230,13 @@ final class SenderController {
         trustStore.remove(id: peerID)
     }
 
+    /// Takes a same-Apple-ID device off the iCloud list and disconnects it. No pairing code is
+    /// needed afterwards.
+    func removeAccountDevice(_ peerID: UUID) {
+        disconnect(peerID)
+        accountDirectory.remove(id: peerID)
+    }
+
     func cancelPairing(_ session: PeerSession) {
         if let id = session.peer?.id {
             wantedReceivers.remove(id)

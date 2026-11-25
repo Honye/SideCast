@@ -69,6 +69,15 @@ final class AccountDeviceDirectory {
         devices.contains { $0.device.id == id }
     }
 
+    /// Takes another device off the iCloud list, on all devices of the account. A device that is
+    /// still running SideCast adds itself back (see `reload`), so it never needs a pairing code;
+    /// one that isn't (e.g. an old iPad) stays off the list until it opens SideCast again.
+    func remove(id: UUID) {
+        guard id != identity.device.id else { return }
+        store.set(nil, forKey: Self.keyPrefix + id.uuidString)
+        reload()
+    }
+
     func reload() {
         isAccountAvailable = accountAvailable()
         let ownKey = Self.keyPrefix + identity.device.id.uuidString
