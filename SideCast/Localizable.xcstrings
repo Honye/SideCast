@@ -134,6 +134,16 @@
         }
       }
     },
+    "Allowed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已授权"
+          }
+        }
+      }
+    },
     "Apps": {
       "localizations": {
         "zh-Hans": {
@@ -754,6 +764,16 @@
         }
       }
     },
+    "Needed to show this Mac's screen on your devices (mirroring and extended display).": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于在你的设备上显示这台 Mac 的屏幕（镜像和扩展屏）。"
+          }
+        }
+      }
+    },
     "Needed to take an app's sound and play it on another device or at another volume. SideCast never records or saves audio.": {
       "localizations": {
         "zh-Hans": {
@@ -830,6 +850,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SideCast 控制的应用没有传来声音。如果它们正在播放，请允许 SideCast 录制系统音频。"
+          }
+        }
+      }
+    },
+    "Not allowed": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未授权"
           }
         }
       }
@@ -1260,6 +1290,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "屏幕镜像"
+          }
+        }
+      }
+    },
+    "Screen recording": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "屏幕录制"
           }
         }
       }
@@ -1923,6 +1963,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS 会在 SideCast 首次需要时请求这些权限，你也可以在「系统设置 › 隐私与安全性」中更改。"
+          }
+        }
+      }
+    },
+    "macOS doesn't tell apps about this permission. SideCast shows it as allowed once it has captured sound.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 不向应用提供此权限的状态，SideCast 捕获到声音后会显示为已授权。"
           }
         }
       }

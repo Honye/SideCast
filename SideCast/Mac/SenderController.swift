@@ -47,6 +47,11 @@ final class SenderController {
     /// Routed apps that claim to play have produced only silence for a while: the audio
     /// capture permission may be missing (FR-PERM-02).
     private(set) var capturedSilenceSuspected = false
+    /// Real sound has been captured, so system audio recording is allowed. macOS has no API to
+    /// ask; remembered across launches.
+    private(set) var audioCaptureConfirmed = UserDefaults.standard.bool(forKey: RuntimeEnvironment.profiled("permissions.audioCaptureConfirmed")) {
+        didSet { UserDefaults.standard.set(audioCaptureConfirmed, forKey: RuntimeEnvironment.profiled("permissions.audioCaptureConfirmed")) }
+    }
 #if DEBUG
     private(set) var debugLines: [String] = []
 #endif
@@ -403,6 +408,7 @@ final class SenderController {
         for key in Array(ruleStore.rules.keys) + [Self.allAudioRouteKey] + systemDeviceKeys {
             guard let peak = router.takePeak(for: key) else { continue }
             levels[key] = peak
+            if peak > 0, !audioCaptureConfirmed { audioCaptureConfirmed = true }
             if playingKeys.contains(key), peak == 0 {
                 silentPolls[key, default: 0] += 1
             } else {

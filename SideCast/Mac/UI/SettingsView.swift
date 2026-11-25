@@ -6,6 +6,7 @@
 //
 
 #if os(macOS)
+import CoreGraphics
 import SwiftUI
 
 enum SettingsTab: String {
@@ -251,6 +252,9 @@ private struct SystemDevicesSection: View {
 
 private struct GeneralSettingsView: View {
     @Environment(SenderController.self) private var sender
+    /// Checked while the page is open, so a permission granted in System Settings shows up.
+    @State private var accessibilityGranted = false
+    @State private var screenRecordingGranted = false
 
     var body: some View {
         @Bindable var sender = sender
@@ -271,12 +275,23 @@ private struct GeneralSettingsView: View {
                 PermissionRow(
                     title: Text("System audio recording"),
                     detail: Text("Needed to take an app's sound and play it on another device or at another volume. SideCast never records or saves audio."),
+                    note: audioStatus == .unknown
+                        ? Text("macOS doesn't tell apps about this permission. SideCast shows it as allowed once it has captured sound.")
+                        : nil,
+                    status: audioStatus,
                     url: SystemSettingsLink.audioCapture
+                )
+                PermissionRow(
+                    title: Text("Screen recording"),
+                    detail: Text("Needed to show this Mac's screen on your devices (mirroring and extended display)."),
+                    status: screenRecordingGranted ? .granted : sender.screenError != nil ? .denied : .unknown,
+                    url: SystemSettingsLink.screenCapture
                 )
                 if RemoteInputInjector.isSupported {
                     PermissionRow(
                         title: Text("Accessibility"),
                         detail: Text("Needed for touch control: taps, drags and scrolling on a device's mirrored screen act on this Mac."),
+                        status: accessibilityGranted ? .granted : .unknown,
                         url: SystemSettingsLink.accessibility
                     )
                 }
@@ -285,6 +300,7 @@ private struct GeneralSettingsView: View {
                     detail: sender.node.localNetworkDenied
                         ? Text("Off. SideCast can't find your devices.")
                         : Text("Needed to find and connect to your devices."),
+                    status: sender.node.localNetworkDenied ? .denied : sender.node.localNetworkConfirmed ? .granted : .unknown,
                     url: SystemSettingsLink.localNetwork
                 )
             } header: {
@@ -294,12 +310,34 @@ private struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .task {
+            while !Task.isCancelled {
+                accessibilityGranted = RemoteInputInjector.status == .available
+                screenRecordingGranted = CGPreflightScreenCaptureAccess()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
     }
+
+    private var audioStatus: PermissionStatus {
+        if sender.audioError != nil || sender.capturedSilenceSuspected { return .denied }
+        return sender.audioCaptureConfirmed ? .granted : .unknown
+    }
+}
+
+enum PermissionStatus {
+    case granted
+    /// Off, or very likely off.
+    case denied
+    /// Not asked yet, or macOS doesn't say.
+    case unknown
 }
 
 private struct PermissionRow: View {
     let title: Text
     let detail: Text
+    var note: Text?
+    let status: PermissionStatus
     let url: URL
 
     var body: some View {
@@ -310,10 +348,31 @@ private struct PermissionRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                if let note {
+                    note
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Spacer()
-            Button("Open Settings") { SystemSettingsLink.open(url) }
-                .controlSize(.small)
+            switch status {
+            case .granted:
+                Label("Allowed", systemImage: "checkmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.green)
+            case .denied:
+                HStack(spacing: 8) {
+                    Label("Not allowed", systemImage: "exclamationmark.triangle.fill")
+                        .font(.callout)
+                        .foregroundStyle(.orange)
+                    Button("Open Settings") { SystemSettingsLink.open(url) }
+                        .controlSize(.small)
+                }
+            case .unknown:
+                Button("Open Settings") { SystemSettingsLink.open(url) }
+                    .controlSize(.small)
+            }
         }
     }
 }

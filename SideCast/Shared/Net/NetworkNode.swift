@@ -36,6 +36,9 @@ final class NetworkNode {
     private(set) var peers: [DiscoveredPeer] = []
     /// The user denied local network access; nothing can be discovered (FR-PERM-02/03).
     private(set) var localNetworkDenied = false
+    /// Local network access works: Bonjour found something (at least this device's own
+    /// service). There is no API to ask macOS / iOS directly.
+    private(set) var localNetworkConfirmed = false
 
     @ObservationIgnored var onIncomingConnection: ((NWConnection) -> Void)?
     @ObservationIgnored var onPeersChanged: (() -> Void)?
@@ -218,6 +221,10 @@ final class NetworkNode {
     }
 
     private func update(_ results: Set<NWBrowser.Result>) {
+        if !results.isEmpty, !localNetworkConfirmed {
+            localNetworkConfirmed = true
+            if localNetworkDenied { localNetworkDenied = false }
+        }
         var byID: [UUID: DiscoveredPeer] = [:]
         for result in results {
             guard case let .bonjour(txt) = result.metadata,
